@@ -1,0 +1,45 @@
+variables:
+  - name: region
+    value: westeurope
+  - name: company
+    value: amido
+  - name: project
+    value: stacks
+  - name: domain
+    value: core
+  - name: self_repo
+    value: stacks-infrastructure-aks    
+
+  # Terraform configuration
+  - name: tf_state_rg
+    value: Stacks-Ancillary-Resources
+  - name: tf_state_storage
+    value: amidostackstfstate
+  - name: tf_state_container
+    value: tfstate
+  - name: tf_state_key
+    value: core-sharedservices
+
+  # Domain names
+  - name: base_domain_nonprod
+    value: nonprod.amidostacks.com
+  - name: base_domain_internal_nonprod
+    value: nonprod.amidostacks.internal
+  - name: base_domain_prod
+    value: prod.amidostacks.com
+  - name: base_domain_internal_prod
+    value: prod.amidostacks.internal
+
+  # DNS configuration
+  - name: create_dns_zone
+    value: false
+  - name: dns_resource_group
+    value: Stacks-Ancillary-Resources
+
+  # GitHub infomration
+  - name: create_release
+    value: true
+  - name: github_release_service_connection
+    value: GitHubReleases
+  - name: github_org
+    value: $(company)    

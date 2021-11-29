@@ -34,53 +34,50 @@ resources:
       image: amidostacks/ci-tf:0.0.8
 
 variables:
-  company: amido
-  project: stacks
-  domain: core
+  - template: azuredevops-vars.yml
+
   # Versioning
-  version_major: 0
-  version_minor: 0
-  version_revision: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
-  version_build_number: "$(version_major).$(version_minor).$(version_revision)-$(Build.SourceBranchName)"
+  - name: version_major
+    value: 0
+  - name: version_minor
+    value: 0
+  - name: version_revision
+    value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
+  - name: version_build_number
+    value: "$(version_major).$(version_minor).$(version_revision)-$(Build.SourceBranchName)"
+  
   # SelfConfig
-  self_repo: stacks-infrastructure-aks
-  self_repo_dir: "$(Agent.BuildDirectory)/s/$(self_repo)"
-  self_repo_tf_src: deploy/azure/infra/stacks-aks
-  self_repo_tf_dir: "$(self_repo_dir)/$(self_repo_tf_src)"
-  self_pipeline_repo: "$(Agent.BuildDirectory)/s/stacks-pipeline-templates"
-  self_pipeline_scripts_dir: "$(self_pipeline_repo)/scripts"
-  # TF STATE CONFIG
-  tf_state_rg: "Stacks-Ancillary-Resources"
-  tf_state_storage: "amidostackstfstate"
-  tf_state_container: "tfstate"
-  # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
-  # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
-  # there are some best practices around this if you are going for feature based environments
-  # - we suggest you create a runtime variable that is dynamically set based on a branch currently running
-  # **`terraform_state_workspace: `** all states will be saved under this key for this definition
-  # avoid running anything past dev that is not on master
-  # sample value: sharedservices
-  tf_state_key: "core-sharedservices"
+  - name: self_repo_dir
+    value: "$(Agent.BuildDirectory)/s/$(self_repo)"
+  - name: self_repo_tf_src
+    value: deploy/azure/infra/stacks-aks
+  - name: self_repo_tf_dir
+    value: "$(self_repo_dir)/$(self_repo_tf_src)"
+  - name: self_pipeline_repo
+    value: "$(Agent.BuildDirectory)/s/stacks-pipeline-templates"
+  - name: self_pipeline_scripts_dir
+    value: "$(self_pipeline_repo)/scripts"
+
   # Scripts directory used by pipeline steps
-  scripts_dir: $(Agent.BuildDirectory)/s/stacks-pipeline-templates/azDevOps/azure/templates/v2/scripts
+  - name: scripts_dir
+    value: $(Agent.BuildDirectory)/s/stacks-pipeline-templates/azDevOps/azure/templates/v2/scripts
+
   # AKS/AZURE
   # This will always be predictably named by setting your company - project - stage - location - compnonent names above
   # IT IS SET per stage as an output to be consumed by deploy stage
-  aks_cluster_version: "1.20.7"
-  region: "westeurope"
+  - name: aks_cluster_version
+    value: "1.20.7"
+
   # DEFAULT IMAGE RUNNER
-  pool_vm_image: ubuntu-20.04
-  # Ensure you find this definition in the K8s and Azure steps to prefix with desired subdomain assignment
-  base_domain_nonprod: nonprod.amidostacks.com
-  base_domain_internal_nonprod: nonprod.amidostacks.internal
-  base_domain_prod: prod.amidostacks.com
-  base_domain_internal_prod: prod.amidostacks.internal
+  - name: pool_vm_image
+    value: ubuntu-20.04
+
   # Yamllint
-  yamllint_config_file: "${{ variables.self_repo_dir }}/yamllint.conf"
-  yamllint_scan_directory: "."
-  # Resource grup that the DNS zones are in
-  create_dns_zone: false
-  dns_resource_group: Stacks-Ancillary-Resources
+  - name: yamllint_config_file
+    value: "${{ variables.self_repo_dir }}/yamllint.conf"
+  - name: yamllint_scan_directory
+    value: "."
+
 
 stages:
   - stage: Build
@@ -463,3 +460,42 @@ stages:
                     external_dns: false
                     external_dns_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/external-dns.yml
                     domain_filter: $(base_domain_prod)
+
+  - stage: Release
+    dependsOn:
+      - Build
+      - Prod
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'))
+    variables:
+      - group: amido-stacks-infra-credentials-nonprod
+      - name: version_number
+        value: "$(version_major).$(version_minor).$(version_revision)"
+    jobs:
+      - job: CreateGitHubRelease
+        pool:
+          vmImage: $(pool_vm_image)
+        steps:
+          # Check out the repo so that it can be tagged
+          - checkout: self
+            persistCredentials: true
+
+          # Create a tag in the code for this release
+          - task: Bash@3
+            displayName: Tag Code
+            inputs:
+              targetType: "inline"
+              script: |
+                git config user.name "BuildService"
+                git config user.email "builder@${COMPANY}.com"
+                git tag -a v${VERSION_NUMBER} -m "Release created by Azure DevOps"
+                git push origin v${VERSION_NUMBER}
+            env:
+              COMPANY: $(company)
+
+          # Create a GitHub release with these packages
+          - task: GitHubRelease@0
+            displayName: Create GitHub Release
+            inputs:
+              gitHubConnection: $(github_release_service_connection)
+              repositoryName: $(github_org)/$(self_repo)
+              tag: $(Build.BuildNumber)
