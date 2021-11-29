@@ -1,6 +1,6 @@
 variables:
   - name: region
-    value: {{ .Input.Cloud.Region }}
+    value: {{ .Project.Cloud.Region }}
   - name: company
     value: {{ .Input.Business.Company }}
   - name: project
