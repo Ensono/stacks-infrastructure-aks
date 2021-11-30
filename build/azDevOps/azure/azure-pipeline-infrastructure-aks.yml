@@ -45,7 +45,7 @@ variables:
     value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
   - name: version_build_number
     value: "$(version_major).$(version_minor).$(version_revision)-$(Build.SourceBranchName)"
-  
+
   # SelfConfig
   - name: self_repo_dir
     value: "$(Agent.BuildDirectory)/s/$(self_repo)"

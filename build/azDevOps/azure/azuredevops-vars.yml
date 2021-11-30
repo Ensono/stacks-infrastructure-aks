@@ -8,7 +8,7 @@ variables:
   - name: domain
     value: core
   - name: self_repo
-    value: stacks-infrastructure-aks    
+    value: stacks-infrastructure-aks
 
   # Terraform configuration
   - name: tf_state_rg
@@ -42,4 +42,4 @@ variables:
   - name: github_release_service_connection
     value: GitHubReleases
   - name: github_org
-    value: $(company)    
+    value: $(company)

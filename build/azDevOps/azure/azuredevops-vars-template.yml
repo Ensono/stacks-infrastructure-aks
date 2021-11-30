@@ -1,14 +1,14 @@
 variables:
   - name: region
-    value: {{ .Project.Cloud.Region }}
+    value: {{.Project.Cloud.Region}}
   - name: company
-    value: {{ .Input.Business.Company }}
+    value: {{.Input.Business.Company}}
   - name: project
-    value: {{ .Project.Name }}
+    value: {{.Project.Name}}
   - name: domain
-    value: {{ .Input.Business.Domain }}
+    value: {{.Input.Business.Domain}}
   - name: self_repo
-    value: {{ .Project.Name }}
+    value: {{.Project.Name}}
 
   # Terraform Configuration
 
@@ -19,23 +19,23 @@ variables:
   # there are some best practices around this if you are going for feature based environments
   # avoid running anything past dev that is not on master
   - name: tf_state_rg
-    value: {{ .Input.Terraform.Backend.Group }}
+    value: {{.Input.Terraform.Backend.Group}}
   - name: tf_state_storage
-    value: {{ .Input.Terraform.Backend.Storage }}
+    value: {{.Input.Terraform.Backend.Storage}}
   - name: tf_state_container
-    value: {{ .Input.Terraform.Backend.Container }}
+    value: {{.Input.Terraform.Backend.Container}}
   - name: tf_state_key
     value: $(self-generic-name)
 
   # Domain names
   - name: base_domain_nonprod
-    value: nonprod.{{ .Input.Network.Base.Domain.External }}
+    value: nonprod.{{.Input.Network.Base.Domain.External}}
   - name: base_domain_internal_nonprod
-    value: nonprod.{{ .Input.Network.Base.Domain.Internal }}
+    value: nonprod.{{.Input.Network.Base.Domain.Internal}}
   - name: base_domain_prod
-    value: prod.{{ .Input.Network.Base.Domain.External }}
+    value: prod.{{.Input.Network.Base.Domain.External}}
   - name: base_domain_internal_prod
-    value: prod.{{ .Input.Network.Base.Domain.Internal }}
+    value: prod.{{.Input.Network.Base.Domain.Internal}}
 
   # DNS configuration
   - name: dns_zone_resource_group
@@ -47,7 +47,6 @@ variables:
   - name: create_release
     value: false
   - name: github_release_service_connection
-    value: 
+    value:
   - name: github_org
     value: $(company)
-
