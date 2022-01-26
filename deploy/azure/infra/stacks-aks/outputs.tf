@@ -84,12 +84,12 @@ output "issuer_pem" {
 
 output "app_gateway_resource_group_name" {
   description = "Resource group of the Application Gateway"
-  value = module.ssl_app_gateway.app_gateway_resource_group_name
+  value       = module.ssl_app_gateway.app_gateway_resource_group_name
 }
 
 output "app_gateway_name" {
   description = "Name of the Application Gateway"
-  value = module.ssl_app_gateway.app_gateway_name
+  value       = module.ssl_app_gateway.app_gateway_name
 }
 
 output "app_gateway_ip" {
@@ -104,36 +104,36 @@ output "dns_resource_group_name" {
 
 output "dns_internal_resource_group_name" {
   description = "Resource group name for the internal DNS zones"
-  value       = module.aks_bootstrap.dns_internal_resource_group_name  
+  value       = module.aks_bootstrap.dns_internal_resource_group_name
 }
 
 output "dns_base_domain" {
   description = "Base domain for the applications"
-  value = module.aks_bootstrap.dns_base_domain
+  value       = module.aks_bootstrap.dns_base_domain
 }
 
 output "dns_base_domain_internal" {
   description = "Base internal domain for the applications"
-  value = module.aks_bootstrap.dns_base_domain_internal
+  value       = module.aks_bootstrap.dns_base_domain_internal
 }
 
 output "app_insights_resource_group_name" {
   description = "Resource group for Application Insights"
-  value = module.aks_bootstrap.app_insights_resource_group_name
+  value       = module.aks_bootstrap.app_insights_resource_group_name
 }
 
 output "app_insights_name" {
   description = "Name of the Application Insights instance"
-  value = module.aks_bootstrap.app_insights_name
+  value       = module.aks_bootstrap.app_insights_name
 }
 
 output "app_insights_id" {
   description = "ID of the Application Insights instance"
-  value = module.aks_bootstrap.app_insights_id
+  value       = module.aks_bootstrap.app_insights_id
 }
 
 output "app_insights_key" {
   description = "Shared key of the Application Insights instance"
-  value = module.aks_bootstrap.app_insights_key
-  sensitive = true
+  value       = module.aks_bootstrap.app_insights_key
+  sensitive   = true
 }
