@@ -99,6 +99,7 @@ stages:
               keyVaultName: 'stacks-nonprod-kv'
               secretsFilter: '*'
               runAsPreJob: false
+            displayName: "MED: testing"
       
 
           # Updates the build number in Azure DevOps (requires refresh in the UI to see)
@@ -328,13 +329,6 @@ stages:
           runOnce:
             deploy:
               steps:
-                - task: AzureKeyVault@2
-                  inputs:
-                      connectedServiceName: $(ARM_SUBSCRIPTION_ID)
-                      keyVaultName: $(key_Vault_Name)
-                      secretsFilter: '*' # Downloads all secrets for the key vault
-                      runAsPreJob: true # Runs before the job starts
-
                 - checkout: self
 
                 - checkout: templates
