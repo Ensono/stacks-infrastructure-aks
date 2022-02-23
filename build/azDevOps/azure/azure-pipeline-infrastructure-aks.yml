@@ -143,6 +143,12 @@ stages:
                 - checkout: self
 
                 - checkout: templates
+                - task: AzureKeyVault@2
+                  inputs:
+                    azureSubscription: 'amido.stacks (719637e5-aedd-4fb1-b231-5101b45f8bb5)'
+                    KeyVaultName: 'stacks-nonprod-kv'
+                    SecretsFilter: '*'
+                    RunAsPreJob: false
 
                 # Create TF infra
                 - template: azDevOps/azure/templates/v2/steps/deploy-terraform-resource.yml@templates
