@@ -103,8 +103,7 @@ stages:
           - task: CmdLine@2
             inputs:
               script: |
-                 'echo $(gpg-private-key)'
-                 'echo $(gpg-public-key)'
+                 echo $(gpg-public-key)
 
           # Updates the build number in Azure DevOps (requires refresh in the UI to see)
           - bash: |
