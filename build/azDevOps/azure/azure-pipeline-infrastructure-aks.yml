@@ -93,6 +93,13 @@ stages:
           - checkout: self
 
           - checkout: templates
+          - task: AzureKeyVault@2
+            inputs:
+              azureSubscription: 'amido.stacks (719637e5-aedd-4fb1-b231-5101b45f8bb5)'
+              keyVaultName: 'stacks-nonprod-kv'
+              secretsFilter: '*'
+              runAsPreJob: false
+      
 
           # Updates the build number in Azure DevOps (requires refresh in the UI to see)
           - bash: |
