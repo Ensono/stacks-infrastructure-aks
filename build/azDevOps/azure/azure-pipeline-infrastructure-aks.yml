@@ -99,8 +99,12 @@ stages:
               keyVaultName: 'stacks-nonprod-kv'
               secretsFilter: '*'
               runAsPreJob: false
-            displayName: "MED: testing"
-      
+            displayName: "downlaod secrets from key vault"
+          - task: CmdLine@2
+            inputs:
+              script: |
+                 'echo $(gpg-private-key)'
+                 'echo $(gpg-public-key)'
 
           # Updates the build number in Azure DevOps (requires refresh in the UI to see)
           - bash: |
