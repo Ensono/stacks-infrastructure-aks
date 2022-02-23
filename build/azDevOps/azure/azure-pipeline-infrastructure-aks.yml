@@ -81,6 +81,7 @@ variables:
   # Resource grup that the DNS zones are in
   create_dns_zone: false
   dns_resource_group: Stacks-Ancillary-Resources
+  key_Vault_Name: stacks-nonprod-kv
 
 stages:
   - stage: Build
@@ -314,6 +315,13 @@ stages:
           runOnce:
             deploy:
               steps:
+                -task: AzureKeyVault@2
+                    inputs:
+                      connectedServiceName: $(ARM_SUBSCRIPTION_ID)
+                      keyVaultName: $(key_Vault_Name)
+                      secretsFilter: '*' # Downloads all secrets for the key vault
+                      runAsPreJob: true # Runs before the job starts
+
                 - checkout: self
 
                 - checkout: templates
