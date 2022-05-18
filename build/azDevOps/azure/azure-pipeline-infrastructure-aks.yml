@@ -78,7 +78,7 @@ variables:
   # Yamllint
   yamllint_config_file: "${{ variables.self_repo_dir }}/yamllint.conf"
   yamllint_scan_directory: "."
-  # Resource grup that the DNS zones are in
+  # Resource group that the DNS zones are in
   create_dns_zone: false
   dns_resource_group: Stacks-Ancillary-Resources
 
