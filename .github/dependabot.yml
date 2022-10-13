@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: terraform
     directory: "/deploy/azure/infra/stacks-aks"
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
       timezone: Europe/London
     open-pull-requests-limit: 10
     rebase-strategy: disabled
