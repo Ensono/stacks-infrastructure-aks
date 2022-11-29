@@ -66,7 +66,7 @@ variables:
   # This will always be predictably named by setting your company - project - stage - location - compnonent names above
   # IT IS SET per stage as an output to be consumed by deploy stage
   - name: aks_cluster_version
-    value: "1.20.7"
+    value: "1.24.6"
 
   # DEFAULT IMAGE RUNNER
   - name: pool_vm_image
