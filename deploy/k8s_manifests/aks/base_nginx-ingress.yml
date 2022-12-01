@@ -359,9 +359,9 @@ metadata:
     app.kubernetes.io/version: 1.5.1
   name: ingress-nginx-controller
   namespace: ingress-nginx
-spec:
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-internal: "${LB_IS_INTERNAL}"
+spec:
   externalTrafficPolicy: Local
   ipFamilies:
   - IPv4
@@ -418,8 +418,8 @@ metadata:
     app.kubernetes.io/version: 1.5.1
   name: ingress-nginx-controller
   namespace: ingress-nginx
-replicas: 2
 spec:
+  replicas: 2
   minReadySeconds: 0
   revisionHistoryLimit: 10
   selector:
