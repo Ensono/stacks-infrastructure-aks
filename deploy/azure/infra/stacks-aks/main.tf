@@ -21,7 +21,7 @@ variable "vnet_cidr" {
 }
 
 module "aks_bootstrap" {
-  source                  = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-aks?ref=v1.5.1"
+  source                  = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-aks?ref=v1.5.2"
   resource_namer          = module.default_label.id
   resource_group_location = var.resource_group_location
   spn_object_id           = data.azurerm_client_config.current.object_id
