@@ -1,0 +1,14 @@
+commonLabels:
+  commit_sha: ${commit_sha}
+controller:
+  replicaCount: ${aks_ingress_replica_count}
+  service:
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "${lb_is_internal}"
+    loadBalancerIP: ${aks_ingress_ip}
+  config:
+    allow-snippet-annotations: "true"
+    use-forwarded-headers: "true"
+    # Extra settings, e.g.:
+    # proxy-buffer-size: "16k"
+    # large-client-header-buffers: "4 16k"

@@ -25,11 +25,12 @@ resources:
     - repository: templates
       type: github
       name: amido/stacks-pipeline-templates
-      ref: refs/tags/v2.0.1
+      # ref: refs/tags/v2.0.1
+      ref: feat/ingress-nginx-helm
       endpoint: amidostacks
   containers:
     - container: k8s_deploy
-      image: amidostacks/ci-k8s:0.0.12
+      image: amidostacks/ci-k8s:0.1.2
     - container: terraform_custom
       image: amidostacks/ci-tf:0.0.8
 
@@ -57,6 +58,12 @@ variables:
     value: "$(Agent.BuildDirectory)/s/stacks-pipeline-templates"
   - name: self_pipeline_scripts_dir
     value: "$(self_pipeline_repo)/scripts"
+
+  # k8s
+  - name: k8s_manifest_directory
+    value: "$(self_repo_dir)/deploy/k8s_manifests"
+  - name: helm_manifest_directory
+    value: "$(self_repo_dir)/deploy/helm_manifests"
 
   # Scripts directory used by pipeline steps
   - name: scripts_dir
@@ -222,8 +229,8 @@ stages:
                     enable_debug: "yes"
                     template_input: [
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_external-dns.yml,
-                        out: $(self_repo_dir)/deploy/k8s_manifests/aks/external-dns.yml,
+                        base: $(k8s_manifest_directory)/aks/base_external-dns.yml,
+                        out: $(k8s_manifest_directory)/aks/external-dns.yml,
                         displayName: ExternalDns,
                         env_vars: {
                           domain_filter: $(base_domain_nonprod),
@@ -232,7 +239,7 @@ stages:
                         args: "-no-empty"
                       },
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_aadpodidentity.yml,
+                        base: $(k8s_manifest_directory)/aks/base_aadpodidentity.yml,
                         displayName: AADPodId,
                         env_vars: {
                           user_identity_id: $(AKS_DEFAULT_USER_IDENTITY_ID),
@@ -242,24 +249,60 @@ stages:
                         args: "-no-empty"
                       },
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_aadpodidentitybinding.yml,
+                        base: $(k8s_manifest_directory)/aks/base_aadpodidentitybinding.yml,
                         displayName: AADPodIdBinding,
                         env_vars: {
                           identity_user_name: $(AKS_DEFAULT_USER_IDENTITY_NAME),
                         },
                         args: "-no-empty"
                       },
+                      # If you've upgraded the ingress to helm, you may remove this and the template file.
+                      # See MIGRATING guide for more details...
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_nginx-ingress.yml,
-                        out: $(self_repo_dir)/deploy/k8s_manifests/aks/nginx-ingress.yml,
+                        base: $(k8s_manifest_directory)/aks/base_nginx-ingress.yml,
+                        out: $(k8s_manifest_directory)/aks/nginx-ingress.yml,
                         displayName: NginxIngress,
                         env_vars: {
                           aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
                           LB_IS_INTERNAL: "true",
                         },
                         args: "-no-empty"
-                      }
+                      },
+                      ## Helm
+                      {
+                        base: '$(helm_manifest_directory)/base_ingress-nginx.yml',
+                        out: '$(helm_manifest_directory)/ingress-nginx.yml',
+                        displayName: "Helm: ingress-nginx",
+                        env_vars: {
+                          aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
+                          aks_ingress_replica_count: 2,
+                          commit_sha: $(Build.SourceVersion),
+                          lb_is_internal: "true",
+                        },
+                        args: "-no-empty",
+                      },
                     ]
+
+                # Set to true to remove non-helm installed nginx Ingress. See MIGRATING guide for more details...
+                - template: azDevOps/azure/templates/v2/steps/delete-non-helm-nginx-ingress-aks.yml@templates
+                  parameters:
+                    enable: true
+                    template_name: $(k8s_manifest_directory)/aks/nginx-ingress.yml
+                    # Azure
+                    azure_tenant_id: $(azure-tenant-id)
+                    azure_subscription_id: $(azure-subscription-id)
+                    azure_client_id: $(azure-client-id)
+                    azure_client_secret: $(azure-client-secret)
+                    # Kubernetes
+                    aks_resource_group_name: $(AKS_RESOURCE_GROUP)
+                    aks_cluster_name: $(AKS_CLUSTER_NAME)
+                    aks_set_acr_perms: false
+                    acr_name: $(docker_container_registry_name)
+                    acr_resource_group_name: $(AKS_RESOURCE_GROUP)
+                    # Helm
+                    helm_container: "k8s_deploy"
+                    display_name: ingress-nginx
+                    namespace: ingress-nginx
 
                 - template: azDevOps/azure/templates/v2/steps/deploy-k8s-cluster.yml@templates
                   parameters:
@@ -275,15 +318,19 @@ stages:
                     aks_deploy_gatekeeper: false
                     aks_aad_pod_identity: false
                     aks_aad_pod_identity_yaml: {
-                      aad_id_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/aadpodidentity.yml,
-                      aad_id_binding_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/aadpodidentitybinding.yml
+                      aad_id_yml: $(k8s_manifest_directory)/aks/aadpodidentity.yml,
+                      aad_id_binding_yml: $(k8s_manifest_directory)/aks/aadpodidentitybinding.yml
                     }
                     acr_name: $(docker_container_registry_name)
                     acr_resource_group_name: $(AKS_RESOURCE_GROUP)
                     ingress_definition:
-                      - $(self_repo_dir)/deploy/k8s_manifests/aks/nginx-ingress.yml
+                      helm_parameters_file: '$(helm_manifest_directory)/ingress-nginx.yml'
+                      display_name: ingress-nginx,
+                      namespace: ingress-nginx,
+                      chart_name: ingress-nginx/ingress-nginx
+                      chart_version: '4.4.2'
                     external_dns: false
-                    external_dns_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/external-dns.yml
+                    external_dns_yml: $(k8s_manifest_directory)/aks/external-dns.yml
                     domain_filter: $(base_domain_nonprod)
 
   - stage: Prod
@@ -397,8 +444,8 @@ stages:
                     enable_debug: "yes"
                     template_input: [
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_external-dns.yml,
-                        out: $(self_repo_dir)/deploy/k8s_manifests/aks/external-dns.yml,
+                        base: $(k8s_manifest_directory)/aks/base_external-dns.yml,
+                        out: $(k8s_manifest_directory)/aks/external-dns.yml,
                         displayName: ExternalDns,
                         env_vars: {
                           domain_filter: $(base_domain_prod),
@@ -407,7 +454,7 @@ stages:
                         args: "-no-empty"
                       },
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_aadpodidentity.yml,
+                        base: $(k8s_manifest_directory)/aks/base_aadpodidentity.yml,
                         displayName: AADPodId,
                         env_vars: {
                           user_identity_id: $(AKS_DEFAULT_USER_IDENTITY_ID),
@@ -417,24 +464,60 @@ stages:
                         args: "-no-empty"
                       },
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_aadpodidentitybinding.yml,
+                        base: $(k8s_manifest_directory)/aks/base_aadpodidentitybinding.yml,
                         displayName: AADPodIdBinding,
                         env_vars: {
                           identity_user_name: $(AKS_DEFAULT_USER_IDENTITY_NAME)
                         },
                         args: "-no-empty"
                       },
+                      # If you've upgraded the ingress to helm, you may remove this and the template file.
+                      # See MIGRATING guide for more details...
                       {
-                        base: $(self_repo_dir)/deploy/k8s_manifests/aks/base_nginx-ingress.yml,
-                        out: $(self_repo_dir)/deploy/k8s_manifests/aks/nginx-ingress.yml,
+                        base: $(k8s_manifest_directory)/aks/base_nginx-ingress.yml,
+                        out: $(k8s_manifest_directory)/aks/nginx-ingress.yml,
                         displayName: NginxIngress,
                         env_vars: {
                           aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
                           LB_IS_INTERNAL: "true",
                         },
                         args: "-no-empty"
-                      }
+                      },
+                      ## Helm
+                      {
+                        base: '$(helm_manifest_directory)/base_ingress-nginx.yml',
+                        out: '$(helm_manifest_directory)/ingress-nginx.yml',
+                        displayName: "Helm: ingress-nginx",
+                        env_vars: {
+                          aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
+                          aks_ingress_replica_count: 2,
+                          commit_sha: $(Build.SourceVersion),
+                          lb_is_internal: "true",
+                        },
+                        args: "-no-empty",
+                      },
                     ]
+
+                # Set to true to remove non-helm installed nginx Ingress. See MIGRATING guide for more details...
+                - template: azDevOps/azure/templates/v2/steps/delete-non-helm-nginx-ingress-aks.yml@templates
+                  parameters:
+                    enable: true
+                    template_name: $(k8s_manifest_directory)/aks/nginx-ingress.yml
+                    # Azure
+                    azure_tenant_id: $(azure-tenant-id)
+                    azure_subscription_id: $(azure-subscription-id)
+                    azure_client_id: $(azure-client-id)
+                    azure_client_secret: $(azure-client-secret)
+                    # Kubernetes
+                    aks_resource_group_name: $(AKS_RESOURCE_GROUP)
+                    aks_cluster_name: $(AKS_CLUSTER_NAME)
+                    aks_set_acr_perms: false
+                    acr_name: $(docker_container_registry_name)
+                    acr_resource_group_name: $(AKS_RESOURCE_GROUP)
+                    # Helm
+                    helm_container: "k8s_deploy"
+                    display_name: ingress-nginx
+                    namespace: ingress-nginx
 
                 - template: azDevOps/azure/templates/v2/steps/deploy-k8s-cluster.yml@templates
                   parameters:
@@ -448,17 +531,24 @@ stages:
                     aks_dns_resource_group_name: $(AKS_RESOURCE_GROUP)
                     aks_set_acr_perms: false
                     aks_deploy_gatekeeper: false
+                    helm_container: "k8s_deploy"
+                    helm_repositories:
+                      ingress-nginx: https://kubernetes.github.io/ingress-nginx
                     aks_aad_pod_identity: false
                     aks_aad_pod_identity_yaml: {
-                      aad_id_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/aadpodidentity.yml,
-                      aad_id_binding_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/aadpodidentitybinding.yml,
+                      aad_id_yml: $(k8s_manifest_directory)/aks/aadpodidentity.yml,
+                      aad_id_binding_yml: $(k8s_manifest_directory)/aks/aadpodidentitybinding.yml,
                     }
                     acr_name: $(docker_container_registry_name)
                     acr_resource_group_name: $(AKS_RESOURCE_GROUP)
                     ingress_definition:
-                      - $(self_repo_dir)/deploy/k8s_manifests/aks/nginx-ingress.yml
+                      helm_parameters_file: '$(helm_manifest_directory)/ingress-nginx.yml'
+                      display_name: ingress-nginx,
+                      namespace: ingress-nginx,
+                      chart_name: ingress-nginx/ingress-nginx
+                      chart_version: '4.4.2'
                     external_dns: false
-                    external_dns_yml: $(self_repo_dir)/deploy/k8s_manifests/aks/external-dns.yml
+                    external_dns_yml: $(k8s_manifest_directory)/aks/external-dns.yml
                     domain_filter: $(base_domain_prod)
 
   - stage: Release
