@@ -307,6 +307,7 @@ stages:
                 - template: azDevOps/azure/templates/v2/steps/deploy-k8s-cluster.yml@templates
                   parameters:
                     scripts_dir: $(scripts_dir)
+                    pipeline_scripts_dir: $(self_pipeline_scripts_dir)
                     azure_tenant_id: $(azure-tenant-id)
                     azure_subscription_id: $(azure-subscription-id)
                     azure_client_id: $(azure-client-id)
@@ -316,6 +317,9 @@ stages:
                     aks_dns_resource_group_name: $(AKS_RESOURCE_GROUP)
                     aks_set_acr_perms: false
                     aks_deploy_gatekeeper: false
+                    helm_container: "k8s_deploy"
+                    helm_repositories:
+                      ingress-nginx: https://kubernetes.github.io/ingress-nginx
                     aks_aad_pod_identity: false
                     aks_aad_pod_identity_yaml: {
                       aad_id_yml: $(k8s_manifest_directory)/aks/aadpodidentity.yml,
@@ -325,8 +329,8 @@ stages:
                     acr_resource_group_name: $(AKS_RESOURCE_GROUP)
                     ingress_definition:
                       helm_parameters_file: '$(helm_manifest_directory)/ingress-nginx.yml'
-                      display_name: ingress-nginx,
-                      namespace: ingress-nginx,
+                      display_name: ingress-nginx
+                      namespace: ingress-nginx
                       chart_name: ingress-nginx/ingress-nginx
                       chart_version: '4.4.2'
                     external_dns: false
@@ -543,8 +547,8 @@ stages:
                     acr_resource_group_name: $(AKS_RESOURCE_GROUP)
                     ingress_definition:
                       helm_parameters_file: '$(helm_manifest_directory)/ingress-nginx.yml'
-                      display_name: ingress-nginx,
-                      namespace: ingress-nginx,
+                      display_name: ingress-nginx
+                      namespace: ingress-nginx
                       chart_name: ingress-nginx/ingress-nginx
                       chart_version: '4.4.2'
                     external_dns: false
