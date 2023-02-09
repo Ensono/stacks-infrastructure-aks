@@ -332,7 +332,7 @@ stages:
                       display_name: ingress-nginx
                       namespace: ingress-nginx
                       chart_name: ingress-nginx/ingress-nginx
-                      chart_version: '4.4.2'
+                      chart_version: '4.2.5'
                     external_dns: false
                     external_dns_yml: $(k8s_manifest_directory)/aks/external-dns.yml
                     domain_filter: $(base_domain_nonprod)
@@ -550,7 +550,7 @@ stages:
                       display_name: ingress-nginx
                       namespace: ingress-nginx
                       chart_name: ingress-nginx/ingress-nginx
-                      chart_version: '4.4.2'
+                      chart_version: '4.2.5'
                     external_dns: false
                     external_dns_yml: $(k8s_manifest_directory)/aks/external-dns.yml
                     domain_filter: $(base_domain_prod)
