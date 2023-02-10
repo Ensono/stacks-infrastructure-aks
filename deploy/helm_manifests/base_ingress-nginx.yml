@@ -2,10 +2,24 @@ commonLabels:
   commit_sha: ${commit_sha}
 controller:
   replicaCount: ${aks_ingress_replica_count}
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: ingress-nginx
+            app.kubernetes.io/component: controller
+            app.kubernetes.io/instance: ${display_name}
+        topologyKey: "kubernetes.io/hostname"
   service:
     annotations:
       service.beta.kubernetes.io/azure-load-balancer-internal: "${lb_is_internal}"
     loadBalancerIP: ${aks_ingress_ip}
+    externalTrafficPolicy: "Local"
   config:
     allow-snippet-annotations: "true"
     use-forwarded-headers: "true"

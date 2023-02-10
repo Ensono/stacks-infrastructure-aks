@@ -277,6 +277,7 @@ stages:
                           aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
                           aks_ingress_replica_count: 2,
                           commit_sha: $(Build.SourceVersion),
+                          display_name: ingress-nginx,
                           lb_is_internal: "true",
                         },
                         args: "-no-empty",
@@ -494,8 +495,9 @@ stages:
                         displayName: "Helm: ingress-nginx",
                         env_vars: {
                           aks_ingress_ip: $(AKS_INGRESS_PRIVATE_IP),
-                          aks_ingress_replica_count: 2,
+                          aks_ingress_replica_count: 3,
                           commit_sha: $(Build.SourceVersion),
+                          display_name: ingress-nginx,
                           lb_is_internal: "true",
                         },
                         args: "-no-empty",
