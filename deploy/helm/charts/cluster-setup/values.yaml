@@ -1,0 +1,11 @@
+# Default values for cluster_setup.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# AKS user values
+aks:
+  user:
+    identity_id: ""
+  identity:
+    client_id: ""
+    user_name: ""

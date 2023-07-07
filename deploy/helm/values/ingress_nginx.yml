@@ -1,0 +1,6 @@
+
+controller:
+  service:
+    annotations:
+      "service.beta.kubernetes.io/azure-load-balancer-internal": true
+    loadBalancerIP: ${env:TFOUT_aks_ingress_private_ip}
