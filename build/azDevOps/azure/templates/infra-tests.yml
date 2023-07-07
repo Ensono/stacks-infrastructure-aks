@@ -1,0 +1,27 @@
+parameters:
+  TESTS_PATH:
+  INSPEC_ARGS:
+  INSPEC_OUTPUT_PATH: /app/outputs/tests
+  CHEF_LICENSE:
+  REPORT_FILENAME:
+
+steps:
+  - task: Bash@3
+    displayName: "TackCTL: Tests"
+    inputs:
+      targetType: inline
+      script: taskctl tests
+    env:
+      TESTS_PATH: ${{ parameters.tests_path }}
+      CHEF_LICENSE: ${{ parameters.chef_license }}
+      INSPEC_ARGS: ${{ parameters.inspec_args }}
+      INSPEC_OUTPUT_PATH: ${{ parameters.inspec_output_path }}
+      REPORT_FILENAME: ${{ parameters.report_filename }}
+
+      # Ensure that the env vars are set for access
+      # The following are the env vars that Inspec requires for authentication with Azure
+      AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+      AZURE_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+      AZURE_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+      AZURE_TENANT_ID: $(ARM_TENANT_ID)
+

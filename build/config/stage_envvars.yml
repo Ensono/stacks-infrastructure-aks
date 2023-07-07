@@ -1,0 +1,66 @@
+default:
+  variables:
+    - name: CLOUD_PLATFORM
+      description: Cloud that is being targeted, e.g. aws or azure
+  credentials:
+    azure:
+      - name: ARM_CLIENT_ID
+      - name: ARM_CLIENT_SECRET
+      - name: ARM_SUBSCRIPTION_ID
+      - name: ARM_TENANT_ID
+    aws:
+      - name: AWS_ACCESS_KEY_ID
+      - name: AWS_SECRET_ACCESS_KEY
+      - name: AWS_REGION
+
+stages:
+  - name: stacks-aks
+    variables:
+      - name: TF_FILE_LOCATION
+        description: Path to the Terraform template files
+      - name: TF_BACKEND_INIT
+        description: Arguments that should be passed to Terraform during the init process
+      - name: TF_BACKEND_PLAN
+        description: Arguments that should be passed to Terraform during the plan process
+        required: false
+      - name: TF_VAR_name_company
+        description: Name of the company that the cluster is being built for
+      - name: TF_VAR_name_project
+        description: Name of the project
+      - name: TF_VAR_name_component
+      - name: TF_VAR_name_environment
+      - name: TF_VAR_stage
+      - name: TF_VAR_attributes
+        required: false
+      - name: TF_VAR_tags
+        required: false
+      - name: TF_VAR_resource_group_location
+        description: Location that the cluster should be deployed to
+      - name: TF_VAR_dns_zone
+        description: Public DNS zone that should be used for URLs
+      - name: TF_VAR_internal_dns_zone
+        description: Private DNS zone for internal services
+      - name: TF_VAR_pfx_password
+        description: Password for the certificate deployed into Kubernetes
+      - name: TF_VAR_dns_resource_group
+        description: Resource group that contains the DNS zones to update
+      - name: TF_VAR_create_dns_zone
+        description: State if the DNS zone should be created
+      - name: TF_VAR_create_aksvnet
+        description: State if the virtual network for AKS should be created
+      - name: TF_VAR_cluster_version
+        description: Version of Kubernetes to deploy
+      - name: TF_VAR_create_acr
+        description: State if a container registry should be created
+      - name: TF_VAR_acr_resource_group
+        description: Resource group that the ACR can be found if not being created
+      - name: TF_VAR_acr_name
+        description: Name of the ACR to create
+      - name: TF_VAR_is_cluster_private
+        description: Can the API be accessed remotely
+      - name: TF_VAR_key_vault_name
+        description: Name of the key vault to create
+        required: false
+      - name: TF_VAR_acme_email
+        description: Email address for Acme certificate registration, must be a valid email
+      - name: TF_VAR_create_user_identity

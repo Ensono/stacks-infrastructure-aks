@@ -1,0 +1,249 @@
+#############################################################################################################################
+# This is a generated file which includes some replacements.                                                                #
+# It is still very much recommended to go through this and ensure all variables are correct for your business/domain        #
+# All variables are defined in a global scope.                                                                              #
+# All Terraform produced resource names are using a labels module ensuring a predictable naming convention                  #
+# E.g.: variables for company, project, stage and domain will produce a name of `$company-$project-$stage-$domain`          #
+# NB: Some resources e.g. blob storage only allow for alpha numeric characters so the name is adjusted accordingly          #
+#  ==> `$company$project$stage$domain`                                                                                      #
+#############################################################################################################################
+name: '$(Build.SourceBranchName)-init'
+
+pr:
+  - master
+
+trigger:
+  branches:
+    include:
+      - 'master'
+  paths:
+    include:
+      - '*'
+
+variables:
+  - template: pipeline-vars.yml
+
+  # Versioning
+  - name: version_major
+    value: 0
+  - name: version_minor
+    value: 1
+  - name: version_revision
+    value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
+  - name: version_build_number
+    value: "$(version_major).$(version_minor).$(version_revision)-$(Build.SourceBranchName)"
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Validate
+        pool:
+          vmImage: $(pool_vm_image)
+        steps:
+
+          # Updates the build number in Azure DevOps (requires refresh in the UI to see)
+          - bash: |
+              echo '##vso[build.updatebuildnumber]$(version_build_number)'
+            displayName: 'Update: Build Number'
+
+          # Validate all the YAML files in the repo
+          - task: Bash@3
+            displayName: Lint files
+            inputs:
+              targetType: inline
+              script: taskctl lint
+            env:
+              TF_FILE_LOCATION: /app/deploy/azure/infra/stacks-aks
+              TF_BACKEND: none
+              STAGE: stacks-aks
+
+  # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
+  - stage: NonProd
+    dependsOn: Build
+    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+    variables:
+      # Pull in the non-production credentials for the build to use
+      - group: stacks-sp-creds
+
+      - name: Environment.ShortName
+        value: nonprod
+    jobs:
+      - deployment: InfraNonProd
+        environment: ${{ variables.domain }}-nonprod
+        pool:
+          vmImage: $(pool_vm_image)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+
+                - template: templates/setup.yml
+                  parameters:
+                    TaskctlVersion: ${{ variables.TaskctlVersion }}
+                    StacksEnvfileVersion: ${{ variables.StacksEnvfileVersion }}
+
+                # Create the resources for the Kubernetes cluster
+                - task: Bash@3
+                  displayName: Deploy AKS
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl infrastructure
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_storage)"
+                    TF_BACKEND_PLAN: "-input=false,-out=tfplan"
+                    TF_VAR_resource_group_location: $(region)
+                    TF_VAR_name_company: $(company)
+                    TF_VAR_name_project: $(project)
+                    TF_VAR_name_component: $(domain)
+                    TF_VAR_name_environment: $(Environment.ShortName)
+                    TF_VAR_acme_email: $(acme_email)
+                    TF_VAR_is_cluster_private: true
+                    TF_VAR_cluster_version: $(aks_cluster_version)
+                    TF_VAR_stage: $(Environment.ShortName)
+                    TF_VAR_create_dns_zone: $(create_dns_zone)
+                    TF_VAR_dns_resource_group: $(dns_resource_group)
+                    TF_VAR_create_key_vault: $(create_key_vault)
+                    TF_VAR_create_aksvnet: true
+                    TF_VAR_create_user_identity: true
+                    TF_VAR_create_acr: false
+                    TF_VAR_pfx_password: Password1
+                    TF_VAR_create_valid_cert: $(create_valid_cert)
+                    TF_VAR_team_owner: $(team_owner)
+
+      - deployment: K8sNonProd
+        dependsOn: InfraNonProd
+        environment: ${{ variables.domain }}-nonprod
+        pool:
+          vmImage: $(pool_vm_image)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: Bash@3
+                  displayName: Deploy Helm Charts
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl helm:charts
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+
+  - stage: Prod
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    variables:
+      # Pull in the production credentials for the build to use
+      - group: stacks-sp-creds
+
+      - name: Environment.ShortName
+        value: prod
+    jobs:
+      - deployment: InfraProd
+        environment: ${{ variables.domain }}-prod
+        pool:
+          vmImage: $(pool_vm_image)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: templates/setup.yml
+                  parameters:
+                    TaskctlVersion: ${{ variables.TaskctlVersion }}
+                    StacksEnvfileVersion: ${{ variables.StacksEnvfileVersion }}
+
+                # Create the resources for the Kubernetes cluster
+                - task: Bash@3
+                  displayName: Deploy AKS
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl infrastructure
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_storage)"
+                    TF_BACKEND_PLAN: "-input=false,-out=tfplan"
+                    TF_VAR_resource_group_location: $(region)
+                    TF_VAR_name_company: $(company)
+                    TF_VAR_name_project: $(project)
+                    TF_VAR_name_component: $(domain)
+                    TF_VAR_name_environment: $(Environment.ShortName)
+                    TF_VAR_acme_email: $(acme_email)
+                    TF_VAR_is_cluster_private: true
+                    TF_VAR_cluster_version: $(aks_cluster_version)
+                    TF_VAR_stage: $(Environment.ShortName)
+                    TF_VAR_create_dns_zone: $(create_dns_zone)
+                    TF_VAR_dns_resource_group: $(dns_resource_group)
+                    TF_VAR_create_key_vault: $(create_key_vault)
+                    TF_VAR_create_aksvnet: true
+                    TF_VAR_create_user_identity: true
+                    TF_VAR_create_acr: false
+                    TF_VAR_pfx_password: Password1
+                    TF_VAR_create_valid_cert: $(create_valid_cert)
+                    TF_VAR_team_owner: $(team_owner)
+
+      - deployment: K8sProd
+        dependsOn: InfraProd
+        environment: ${{ variables.domain}}-prod
+        pool:
+          vmImage: $(pool_vm_image)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+
+                - task: Bash@3
+                  displayName: Deploy Helm Charts
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl helm:charts
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+
+  - stage: Release
+    dependsOn:
+      - Build
+      - Prod
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'))
+    variables:
+      - group: amido-stacks-infra-credentials-nonprod
+      - name: version_number
+        value: "$(version_major).$(version_minor).$(version_revision)"
+    jobs:
+      - job: CreateGitHubRelease
+        pool:
+          vmImage: $(pool_vm_image)
+        steps:
+          # Check out the repo so that it can be tagged
+          - checkout: self
+            persistCredentials: true
+
+          # Create a tag in the code for this release
+          - task: Bash@3
+            displayName: Tag Code
+            inputs:
+              targetType: "inline"
+              script: |
+                git config user.name "BuildService"
+                git config user.email "builder@${COMPANY}.com"
+                git tag -a v${VERSION_NUMBER} -m "Release created by Azure DevOps"
+                git push origin v${VERSION_NUMBER}
+            env:
+              COMPANY: $(company)
+
+          # Create a GitHub release with these packages
+          - task: GitHubRelease@0
+            displayName: Create GitHub Release
+            inputs:
+              gitHubConnection: $(github_release_service_connection)
+              repositoryName: $(github_org)/$(self_repo)
+              tag: $(Build.BuildNumber)

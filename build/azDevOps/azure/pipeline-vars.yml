@@ -1,0 +1,89 @@
+variables:
+
+  # ------- General Agent Setup
+  # set the location that the resources should be deployed to
+  - name: region
+    value: westeurope
+
+  # set the version of the agent that should be used to start the build
+  - name: pool_vm_image
+    value: ubuntu-22.04
+
+  # ------- Stacks configuration
+  # name of the company that owns the project
+  - name: company
+    value: ed
+
+  # name of the project
+  - name: project
+    value: stacks
+
+  # which domain fo the company is this. e.g. core resources, or front end
+  # This is not a network domain
+  - name: domain
+    value: core
+
+  # the email address to use when creating the SSL certificate
+  - name: acme_email
+    value: stacks@amido.com
+
+  # -------- Cluster information
+  # version of AKS to deploy
+  - name: aks_cluster_version
+    value: 1.24.9
+
+  # Should a valid certificate be obtained, or use a self signed one
+  - name: create_valid_cert
+    value: false
+
+  # Additional node pools for kubernetes
+  - name: aks_node_pools
+    value:
+      app_pool:
+        vm_size: Standard_DS2_V2
+        auto_scaling: true
+        min_nodes: 1
+        max_nodes: 10    
+
+  # -------- Terraform remote state
+  # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
+  # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
+  # there are some best practices around this if you are going for feature based environments
+  # avoid running anything past dev that is not on master  
+  - name: tf_state_rg
+    value: stacks-terraform-state
+  - name: tf_state_storage
+    value: stacksstatehjfis
+  - name: tf_state_container
+    value: tfstate
+  - name: tf_state_key
+    value: core
+
+  # -------- Network Domain names
+  - name: base_domain_nonprod
+    value: nonprod.stacks.ensono.com
+  - name: base_domain_internal_nonprod
+    value: nonprod.stacks.ensono.internal
+  - name: base_domain_prod
+    value: prod.stacks.ensono.com
+  - name: base_domain_internal_prod
+    value: prod.stacks.ensono.internal
+
+  # ------- DNS configuration
+  - name: create_dns_zone
+    value: false
+  - name: dns_resource_group
+    value: stacks-ancillary-resources
+
+  # ------- GitHub
+  - name: create_release
+    value: true
+  - name: github_release_service_connection
+    value: GitHubReleases
+  - name: github_org
+    value: $(company)
+
+  # ------- Resource Tags
+  - name: team_owner
+    value: plateng
+
