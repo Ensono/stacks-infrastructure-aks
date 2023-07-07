@@ -137,3 +137,32 @@ output "app_insights_key" {
   value       = module.aks_bootstrap.app_insights_key
   sensitive   = true
 }
+
+# Output the create flags so that they can be used in the tests
+output "create_dns_zone" {
+  value = var.create_dns_zone
+}
+
+output "create_aksvnet" {
+  value = var.create_aksvnet
+}
+
+output "create_user_identity" {
+  value = var.create_user_identity
+}
+
+output "create_acr" {
+  value = var.create_acr
+}
+
+output "create_key_vault" {
+  value = var.create_key_vault
+}
+
+output "create_valid_cert" {
+  value = var.create_valid_cert
+}
+
+output "kubernetes_version" {
+  value = var.cluster_version
+}

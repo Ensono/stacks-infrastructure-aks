@@ -35,23 +35,6 @@ variable "tags" {
   default = {}
 }
 
-# Each region must have corresponding a shortend name for resource naming purposes
-variable "location_name_map" {
-  type = map(string)
-
-  default = {
-    northeurope   = "eun"
-    westeurope    = "euw"
-    uksouth       = "uks"
-    ukwest        = "ukw"
-    eastus        = "use"
-    eastus2       = "use2"
-    westus        = "usw"
-    eastasia      = "ase"
-    southeastasia = "asse"
-  }
-}
-
 ############################################
 # AZURE INFORMATION
 ############################################
@@ -76,6 +59,16 @@ variable "dns_resource_group" {
   type = string
 }
 
+variable "aks_node_pools" {
+  type = map(object({
+    vm_size      = string,
+    auto_scaling = bool,
+    min_nodes    = number,
+    max_nodes    = number
+  }))
+  description = "Additional node pools as required by the platform"
+  default     = {}
+}
 # ###########################
 # # CONDITIONALS
 # ##########################
@@ -103,21 +96,54 @@ variable "acr_resource_group" {
   type = string
 }
 
+variable "acr_name" {
+  type    = string
+  default = ""
+}
+
 variable "is_cluster_private" {
   type        = bool
   description = "Set cluster private - API only accessible over internal network"
 }
 
 variable "log_application_type" {
-  type = string
+  type    = string
+  default = "other"
 }
 
-variable key_vault_name {
+variable "key_vault_name" {
   type        = string
   description = "Key Vault name - if not specificied will default to computed naming convention"
+  default     = ""
 }
 
-variable acme_email {
+variable "create_key_vault" {
+  type        = bool
+  description = "States if the AKS module should create a Key Vault or not"
+  default     = false
+}
+
+variable "create_valid_cert" {
+  type        = bool
+  description = "Denote if a certificate should be created on the gateway. Useful if DNS is not yet configured"
+  default     = true
+}
+
+variable "acme_email" {
   type        = string
   description = "Email for Acme registration, must be a valid email"
 }
+
+# if you do not set the
+# `service_cidr`
+# `dns_service_ip`
+# `docker_bridge_cidr`
+# AKS will default to ==> 10.0.0.0/16
+variable "vnet_cidr" {
+  default = ["10.1.0.0/16"]
+}
+
+variable "tag_team_owner" {
+  default = ""
+}
+
