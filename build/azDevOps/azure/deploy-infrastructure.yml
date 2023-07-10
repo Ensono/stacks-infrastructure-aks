@@ -114,7 +114,7 @@ stages:
                     TF_VAR_team_owner: $(team_owner)
 
                 # Perform infrastructure tests
-                - template: ../templates/infra-tests.yml
+                - template: templates/infra-tests.yml
                   parameters:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/terraform_state/tests
@@ -203,7 +203,7 @@ stages:
                     TF_VAR_team_owner: $(team_owner)
 
                 # Perform infrastructure tests
-                - template: ../templates/infra-tests.yml
+                - template: templates/infra-tests.yml
                   parameters:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/terraform_state/tests
