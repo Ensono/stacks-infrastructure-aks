@@ -1,5 +1,4 @@
 tasks:
-
   build:number:
     context: powershell
     description: Update the build number
@@ -8,7 +7,7 @@ tasks:
     exportAs: BUILDNUMBER
 
   lint:yaml:
-    context: powershell-python
+    context: powershell
     description: Perform YAML linting
     command:
       - Invoke-YamlLint
@@ -55,7 +54,6 @@ tasks:
     description: Configure Kubernetes cluster
     command:
       - Invoke-Terraform -Output
-
 
   init:envs:
     command:
@@ -109,7 +107,7 @@ tasks:
         /app/build/scripts/Deploy-Charts.ps1 /app/deploy/helm/k8s_apps.yml `
               -resourcegroup ${env:TFOUT_resource_group_name} `
               -aksname ${env:TFOUT_aks_cluster_name}
-        
+
   _docs:
     description: Build Docs for AKS
     context: docsenv
@@ -126,6 +124,3 @@ tasks:
           -artifactsDir $env:ARTIFACTS_DIR `
           -Owner $env:OWNER `
           -repository $env:REPONAME
-
-
-

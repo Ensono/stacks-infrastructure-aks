@@ -3,5 +3,5 @@ kind: AzureIdentityBinding
 metadata:
   name: stacks-webapp-azure-identity-binding
 spec:
-  azureIdentity: {{ .Values.aks.identity.username }}
+  azureIdentity: {{.Values.aks.identity.username}}
   selector: stacks-webapp-identity

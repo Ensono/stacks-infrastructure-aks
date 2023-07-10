@@ -7,7 +7,7 @@
 # NB: Some resources e.g. blob storage only allow for alpha numeric characters so the name is adjusted accordingly          #
 #  ==> `$company$project$stage$domain`                                                                                      #
 #############################################################################################################################
-name: '$(Build.SourceBranchName)-init'
+name: "$(Build.SourceBranchName)-init"
 
 pr:
   - master
@@ -15,10 +15,10 @@ pr:
 trigger:
   branches:
     include:
-      - 'master'
+      - "master"
   paths:
     include:
-      - '*'
+      - "*"
 
 variables:
   - template: pipeline-vars.yml
@@ -43,7 +43,6 @@ stages:
         pool:
           vmImage: $(pool_vm_image)
         steps:
-
           # Create the documentation for the repo
           - task: Bash@3
             displayName: Documentation
@@ -79,7 +78,6 @@ stages:
           runOnce:
             deploy:
               steps:
-
                 - template: templates/setup.yml
                   parameters:
                     TaskctlVersion: ${{ variables.TaskctlVersion }}
@@ -272,6 +270,3 @@ stages:
               ARTIFACTS_DIR: outputs/docs
               OWNER: ${{ variables.RepoOwner }}
               REPONAME: ${{ variables.RepoName }}
-
-          
-

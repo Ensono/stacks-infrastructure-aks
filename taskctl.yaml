@@ -42,5 +42,5 @@ pipelines:
         API_KEY: $API_KEY
         NOTES:
         COMMIT_ID: $COMMIT_ID
-        ARTIFACTS_DIR: $ARTIFACTS_DIR  
+        ARTIFACTS_DIR: $ARTIFACTS_DIR
         REPONAME: $REPONAME

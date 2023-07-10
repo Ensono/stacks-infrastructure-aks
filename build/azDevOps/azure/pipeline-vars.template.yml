@@ -1,27 +1,26 @@
 variables:
-
   # ------- General Agent Setup
   # set the location that the resources should be deployed to
   - name: region
-    value: {{.Project.Cloud.Region}}
+    value: {{ .Project.Cloud.Region }}
 
   # set the version of the agent that should be used to start the build
   - name: pool_vm_image
     value: ubuntu-22.04
 
   # ------- Stacks configuration
-  # name of the company that owns the project  
+  # name of the company that owns the project
   - name: company
-    value: {{.Input.Business.Company}}
+    value: {{ .Input.Business.Company }}
 
   # name of the project
   - name: project
-    value: {{.Project.Name}}
+    value: {{ .Project.Name }}
 
   # which domain fo the company is this. e.g. core resources, or front end
-  # This is not a network domain    
+  # This is not a network domain
   - name: domain
-    value: {{.Input.Business.Domain}}
+    value: {{ .Input.Business.Domain }}
 
   # the email address to use when creating the SSL certificate
   - name: acme_email
@@ -38,7 +37,7 @@ variables:
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
-    value: {}  
+    value: {}
 
   # -------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
@@ -46,11 +45,11 @@ variables:
   # there are some best practices around this if you are going for feature based environments
   # avoid running anything past dev that is not on master
   - name: tf_state_rg
-    value: {{.Input.Terraform.Backend.Group}}
+    value: {{ .Input.Terraform.Backend.Group }}
   - name: tf_state_storage
-    value: {{.Input.Terraform.Backend.Storage}}
+    value: {{ .Input.Terraform.Backend.Storage }}
   - name: tf_state_container
-    value: {{.Input.Terraform.Backend.Container}}
+    value: {{ .Input.Terraform.Backend.Container }}
   - name: tf_state_key
     value: core
 

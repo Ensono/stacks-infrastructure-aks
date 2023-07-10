@@ -1,4 +1,3 @@
-
 # Include necessary variables for this pipeline file
 variables:
   - group: ensono-sp-creds
@@ -24,11 +23,9 @@ schedules:
     always: true
 
 stages:
-
   - stage: infrastructure_tests
 
     jobs:
-
       - job: terraform_state
         displayName: Terraform State
         pool:

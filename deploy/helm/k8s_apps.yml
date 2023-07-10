@@ -1,52 +1,51 @@
 charts:
+  - name: aad-pod-identity
+    location: aad-pod-identity
+    enabled: true
+    repo: https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
+    values_template: deploy/helm/values/aad_pod_identity.yml
+    clouds:
+      - azure
 
-- name: aad-pod-identity
-  location: aad-pod-identity
-  enabled: true
-  repo: https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
-  values_template: deploy/helm/values/aad_pod_identity.yml
-  clouds:
-    - azure
+  - name: cluster-setup
+    location: ./deploy/helm/charts
+    enabled: true
+    values_template: deploy/helm/values/cluster_setup.yml
+    clouds:
+      - azure
 
-- name: cluster-setup
-  location: ./deploy/helm/charts
-  enabled: true
-  values_template: deploy/helm/values/cluster_setup.yml
-  clouds:
-    - azure
+  - name: external-dns
+    location: external-dns
+    repo: https://kubernetes-sigs.github.io/external-dns/
+    enabled: false
+    values_template: deploy/helm/values/external_dns.yml
 
-- name: external-dns
-  location: external-dns
-  repo: https://kubernetes-sigs.github.io/external-dns/
-  enabled: false
-  values_template: deploy/helm/values/external_dns.yml
+  - name: ingress-nginx
+    location: ingress-nginx
+    enabled: true
+    repo: https://kubernetes.github.io/ingress-nginx
+    values_template: deploy/helm/values/ingress_nginx.yml
 
-- name: ingress-nginx
-  location: ingress-nginx
-  enabled: true
-  repo: https://kubernetes.github.io/ingress-nginx
-  values_template: deploy/helm/values/ingress_nginx.yml
+  - name: argo-rollouts
+    location: argo-rollouts
+    enabled: false
+    repo: https://argoproj.github.io/argo-helm
+    values_template: deploy/helm/values/argo_rollouts.yml
 
-- name: argo-rollouts
-  location: argo-rollouts
-  enabled: false
-  repo: https://argoproj.github.io/argo-helm
-  values_template: deploy/helm/values/argo_rollouts.yml
+  - name: grafana
+    location: grafana
+    enabled: false
+    repo: https://grafana.github.io/helm-charts
+    values_repo: deploy/helm/values/grafana.yml
 
-- name: grafana
-  location: grafana
-  enabled: false
-  repo: https://grafana.github.io/helm-charts
-  values_repo: deploy/helm/values/grafana.yml
+  - name: velero
+    location: vmware-tanzu
+    enabled: false
+    repo: https://vmware-tanzu.github.io/helm-charts
+    values_repo: deploy/helm/values/velero.yml
 
-- name: velero
-  location: vmware-tanzu
-  enabled: false
-  repo: https://vmware-tanzu.github.io/helm-charts
-  values_repo: deploy/helm/values/velero.yml
-
-- name: prometheus
-  location: prometheus-community
-  enabled: false
-  repo: https://prometheus-community.github.io/helm-charts
-  values_repo: deploy/helm/values/prometheus.yml
+  - name: prometheus
+    location: prometheus-community
+    enabled: false
+    repo: https://prometheus-community.github.io/helm-charts
+    values_repo: deploy/helm/values/prometheus.yml

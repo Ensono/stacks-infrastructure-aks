@@ -1,5 +1,4 @@
 contexts:
-
   powershell:
     executable:
       bin: docker
@@ -21,7 +20,6 @@ contexts:
         - -NoProfile
         - -Command
     quote: "'"
-    #before: envfile -e home,path
     envfile:
       generate: true
       exclude:
@@ -50,7 +48,6 @@ contexts:
         - -NoProfile
         - -Command
     quote: "'"
-    #before: envfile -e home,path
     envfile:
       generate: true
       exclude:
@@ -94,11 +91,11 @@ contexts:
         - -v
         - ${PWD}:/app
         - -e
-        - PSModulePath=/modules        
+        - PSModulePath=/modules
         - -w
         - /app
         - --env-file
-        - envfile        
+        - envfile
         - amidostacks/runner-pwsh-asciidoctor
         - pwsh
         - -NoProfile
@@ -108,4 +105,4 @@ contexts:
       generate: true
       exclude:
         - path
-        - home        
+        - home

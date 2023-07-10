@@ -26,24 +26,24 @@ base:
   # color as hex string (leading # is optional)
   font_color: 333333
   # color as RGB array
-  #font_color: [51, 51, 51]
+  # font_color: [51, 51, 51]
   # color as CMYK array (approximated)
-  #font_color: [0, 0, 0, 0.92]
-  #font_color: [0, 0, 0, 92%]
+  # font_color: [0, 0, 0, 0.92]
+  # font_color: [0, 0, 0, 92%]
   font_family: Noto Serif
   # choose one of these font_size/line_height_length combinations
-  #font_size: 14
-  #line_height_length: 20
-  #font_size: 11.25
-  #line_height_length: 18
-  #font_size: 11.2
-  #line_height_length: 16
+  # font_size: 14
+  # line_height_length: 20
+  # font_size: 11.25
+  # line_height_length: 18
+  # font_size: 11.2
+  # line_height_length: 16
   font_size: 10.5
-  #line_height_length: 15
+  # line_height_length: 15
   # correct line height for Noto Serif metrics
   line_height_length: 12
-  #font_size: 11.25
-  #line_height_length: 18
+  # font_size: 11.25
+  # line_height_length: 18
   line_height: $base_line_height_length / $base_font_size
   font_size_large: round($base_font_size * 1.25)
   font_size_small: round($base_font_size * 0.85)
@@ -66,7 +66,7 @@ role:
     font_size: 0.8em
     font_style: normal_italic
 # FIXME vertical_rhythm is weird; we should think in terms of ems
-#vertical_rhythm: $base_line_height_length * 2 / 3
+# vertical_rhythm: $base_line_height_length * 2 / 3
 # correct line height for Noto Serif metrics (comes with built-in line height)
 vertical_rhythm: $base_line_height_length
 horizontal_rhythm: $base_line_height_length
@@ -105,7 +105,7 @@ heading:
   h4_font_size: $base_font_size_large
   h5_font_size: $base_font_size
   h6_font_size: $base_font_size_small
-  #line_height: 1.4
+  # line_height: 1.4
   # correct line height for Noto Serif metrics (comes with built-in line height)
   line_height: 1
   margin_top: $vertical_rhythm * 0.4
@@ -157,7 +157,7 @@ admonition:
   column_rule_color: $base_border_color
   column_rule_width: $base_border_width
   padding: [0, $horizontal_rhythm, 0, $horizontal_rhythm]
-  #icon:
+  # icon:
   #  tip:
   #    name: far-lightbulb
   #    stroke_color: 111111
@@ -171,7 +171,13 @@ blockquote:
   border_width: 0
   border_left_width: 5
   # FIXME disable negative padding bottom once margin collapsing is implemented
-  padding: [0, $horizontal_rhythm, $block_margin_bottom * -0.75, $horizontal_rhythm + $blockquote_border_left_width / 2]
+  padding:
+    [
+      0,
+      $horizontal_rhythm,
+      $block_margin_bottom * -0.75,
+      $horizontal_rhythm + $blockquote_border_left_width / 2,
+    ]
   cite:
     font_size: $base_font_size_small
     font_color: $role_subtitle_font_color
@@ -222,7 +228,8 @@ sidebar:
   border_radius: $base_border_radius
   border_width: $base_border_width
   # FIXME reenable padding bottom once margin collapsing is implemented
-  padding: [$vertical_rhythm, $vertical_rhythm * 1.25, 0, $vertical_rhythm * 1.25]
+  padding:
+    [$vertical_rhythm, $vertical_rhythm * 1.25, 0, $vertical_rhythm * 1.25]
   title:
     align: center
     font_color: $heading_font_color
@@ -240,7 +247,7 @@ description_list:
   description_indent: $horizontal_rhythm * 1.25
 outline_list:
   indent: $horizontal_rhythm * 1.5
-  #marker_font_color: 404040
+  # marker_font_color: 404040
   # NOTE outline_list_item_spacing applies to list items that do not have complex content
   item_spacing: $vertical_rhythm / 2
 table:
@@ -259,9 +266,9 @@ toc:
   indent: $horizontal_rhythm
   line_height: 1.4
   dot_leader:
-    #content: ". "
+    # content: ". "
     font_color: A9A9A9
-    #levels: 2 3
+    # levels: 2 3
 footnotes:
   font_size: round($base_font_size * 0.75)
   item_spacing: $outline_list_item_spacing / 2
@@ -280,7 +287,7 @@ footer:
   vertical_align: top
   recto:
     right:
-      content: '{page-number}'
+      content: "{page-number}"
   verso:
     left:
       content: $footer_recto_right_content
