@@ -16,7 +16,6 @@ pipelines:
 
   infrastructure:
     - task: setup:environment
-    - pipeline: lint
     - task: infra:init
       depends_on:
         - setup:environment

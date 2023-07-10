@@ -43,6 +43,18 @@ stages:
         pool:
           vmImage: $(pool_vm_image)
         steps:
+          - template: templates/setup.yml
+            parameters:
+              TaskctlVersion: ${{ variables.TaskctlVersion }}
+
+          # lint files in the repo
+          - task: Bash@3
+            displayName: DocLintumentation
+            inputs:
+              targetType: inline
+              script: |
+                taskctl lint
+
           # Create the documentation for the repo
           - task: Bash@3
             displayName: Documentation
@@ -81,7 +93,6 @@ stages:
                 - template: templates/setup.yml
                   parameters:
                     TaskctlVersion: ${{ variables.TaskctlVersion }}
-                    StacksEnvfileVersion: ${{ variables.StacksEnvfileVersion }}
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
@@ -170,7 +181,6 @@ stages:
                 - template: templates/setup.yml
                   parameters:
                     TaskctlVersion: ${{ variables.TaskctlVersion }}
-                    StacksEnvfileVersion: ${{ variables.StacksEnvfileVersion }}
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
