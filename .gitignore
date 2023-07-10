@@ -5,3 +5,13 @@
 tfplan
 
 local
+
+envfile
+
+vendor
+
+inspec_inputs.yml
+
+tmp
+
+outputs

@@ -1,0 +1,45 @@
+# Extend the default theme
+extends: default
+
+page:
+  size: A4
+  margin: [2cm, 1.27cm, 1.27cm, 1.27cm]
+
+# Add extra fonts to the catalog
+font:
+  catalog:
+    merge: true
+    Opensans:
+      normal: OpenSans-Regular.ttf
+      italic: OpenSans-Italic.ttf
+      bold: OpenSans-Bold.ttf
+      bold_italic: OpenSans-BoldItalic.ttf
+
+# State what fonts should be used
+base:
+  font-family: Opensans
+
+# Configure the header to add a logo
+header:
+  height: $base_line_height_length * 3.5
+  border_width: 0.25
+  border_color: dddddd
+  recto:
+    columns: "<40% =20% >40%"
+    left:
+      content: 'image:../images/amido_logo.png[]'
+    center:
+      content: '{document-title}'
+  verso:
+    left:
+      content: $header_recto_left_content
+    center:
+      content: $header_recto_center_content
+
+# Define the table style
+table:
+  caption:
+    side: bottom
+  head:
+    background_color: 08c1a7
+    font-color: ffffff

@@ -23,6 +23,9 @@ trigger:
 variables:
   - template: pipeline-vars.yml
 
+  - name: CHEF_LICENSE
+    value: accept-silent
+
   # Versioning
   - name: version_major
     value: 0
@@ -41,21 +44,20 @@ stages:
           vmImage: $(pool_vm_image)
         steps:
 
-          # Updates the build number in Azure DevOps (requires refresh in the UI to see)
-          - bash: |
-              echo '##vso[build.updatebuildnumber]$(version_build_number)'
-            displayName: 'Update: Build Number'
-
-          # Validate all the YAML files in the repo
+          # Create the documentation for the repo
           - task: Bash@3
-            displayName: Lint files
+            displayName: Documentation
             inputs:
               targetType: inline
-              script: taskctl lint
-            env:
-              TF_FILE_LOCATION: /app/deploy/azure/infra/stacks-aks
-              TF_BACKEND: none
-              STAGE: stacks-aks
+              script: |
+                taskctl docs
+
+          # Upload the documentation as a build artifact
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Documentation
+            inputs:
+              pathToPublish: $(Build.SourcesDirectory)/outputs/docs
+              artifactName: docs
 
   # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
   - stage: NonProd
@@ -92,7 +94,7 @@ stages:
                       taskctl infrastructure
                   env:
                     TF_FILE_LOCATION: /app/deploy/terraform
-                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_storage)"
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                     TF_BACKEND_PLAN: "-input=false,-out=tfplan"
                     TF_VAR_resource_group_location: $(region)
                     TF_VAR_name_company: $(company)
@@ -112,6 +114,20 @@ stages:
                     TF_VAR_pfx_password: Password1
                     TF_VAR_create_valid_cert: $(create_valid_cert)
                     TF_VAR_team_owner: $(team_owner)
+
+                # Perform infrastructure tests
+                - template: ../templates/infra-tests.yml
+                  parameters:
+                    CHEF_LICENSE: $(CHEF_LICENSE)
+                    TESTS_PATH: /app/deploy/terraform_state/tests
+                    REPORT_FILENAME: inspec_azure_aks.xml
+
+                - task: PublishTestResults@2
+                  inputs:
+                    testResultsFormat: JUnit
+                    testResultsFiles: outputs/tests/inspec_azure_aks.xml
+                    testRunTitle: Terraform Remote State Tests
+                    failTaskOnFailedTests: true
 
       - deployment: K8sNonProd
         dependsOn: InfraNonProd
@@ -167,7 +183,7 @@ stages:
                       taskctl infrastructure
                   env:
                     TF_FILE_LOCATION: /app/deploy/terraform
-                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_storage)"
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                     TF_BACKEND_PLAN: "-input=false,-out=tfplan"
                     TF_VAR_resource_group_location: $(region)
                     TF_VAR_name_company: $(company)
@@ -187,6 +203,20 @@ stages:
                     TF_VAR_pfx_password: Password1
                     TF_VAR_create_valid_cert: $(create_valid_cert)
                     TF_VAR_team_owner: $(team_owner)
+
+                # Perform infrastructure tests
+                - template: ../templates/infra-tests.yml
+                  parameters:
+                    CHEF_LICENSE: $(CHEF_LICENSE)
+                    TESTS_PATH: /app/deploy/terraform_state/tests
+                    REPORT_FILENAME: inspec_azure_aks.xml
+
+                - task: PublishTestResults@2
+                  inputs:
+                    testResultsFormat: JUnit
+                    testResultsFiles: outputs/tests/inspec_azure_aks.xml
+                    testRunTitle: Terraform Remote State Tests
+                    failTaskOnFailedTests: true
 
       - deployment: K8sProd
         dependsOn: InfraProd
@@ -215,7 +245,7 @@ stages:
       - Prod
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'))
     variables:
-      - group: amido-stacks-infra-credentials-nonprod
+      - group: stacks-sp-creds
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
@@ -223,27 +253,25 @@ stages:
         pool:
           vmImage: $(pool_vm_image)
         steps:
-          # Check out the repo so that it can be tagged
-          - checkout: self
-            persistCredentials: true
+          - template: templates/setup.yml
+            parameters:
+              TaskctlVersion: ${{ variables.TaskctlVersion }}
 
-          # Create a tag in the code for this release
+          # Tag the code with the version of the build
           - task: Bash@3
-            displayName: Tag Code
+            displayName: Release
             inputs:
-              targetType: "inline"
+              targetType: inline
               script: |
-                git config user.name "BuildService"
-                git config user.email "builder@${COMPANY}.com"
-                git tag -a v${VERSION_NUMBER} -m "Release created by Azure DevOps"
-                git push origin v${VERSION_NUMBER}
+                taskctl release
             env:
-              COMPANY: $(company)
+              BUILDNUMBER: $(Build.BuildNumber)
+              API_KEY: $(GITHUB_TOKEN)
+              NOTES:
+              COMMIT_ID: $(Build.SourceVersion)
+              ARTIFACTS_DIR: outputs/docs
+              OWNER: ${{ variables.RepoOwner }}
+              REPONAME: ${{ variables.RepoName }}
 
-          # Create a GitHub release with these packages
-          - task: GitHubRelease@0
-            displayName: Create GitHub Release
-            inputs:
-              gitHubConnection: $(github_release_service_connection)
-              repositoryName: $(github_org)/$(self_repo)
-              tag: $(Build.BuildNumber)
+          
+

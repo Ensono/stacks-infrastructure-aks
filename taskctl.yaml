@@ -16,6 +16,7 @@ pipelines:
 
   infrastructure:
     - task: setup:environment
+    - pipeline: lint
     - task: infra:init
       depends_on:
         - setup:environment
@@ -25,3 +26,21 @@ pipelines:
     - task: infra:apply
       depends_on:
         - infra:plan
+
+  docs:
+    - task: build:number
+    - task: _docs
+      depends_on: build:number
+
+  release:
+    - task: build:number
+    - task: _release
+      depends_on:
+        - build:number
+      env:
+        VERSION_NUMBER: $BUILDNUMBER
+        API_KEY: $API_KEY
+        NOTES:
+        COMMIT_ID: $COMMIT_ID
+        ARTIFACTS_DIR: $ARTIFACTS_DIR  
+        REPONAME: $REPONAME

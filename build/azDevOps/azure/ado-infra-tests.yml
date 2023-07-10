@@ -35,7 +35,7 @@ stages:
           vmImage: $(pool_vm_image)
 
         variables:
-          - template: azdo-pipeline-vars.yml
+          - template: pipeline-vars.yml
 
         steps:
           - template: ../templates/setup.yml

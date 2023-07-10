@@ -84,3 +84,28 @@ contexts:
       exclude:
         - path
         - home
+
+  docsenv:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -e
+        - PSModulePath=/modules        
+        - -w
+        - /app
+        - --env-file
+        - envfile        
+        - amidostacks/runner-pwsh-asciidoctor
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"
+    envfile:
+      generate: true
+      exclude:
+        - path
+        - home        

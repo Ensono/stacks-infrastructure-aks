@@ -26,3 +26,27 @@ charts:
   enabled: true
   repo: https://kubernetes.github.io/ingress-nginx
   values_template: deploy/helm/values/ingress_nginx.yml
+
+- name: argo-rollouts
+  location: argo-rollouts
+  enabled: false
+  repo: https://argoproj.github.io/argo-helm
+  values_template: deploy/helm/values/argo_rollouts.yml
+
+- name: grafana
+  location: grafana
+  enabled: false
+  repo: https://grafana.github.io/helm-charts
+  values_repo: deploy/helm/values/grafana.yml
+
+- name: velero
+  location: vmware-tanzu
+  enabled: false
+  repo: https://vmware-tanzu.github.io/helm-charts
+  values_repo: deploy/helm/values/velero.yml
+
+- name: prometheus
+  location: prometheus-community
+  enabled: false
+  repo: https://prometheus-community.github.io/helm-charts
+  values_repo: deploy/helm/values/prometheus.yml

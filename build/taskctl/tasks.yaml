@@ -110,5 +110,22 @@ tasks:
               -resourcegroup ${env:TFOUT_resource_group_name} `
               -aksname ${env:TFOUT_aks_cluster_name}
         
-        
+  _docs:
+    description: Build Docs for AKS
+    context: docsenv
+    command:
+      - Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
+
+  _release:
+    context: buildenv
+    command:
+      - |
+        /Publish-GitHubRelease -version $env:BUILDNUMBER `
+          -commitId $env:COMMIT_ID `
+          -apikey $env:API_KEY `
+          -artifactsDir $env:ARTIFACTS_DIR `
+          -Owner $env:OWNER `
+          -repository $env:REPONAME
+
+
 
