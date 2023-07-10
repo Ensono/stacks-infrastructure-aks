@@ -22,6 +22,7 @@ trigger:
 
 variables:
   - template: pipeline-vars.yml
+  - template: agent-config-vars.yml
 
   - name: CHEF_LICENSE
     value: accept-silent

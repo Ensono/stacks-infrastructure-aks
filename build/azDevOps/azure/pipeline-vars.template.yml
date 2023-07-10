@@ -4,10 +4,6 @@ variables:
   - name: region
     value: {{ .Project.Cloud.Region }}
 
-  # set the version of the agent that should be used to start the build
-  - name: pool_vm_image
-    value: ubuntu-22.04
-
   # ------- Stacks configuration
   # name of the company that owns the project
   - name: company
