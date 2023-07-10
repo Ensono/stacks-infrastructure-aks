@@ -37,12 +37,7 @@ variables:
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
-    value:
-      app_pool:
-        vm_size: Standard_DS2_V2
-        auto_scaling: true
-        min_nodes: 1
-        max_nodes: 10
+    value: '{"app_pool": {"vm_size": "Standard_DS2_2", "auto_scaling": true, "min_nodes": 1, "max_nodes": 10}}'
 
   # -------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
