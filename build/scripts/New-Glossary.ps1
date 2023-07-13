@@ -23,6 +23,8 @@ param (
     $extensions = @("adoc", "md")
 )
 
+Write-Host "Creating glossary table of acronyms" -ForegroundColor yellow
+
 # Define list of acroynms and expansions
 $acronyms = @{
     "EDIR" = @{
