@@ -34,8 +34,10 @@ variables:
     value: 1
   - name: version_revision
     value: $[counter(join(variables['version_major'], join('-', variables['version_minor'])), 0)]
-  - name: version_build_number
+  - name: version_number
     value: "$(version_major).$(version_minor).$(version_revision)-$(Build.SourceBranchName)"
+  - name: DOCKER_IMAGE_TAG
+    value: "$(version_number)"
 
 stages:
   - stage: Build
