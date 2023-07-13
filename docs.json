@@ -12,7 +12,8 @@
             "pdf-fontsdir=\"{{ basepath }}/docs/styles/fonts;GEM_FONTS_DIR\"",
             "allow-uri-read",
             "blockdiag=/usr/bin/blockdiag",
-            "skip-front-matter"
+            "skip-front-matter",
+            "graphvizdot=/usr/bin/dot"
         ]
     },
     "html": {

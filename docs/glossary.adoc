@@ -1,0 +1,6 @@
+== Glossary
+
+The following table shows all of the acronyms that are used in the document and what they mean.
+
+include::../tmp/glossary.adoc[]
+

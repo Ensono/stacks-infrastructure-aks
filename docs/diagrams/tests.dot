@@ -1,0 +1,15 @@
+digraph G {
+  rankdir=LR
+  node[fontsize="10"]
+  
+  start [shape=oval, label="Start"];
+  end [shape=oval, label="End"];
+  
+vendor[shape=box, label="tests:infra:vendor"]
+run[shape=box, label="tests:infra:run"]
+
+
+
+  start -> vendor -> run -> end
+
+}

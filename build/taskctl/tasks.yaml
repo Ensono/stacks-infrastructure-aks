@@ -49,16 +49,6 @@ tasks:
     command:
       - Invoke-Terraform -Output
 
-  infra:setup:
-    context: powershell
-    description: Configure Kubernetes cluster
-    command:
-      - Invoke-Terraform -Output
-
-  init:envs:
-    command:
-      - envfile -e home,path
-
   setup:dev:
     context: powershell
     description: Create a shell script to configure the environment variables

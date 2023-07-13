@@ -96,7 +96,7 @@ contexts:
         - /app
         - --env-file
         - envfile
-        - amidostacks/runner-pwsh-asciidoctor
+        - amidostacks/runner-pwsh-asciidoctor:0.4.5-unstable
         - pwsh
         - -NoProfile
         - -Command

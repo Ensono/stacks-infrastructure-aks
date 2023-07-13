@@ -15,4 +15,18 @@ include::introduction.adoc[]
 
 include::infrastructure.adoc[]
 
+<<<
+
+include::getting_started.adoc[]
+
+<<<
+
 include::helm.adoc[]
+
+<<<
+
+include::pipeline.adoc[]
+
+<<<
+
+include::glossary.adoc[]
