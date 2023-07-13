@@ -35,6 +35,15 @@ variables:
   - name: aks_node_pools
     value: '{"app_pool": {"vm_size": "Standard_DS2_2", "auto_scaling": true, "min_nodes": 1, "max_nodes": 10}}'
 
+  - name: private_cluster
+    value: false
+
+  - name: create_aksvnet
+    value: true
+
+  - name: create_user_identity
+    value: true
+
   # -------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
   # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
@@ -64,6 +73,14 @@ variables:
     value: false
   - name: dns_resource_group
     value: stacks-ancillary-resources
+
+  # ------- Container registry
+  - name: create_acr
+    value: false
+  - name: acr_resource_group
+    value: amido-stacks-nonprod-euw-core
+  - name: acr_name
+    value: amidostacksnonprodeuwcore
 
   # ------- GitHub
   - name: create_release
