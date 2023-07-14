@@ -36,7 +36,7 @@ variables:
     value: '{"app_pool": {"vm_size": "Standard_DS2_2", "auto_scaling": true, "min_nodes": 1, "max_nodes": 10}}'
 
   - name: private_cluster
-    value: false
+    value: true
 
   - name: create_aksvnet
     value: true
