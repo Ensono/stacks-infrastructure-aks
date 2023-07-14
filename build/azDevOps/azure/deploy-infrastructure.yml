@@ -227,7 +227,7 @@ stages:
                 - template: templates/infra-tests.yml
                   parameters:
                     CHEF_LICENSE: $(CHEF_LICENSE)
-                    TESTS_PATH: /app/deploy/terraform_state/tests
+                    TESTS_PATH: /app/deploy/tests
                     REPORT_FILENAME: inspec_azure_aks.xml
 
                 - task: PublishTestResults@2
