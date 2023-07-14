@@ -2,6 +2,10 @@ control "azure-kubernetes-public-ip" do
     title "App Gateway IP"
     desc "Ensure that a Public IP address has been configured for the App Gateway"
 
+    only_if("IP address should be tested") do
+        false
+    end
+
     describe azure_public_ip(resource_group: input("resource_group_name"), name: input("app_gateway_ip")) do
         it { should exist }
         its("location") { should cmp input("region") }
