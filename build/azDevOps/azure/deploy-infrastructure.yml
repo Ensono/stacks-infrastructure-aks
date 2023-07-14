@@ -116,6 +116,7 @@ stages:
                     TF_VAR_acme_email: $(acme_email)
                     TF_VAR_is_cluster_private: $(private_cluster)
                     TF_VAR_cluster_version: $(aks_cluster_version)
+                    TF_VAR_aks_node_pools: $(aks_node_pools)
                     TF_VAR_stage: $(Environment.ShortName)
                     TF_VAR_create_dns_zone: $(create_dns_zone)
                     TF_VAR_dns_zone: $(base_domain_nonprod)
@@ -146,7 +147,7 @@ stages:
                   inputs:
                     testResultsFormat: JUnit
                     testResultsFiles: outputs/tests/inspec_azure_aks.xml
-                    testRunTitle: Terraform Remote State Tests
+                    testRunTitle: Terraform AKS Tests
                     failTaskOnFailedTests: true
 
       - deployment: K8sNonProd
@@ -214,6 +215,7 @@ stages:
                     TF_VAR_acme_email: $(acme_email)
                     TF_VAR_is_cluster_private: $(private_cluster)
                     TF_VAR_cluster_version: $(aks_cluster_version)
+                    TF_VAR_aks_node_pools: $(aks_node_pools)
                     TF_VAR_stage: $(Environment.ShortName)
                     TF_VAR_create_dns_zone: $(create_dns_zone)
                     TF_VAR_dns_zone: $(base_domain_prod)
@@ -244,7 +246,7 @@ stages:
                   inputs:
                     testResultsFormat: JUnit
                     testResultsFiles: outputs/tests/inspec_azure_aks.xml
-                    testRunTitle: Terraform Remote State Tests
+                    testRunTitle: Terraform AKS Tests
                     failTaskOnFailedTests: true
 
       - deployment: K8sProd

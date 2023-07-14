@@ -50,5 +50,5 @@ stages:
             inputs:
               testResultsFormat: JUnit
               testResultsFiles: outputs/tests/inspec_azure_aks.xml
-              testRunTitle: Terraform Remote State Tests
+              testRunTitle: AKS Tests
               failTaskOnFailedTests: true
