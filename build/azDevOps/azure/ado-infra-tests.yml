@@ -26,8 +26,8 @@ stages:
   - stage: infrastructure_tests
 
     jobs:
-      - job: terraform_state
-        displayName: Terraform State
+      - job: aks
+        displayName: AKS
         pool:
           vmImage: $(pool_vm_image)
 
@@ -42,7 +42,7 @@ stages:
           - template: ../templates/infra-tests.yml
             parameters:
               CHEF_LICENSE: $(CHEF_LICENSE)
-              TESTS_PATH: /app/deploy/terraform_state/tests/$(CLOUD_PLATFORM)
+              TESTS_PATH: /app/deploy/tests
               INSPEC_ARGS: "--input resource_group_name=$(resource_group_name) storage_account_name=$(storage_account_name) region=$(location)"
               REPORT_FILENAME: inspec_azure_aks.xml
 
