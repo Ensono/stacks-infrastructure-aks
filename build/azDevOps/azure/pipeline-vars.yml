@@ -82,6 +82,10 @@ variables:
   - name: acr_name
     value: ensonodigitaleuw
 
+  # ------ Key Vault
+  - name: create_key_vault
+    value: false
+
   # ------- GitHub
   - name: create_release
     value: true
