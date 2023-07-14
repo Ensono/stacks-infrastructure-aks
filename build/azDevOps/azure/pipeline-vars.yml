@@ -33,7 +33,7 @@ variables:
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
-    value: '{"app_pool": {"vm_size": "Standard_DS2_2", "auto_scaling": true, "min_nodes": 1, "max_nodes": 10}}'
+    value: '{"apps": {"vm_size": "Standard_DS2_2", "auto_scaling": true, "min_nodes": 1, "max_nodes": 10}}'
 
   - name: private_cluster
     value: true
