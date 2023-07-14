@@ -78,9 +78,9 @@ variables:
   - name: create_acr
     value: false
   - name: acr_resource_group
-    value: amido-stacks-nonprod-euw-core
+    value: stacks-ancillary-resources
   - name: acr_name
-    value: amidostacksnonprodeuwcore
+    value: ensonodigitaleuw
 
   # ------- GitHub
   - name: create_release
