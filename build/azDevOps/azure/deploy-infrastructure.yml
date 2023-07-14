@@ -137,6 +137,10 @@ stages:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/tests
                     REPORT_FILENAME: inspec_azure_aks.xml
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_VAR_name_environment: $(Environment.ShortName)
+                    TF_VAR_resource_group_location: $(region)
+                    TF_VAR_is_cluster_private: $(private_cluster)
 
                 - task: PublishTestResults@2
                   inputs:
@@ -155,7 +159,9 @@ stages:
           runOnce:
             deploy:
               steps:
-                - checkout: self
+                - template: templates/setup.yml
+                  parameters:
+                    TaskctlVersion: ${{ variables.TaskctlVersion }}
 
                 - task: Bash@3
                   displayName: Deploy Helm Charts
@@ -229,6 +235,10 @@ stages:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/tests
                     REPORT_FILENAME: inspec_azure_aks.xml
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_VAR_name_environment: $(Environment.ShortName)
+                    TF_VAR_resource_group_location: $(region)
+                    TF_VAR_is_cluster_private: $(private_cluster)
 
                 - task: PublishTestResults@2
                   inputs:
@@ -247,7 +257,9 @@ stages:
           runOnce:
             deploy:
               steps:
-                - checkout: self
+                - template: templates/setup.yml
+                  parameters:
+                    TaskctlVersion: ${{ variables.TaskctlVersion }}
 
                 - task: Bash@3
                   displayName: Deploy Helm Charts
