@@ -137,7 +137,6 @@ stages:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/tests
                     REPORT_FILENAME: inspec_azure_aks.xml
-                  env:
                     TF_FILE_LOCATION: /app/deploy/terraform
                     TF_VAR_name_environment: $(Environment.ShortName)
                     TF_VAR_resource_group_location: $(region)
@@ -236,7 +235,6 @@ stages:
                     CHEF_LICENSE: $(CHEF_LICENSE)
                     TESTS_PATH: /app/deploy/tests
                     REPORT_FILENAME: inspec_azure_aks.xml
-                  env:
                     TF_FILE_LOCATION: /app/deploy/terraform
                     TF_VAR_name_environment: $(Environment.ShortName)
                     TF_VAR_resource_group_location: $(region)
