@@ -43,7 +43,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - amidostacks/runner-pwsh-inspec
+        - amidostacks/runner-pwsh-inspec:0.4.6-unstable
         - pwsh
         - -NoProfile
         - -Command
