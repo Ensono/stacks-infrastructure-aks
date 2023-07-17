@@ -151,7 +151,8 @@ stages:
                   - task: PublishBuildArtifacts@1
                     displayName: Upload generated files
                     inputs:
-                      pathToPublish: $(Build.SourcesDirectory)/deploy/terraform/*.tfvars
+                      contents: "*.tfvars"
+                      pathToPublish: $(Build.SourcesDirectory)/deploy/terraform
                       artifactName: generated
 
                 # Remove the infrastructure if the parameter has been set
