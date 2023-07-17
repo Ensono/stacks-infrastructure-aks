@@ -12,6 +12,7 @@ name: "$(Build.SourceBranchName)-init"
 pr:
   - master
 
+# Define the triggers for when the build runs automatically
 trigger:
   branches:
     include:
@@ -19,6 +20,13 @@ trigger:
   paths:
     include:
       - "*"
+
+# Configure parameters for running the build
+parameters:
+  - name: rebuild
+    type: boolean
+    default: false
+
 
 variables:
   - template: pipeline-vars.yml
@@ -42,7 +50,7 @@ variables:
 stages:
   - stage: Build
     jobs:
-      - job: Validate
+      - job: Setup
         pool:
           vmImage: $(pool_vm_image)
         steps:
@@ -83,6 +91,8 @@ stages:
 
       - name: Environment.ShortName
         value: nonprod
+
+      - template: terraform-vars.yml
     jobs:
       - deployment: InfraNonProd
         environment: ${{ variables.domain }}-nonprod
@@ -104,33 +114,6 @@ stages:
                     targetType: inline
                     script: |
                       taskctl infrastructure
-                  env:
-                    TF_FILE_LOCATION: /app/deploy/terraform
-                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                    TF_BACKEND_PLAN: "-input=false,-out=tfplan"
-                    TF_VAR_resource_group_location: $(region)
-                    TF_VAR_name_company: $(company)
-                    TF_VAR_name_project: $(project)
-                    TF_VAR_name_component: $(domain)
-                    TF_VAR_name_environment: $(Environment.ShortName)
-                    TF_VAR_acme_email: $(acme_email)
-                    TF_VAR_is_cluster_private: $(private_cluster)
-                    TF_VAR_cluster_version: $(aks_cluster_version)
-                    TF_VAR_aks_node_pools: $(aks_node_pools)
-                    TF_VAR_stage: $(Environment.ShortName)
-                    TF_VAR_create_dns_zone: $(create_dns_zone)
-                    TF_VAR_dns_zone: $(base_domain_nonprod)
-                    TF_VAR_internal_dns_zone: $(base_domain_internal_nonprod)
-                    TF_VAR_dns_resource_group: $(dns_resource_group)
-                    TF_VAR_create_key_vault: $(create_key_vault)
-                    TF_VAR_create_aksvnet: $(create_aksvnet)
-                    TF_VAR_create_user_identity: $(create_user_identity)
-                    TF_VAR_create_acr: $(create_acr)
-                    TF_VAR_acr_resource_group: $(acr_resource_group)
-                    TF_VAR_acr_name: $(acr_name)
-                    TF_VAR_pfx_password: Password1
-                    TF_VAR_create_valid_cert: $(create_valid_cert)
-                    TF_VAR_team_owner: $(team_owner)
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
