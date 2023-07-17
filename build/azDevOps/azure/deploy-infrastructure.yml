@@ -149,6 +149,7 @@ stages:
                   - task: CopyFiles@2
                     displayName: "DEBUG: Copy files to staging directory"
                     inputs:
+                      flattenFolders: true
                       contents: $(Build.SourcesDirectory)/deploy/terraform/*.tfvars
                       targetFolder: $(Build.ArtifactStagingDirectory)
 
@@ -171,6 +172,7 @@ stages:
                       TF_FILE_LOCATION: /app/deploy/terraform
                       TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                       TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""                        
+                      TF_VAR_name_environment: $(Environment.ShortName)
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
@@ -182,7 +184,8 @@ stages:
                   env:
                     TF_FILE_LOCATION: /app/deploy/terraform
                     TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""                      
+                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                    TF_VAR_name_environment: $(Environment.ShortName)
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
@@ -293,6 +296,7 @@ stages:
                       TF_FILE_LOCATION: /app/deploy/terraform
                       TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                       TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
+                      TF_VAR_name_environment: $(Environment.ShortName)
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
@@ -305,6 +309,7 @@ stages:
                     TF_FILE_LOCATION: /app/deploy/terraform
                     TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                     TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                    TF_VAR_name_environment: $(Environment.ShortName)
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
