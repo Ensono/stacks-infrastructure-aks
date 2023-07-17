@@ -7,8 +7,8 @@ param (
     $prefix = "TF_VAR_*"
 )
 
-$tfvars =  [System.Text.StringBuilder]::new()
-
+# configure hashtable of found variables
+$tfvars = @{}
 
 # Output the values of the enviornment variables
 Get-ChildItem -Path env: | Where-Object name -like $prefix | % {
@@ -23,9 +23,10 @@ Get-ChildItem -Path env: | Where-Object name -like $prefix | % {
         $value = "`"{0}`"" -f $value
     }
 
-    $line = '{0} = {1}' -f $name, $value
-    [void]$tfvars.AppendLine($line)
+    $tfvars[$name.ToLower()] = $value
 
 }
 
-$tfvars.ToString()
+foreach ($item in $tfvars.GetEnumerator()) {
+    Write-Output ("{0} = {1}" -f $item.name, $item.value)
+}

@@ -148,11 +148,17 @@ stages:
 
                 # Upload the Terraform variables file and the plan for debugging
                 - ${{ if eq(parameters.upload, true) }}:
-                  - task: PublishBuildArtifacts@1
-                    displayName: Upload generated files
+                  - task: CopyFiles@2
+                    displayName: "DEBUG: Copy files to staging directory"
                     inputs:
-                      contents: "*.tfvars"
-                      pathToPublish: $(Build.SourcesDirectory)/deploy/terraform
+                      contents: $(Build.SourcesDirectory)/deploy/terraform/*.tfvars
+                      targetFolder: $(Build.ArtifactStagingDirectory)
+
+                - ${{ if eq(parameters.upload, true) }}:
+                  - task: PublishBuildArtifacts@1
+                    displayName: "DEBUG: Upload generated files"
+                    inputs:
+                      pathToPublish: $(Build.ArtifactStagingDirectory)
                       artifactName: generated
 
                 # Remove the infrastructure if the parameter has been set

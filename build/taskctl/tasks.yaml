@@ -36,6 +36,7 @@ tasks:
     description: Create Terraform variables file
     command:
       - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - dir ${env:TF_FILE_LOCATION}
 
   infra:plan:
     context: powershell
@@ -59,7 +60,7 @@ tasks:
     context: powershell
     description: Destroy Environment.ShortName
     command:
-      - Invoke-Terraform -Plan -Path "${env:TF_FILE_LOCATION}/destroy.tfplan -Arguments "-destroy" -debug
+      - Invoke-Terraform -Plan -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
 
 
   infra:output:
