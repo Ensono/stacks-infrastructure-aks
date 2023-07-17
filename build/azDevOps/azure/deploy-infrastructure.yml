@@ -96,8 +96,6 @@ stages:
 
       - name: Environment.ShortName
         value: nonprod
-
-      - template: terraform-vars.yml
     jobs:
       - deployment: InfraNonProd
         environment: ${{ variables.domain }}-nonprod
@@ -281,7 +279,7 @@ stages:
                     TF_VAR_acr_name: $(acr_name)
                     TF_VAR_pfx_password: Password1
                     TF_VAR_create_valid_cert: $(create_valid_cert)
-                    TF_VAR_team_owner: $(team_owner)
+                    TF_VAR_tag_team_owner: $(team_owner)
 
                 # Remove the infrastructure if the parameter has been set
                 - ${{ if eq(parameters.rebuild, true) }}:
