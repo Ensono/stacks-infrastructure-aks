@@ -27,6 +27,10 @@ parameters:
     displayName: Rebuild Environment
     type: boolean
     default: false
+  - name: upload
+    displayName: Upload generated files
+    type: boolean
+    default: false
 
 
 variables:
@@ -116,10 +120,6 @@ stages:
                     script: |
                       taskctl infra:vars
                   env:
-                    TF_FILE_LOCATION: /app/deploy/terraform
-                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
-                    TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
                     TF_VAR_resource_group_location: $(region)
                     TF_VAR_name_company: $(company)
                     TF_VAR_name_project: $(project)
@@ -152,6 +152,10 @@ stages:
                       targetType: inline
                       script: |
                         taskctl infrastructure_destroy
+                    env:
+                      TF_FILE_LOCATION: /app/deploy/terraform
+                      TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                      TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""                        
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
@@ -160,6 +164,10 @@ stages:
                     targetType: inline
                     script: |
                       taskctl infrastructure
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""                      
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
@@ -178,6 +186,14 @@ stages:
                     testResultsFiles: outputs/tests/inspec_azure_aks.xml
                     testRunTitle: Terraform AKS Tests
                     failTaskOnFailedTests: true
+
+                # Upload the Terraform variables file and the plan for debugging
+                - ${{ if eq(parameters.upload, true) }}:
+                  - task: PublishBuildArtifacts@1
+                    displayName: Upload generated files
+                    inputs:
+                      pathToPublish: $(Build.SourcesDirectory)/deploy/terraform/*.tfvars
+                      artifactName: generated
 
       - deployment: K8sNonProd
         dependsOn: InfraNonProd
@@ -233,10 +249,6 @@ stages:
                     script: |
                       taskctl infra:vars
                   env:
-                    TF_FILE_LOCATION: /app/deploy/terraform
-                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
-                    TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
                     TF_VAR_resource_group_location: $(region)
                     TF_VAR_name_company: $(company)
                     TF_VAR_name_project: $(project)
@@ -269,6 +281,10 @@ stages:
                       targetType: inline
                       script: |
                         taskctl infrastructure_destroy
+                    env:
+                      TF_FILE_LOCATION: /app/deploy/terraform
+                      TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                      TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
 
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
@@ -277,6 +293,10 @@ stages:
                     targetType: inline
                     script: |
                       taskctl infrastructure
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
