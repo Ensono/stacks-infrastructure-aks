@@ -1,10 +1,10 @@
 variables:
 
-- name: FILE_LOCATION
+- name: TF_FILE_LOCATION
   value: /app/deploy/terraform
-- name: BACKEND_INIT
+- name: TF_BACKEND_INIT
   value: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-- name: BACKEND_PLAN
+- name: TF_BACKEND_PLAN
   value: "-input=false,-out=tfplan"
 - name: TF_VAR_resource_group_location
   value: $(region)
