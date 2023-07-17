@@ -15,3 +15,6 @@ inspec_inputs.yml
 tmp
 
 outputs
+
+deploy/terraform/*.tfvars
+deploy/terraform/*.tfplan

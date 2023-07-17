@@ -31,6 +31,12 @@ tasks:
       - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
       - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
 
+  infra:vars:
+    context: powershell
+    description: Create Terraform variables file
+    command:
+      - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+
   infra:plan:
     context: powershell
     description: Plan Terraform
@@ -41,7 +47,20 @@ tasks:
     context: powershell
     description: Apply Terraform
     command:
-      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/tfplan"
+      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/deploy.tfplan"
+
+  infra:destroy:plan:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command:
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-destroy,${env:TF_BACKEND_DESTROY_PLAN}" -debug
+
+  infra:destroy:apply:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command:
+      - Invoke-Terraform -Plan -Path "${env:TF_FILE_LOCATION}/destroy.tfplan -Arguments "-destroy" -debug
+
 
   infra:output:
     context: powershell

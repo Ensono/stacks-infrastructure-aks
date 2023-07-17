@@ -19,12 +19,31 @@ pipelines:
     - task: infra:init
       depends_on:
         - setup:environment
+    - task: infra:vars
     - task: infra:plan
       depends_on:
         - infra:init
+        - infra:vars
     - task: infra:apply
       depends_on:
         - infra:plan
+        - infra:vars
+
+  infrastructure_destroy:
+    - task: setup:environment
+    - task: infra:init
+      depends_on:
+        - setup:environment
+    - task: infra:vars
+    - task: infra:destroy:plan
+      depends_on:
+        - infra:init
+        - infra:vars
+    - task: infra:destroy:apply
+      depends_on:
+        - infra:destroy:plan
+        - infra:vars
+
 
   docs:
     - task: build:number

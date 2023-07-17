@@ -24,6 +24,7 @@ trigger:
 # Configure parameters for running the build
 parameters:
   - name: rebuild
+    displayName: Rebuild Environment
     type: boolean
     default: false
 
@@ -107,6 +108,51 @@ stages:
                   parameters:
                     TaskctlVersion: ${{ variables.TaskctlVersion }}
 
+                # Create a tfvars file for the values
+                # This is so that variables can be set and reused as required
+                - task: Bash@3
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl infra:vars
+                  env:
+                    TF_FILE_LOCATION: /app/deploy/terraform
+                    TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                    TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
+                    TF_VAR_resource_group_location: $(region)
+                    TF_VAR_name_company: $(company)
+                    TF_VAR_name_project: $(project)
+                    TF_VAR_name_component: $(domain)
+                    TF_VAR_name_environment: $(Environment.ShortName)
+                    TF_VAR_acme_email: $(acme_email)
+                    TF_VAR_is_cluster_private: $(private_cluster)
+                    TF_VAR_cluster_version: $(aks_cluster_version)
+                    TF_VAR_aks_node_pools: $(aks_node_pools)
+                    TF_VAR_stage: $(Environment.ShortName)
+                    TF_VAR_create_dns_zone: $(create_dns_zone)
+                    TF_VAR_dns_zone: $(base_domain_nonprod)
+                    TF_VAR_internal_dns_zone: $(base_domain_internal_nonprod)
+                    TF_VAR_dns_resource_group: $(dns_resource_group)
+                    TF_VAR_create_key_vault: $(create_key_vault)
+                    TF_VAR_create_aksvnet: $(create_aksvnet)
+                    TF_VAR_create_user_identity: $(create_user_identity)
+                    TF_VAR_create_acr: $(create_acr)
+                    TF_VAR_acr_resource_group: $(acr_resource_group)
+                    TF_VAR_acr_name: $(acr_name)
+                    TF_VAR_pfx_password: Password1
+                    TF_VAR_create_valid_cert: $(create_valid_cert)
+                    TF_VAR_tag_team_owner: $(team_owner)
+
+                # Remove the infrastructure if the parameter has been set
+                - ${{ if eq(parameters.rebuild, true) }}:
+                  - task: Bash@3
+                    displayName: Destroy environment
+                    inputs:
+                      targetType: inline
+                      script: |
+                        taskctl infrastructure_destroy
+
                 # Create the resources for the Kubernetes cluster
                 - task: Bash@3
                   displayName: Deploy AKS
@@ -179,17 +225,18 @@ stages:
                   parameters:
                     TaskctlVersion: ${{ variables.TaskctlVersion }}
 
-                # Create the resources for the Kubernetes cluster
+                # Create a tfvars file for the values
+                # This is so that variables can be set and reused as required
                 - task: Bash@3
-                  displayName: Deploy AKS
                   inputs:
                     targetType: inline
                     script: |
-                      taskctl infrastructure
+                      taskctl infra:vars
                   env:
                     TF_FILE_LOCATION: /app/deploy/terraform
                     TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                    TF_BACKEND_PLAN: "-input=false,-out=tfplan"
+                    TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                    TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
                     TF_VAR_resource_group_location: $(region)
                     TF_VAR_name_company: $(company)
                     TF_VAR_name_project: $(project)
@@ -213,6 +260,23 @@ stages:
                     TF_VAR_pfx_password: Password1
                     TF_VAR_create_valid_cert: $(create_valid_cert)
                     TF_VAR_team_owner: $(team_owner)
+
+                # Remove the infrastructure if the parameter has been set
+                - ${{ if eq(parameters.rebuild, true) }}:
+                  - task: Bash@3
+                    displayName: Destroy environment
+                    inputs:
+                      targetType: inline
+                      script: |
+                        taskctl infrastructure_destroy
+
+                # Create the resources for the Kubernetes cluster
+                - task: Bash@3
+                  displayName: Deploy AKS
+                  inputs:
+                    targetType: inline
+                    script: |
+                      taskctl infrastructure
 
                 # Perform infrastructure tests
                 - template: templates/infra-tests.yml
