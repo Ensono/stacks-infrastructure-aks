@@ -39,6 +39,7 @@ parameters:
         dependsOn: Build
         condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
         environment.shortname: nonprod
+        environment: $(variables.domain)-nonprod
         domain.internal: $(base_domain_internal_nonprod)
         deployment.infra: InfraNonProd
         deployment.apps: K8sNonProd
@@ -46,6 +47,7 @@ parameters:
         dependsOn: Build
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
         environment.shortname: prod
+        environment: $(variables.domain)-prod
         domain.internal: $(base_domain_internal_prod)
         deployment.infra: InfraProd
         deployment.apps: K8sProd
@@ -113,7 +115,7 @@ stages:
         - group: ensono-sp-creds
       jobs:
         - deployment: ${{ stage.deployment.infra }}
-          environment: "${{ variables.domain }}-${{ stage.environment.shortname }}"
+          environment: ${{ stage.environment }}
           pool:
             vmImage: $(pool_vm_image)
 
@@ -210,7 +212,7 @@ stages:
 
         - deployment: ${{ stage.deployment.apps }}
           dependsOn: ${{ stage.deployment.infra }}
-          environment: "${{ variables.domain }}-${{ stage.environment.shortname }}"
+          environment: ${{ stage.environment }}
           pool:
             vmImage: $(pool_vm_image)
 
