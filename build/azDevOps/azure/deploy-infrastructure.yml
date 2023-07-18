@@ -33,6 +33,7 @@ parameters:
     default: false
   - name: force_deploy
     displayName: Force deploy regardless of branch
+    type: boolean
     default: false
 
   - name: stages
