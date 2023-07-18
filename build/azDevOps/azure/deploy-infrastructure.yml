@@ -107,7 +107,7 @@ stages:
   - ${{ each stage in parameters.stages }}:
     - stage: ${{ stage.stage }}
       dependsOn: ${{ stage.dependsOn }}
-      condition: ${{ stage.condition }}
+      condition: $(stage.condition)
       variables:
         # Pull in the non-production credentials for the build to use
         - group: ensono-sp-creds
