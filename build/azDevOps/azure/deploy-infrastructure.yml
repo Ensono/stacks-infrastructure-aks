@@ -45,7 +45,7 @@ parameters:
       - stage: Prod
         dependsOn: Build
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-        environment+shortname: prod
+        environment_shortname: prod
         domain_internal: $(base_domain_internal_prod)
         deployment_infra: InfraProd
         deployment_apps: K8sProd
