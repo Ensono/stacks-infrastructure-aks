@@ -39,16 +39,16 @@ parameters:
         dependsOn: Build
         condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
         environment_shortname: nonprod
-        domain.internal: $(base_domain_internal_nonprod)
-        deployment.infra: InfraNonProd
-        deployment.apps: K8sNonProd
+        domain_internal: $(base_domain_internal_nonprod)
+        deployment_infra: InfraNonProd
+        deployment_apps: K8sNonProd
       - stage: Prod
         dependsOn: Build
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
         environment+shortname: prod
-        domain.internal: $(base_domain_internal_prod)
-        deployment.infra: InfraProd
-        deployment.apps: K8sProd
+        domain_internal: $(base_domain_internal_prod)
+        deployment_infra: InfraProd
+        deployment_apps: K8sProd
 
 variables:
   - template: pipeline-vars.yml
@@ -112,8 +112,8 @@ stages:
         # Pull in the non-production credentials for the build to use
         - group: ensono-sp-creds
       jobs:
-        - deployment: ${{ stage.deployment.infra }}
-          environment: ${{ variables.name }}-${{ stage.environment_shortname }}
+        - deployment: ${{ stage.deployment_infra }}
+          environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
 
@@ -147,7 +147,7 @@ stages:
                       TF_VAR_stage: ${{ stage.environment_shortname }}
                       TF_VAR_create_dns_zone: $(create_dns_zone)
                       TF_VAR_dns_zone: $(base_domain_nonprod)
-                      TF_VAR_internal_dns_zone: ${{ stage.domain.internal }}
+                      TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
                       TF_VAR_dns_resource_group: $(dns_resource_group)
                       TF_VAR_create_key_vault: $(create_key_vault)
                       TF_VAR_create_aksvnet: $(create_aksvnet)
@@ -208,9 +208,9 @@ stages:
                       testRunTitle: Terraform AKS Tests
                       failTaskOnFailedTests: true
 
-        - deployment: ${{ stage.deployment.apps }}
-          dependsOn: ${{ stage.deployment.infra }}
-          environment: ${{ variables.name }}-${{ stage.environment_shortname }}
+        - deployment: ${{ stage.deployment_apps }}
+          dependsOn: ${{ stage.deployment_infra }}
+          environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
 
