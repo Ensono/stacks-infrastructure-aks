@@ -104,7 +104,7 @@ stages:
               artifactName: docs
 
   # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
-  - ${{ each stage in parameters.stage }}:
+  - ${{ each stage in parameters.stages }}:
     - stage: ${{ stage.stage }}
       dependsOn: ${{ stage.dependsOn }}
       condition: ${{ stage.condition }}
