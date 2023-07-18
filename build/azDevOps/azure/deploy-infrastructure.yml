@@ -38,16 +38,14 @@ parameters:
       - stage: NonProd
         dependsOn: Build
         condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
-        environment.shortname: nonprod
-        environment: ${{ variables.domain }}-nonprod
+        environment_shortname: nonprod
         domain.internal: $(base_domain_internal_nonprod)
         deployment.infra: InfraNonProd
         deployment.apps: K8sNonProd
       - stage: Prod
         dependsOn: Build
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
-        environment.shortname: prod
-        environment: ${{ variables.domain }}-prod
+        environment+shortname: prod
         domain.internal: $(base_domain_internal_prod)
         deployment.infra: InfraProd
         deployment.apps: K8sProd
@@ -115,7 +113,7 @@ stages:
         - group: ensono-sp-creds
       jobs:
         - deployment: ${{ stage.deployment.infra }}
-          environment: ${{ stage.environment }}
+          environment: ${{ variables.name }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
 
@@ -141,12 +139,12 @@ stages:
                       TF_VAR_name_company: $(company)
                       TF_VAR_name_project: $(project)
                       TF_VAR_name_component: $(domain)
-                      TF_VAR_name_environment: ${{ stage.environment.shortname }}
+                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
                       TF_VAR_acme_email: $(acme_email)
                       TF_VAR_is_cluster_private: $(private_cluster)
                       TF_VAR_cluster_version: $(aks_cluster_version)
                       TF_VAR_aks_node_pools: $(aks_node_pools)
-                      TF_VAR_stage: ${{ stage.environment.shortname }}
+                      TF_VAR_stage: ${{ stage.environment_shortname }}
                       TF_VAR_create_dns_zone: $(create_dns_zone)
                       TF_VAR_dns_zone: $(base_domain_nonprod)
                       TF_VAR_internal_dns_zone: ${{ stage.domain.internal }}
@@ -177,7 +175,7 @@ stages:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""                        
-                        TF_VAR_name_environment: ${{ stage.environment.shortname }}
+                        TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                   # Create the resources for the Kubernetes cluster
                   - task: Bash@3
@@ -190,7 +188,7 @@ stages:
                       TF_FILE_LOCATION: /app/deploy/terraform
                       TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                       TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
-                      TF_VAR_name_environment: ${{ stage.environment.shortname }}
+                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                   # Perform infrastructure tests
                   - template: templates/infra-tests.yml
@@ -199,7 +197,7 @@ stages:
                       TESTS_PATH: /app/deploy/tests
                       REPORT_FILENAME: inspec_azure_aks.xml
                       TF_FILE_LOCATION: /app/deploy/terraform
-                      TF_VAR_name_environment: ${{ stage.environment.shortname }}
+                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
                       TF_VAR_resource_group_location: $(region)
                       TF_VAR_is_cluster_private: $(private_cluster)
 
@@ -212,7 +210,7 @@ stages:
 
         - deployment: ${{ stage.deployment.apps }}
           dependsOn: ${{ stage.deployment.infra }}
-          environment: ${{ stage.environment }}
+          environment: ${{ variables.name }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
 
