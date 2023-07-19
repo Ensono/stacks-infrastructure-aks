@@ -221,6 +221,7 @@ stages:
 
         - deployment: ${{ stage.deployment_apps }}
           dependsOn: ${{ stage.deployment_infra }}
+          condition: eq(parameters.deploy, true)
           environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
@@ -241,12 +242,13 @@ stages:
                         taskctl helm:charts
                     env:
                       TF_FILE_LOCATION: /app/deploy/terraform
+                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
   - stage: Release
     dependsOn:
       - Build
       - Prod
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'), eq(parameters.deploy, 'true'))
     variables:
       - group: ensono-sp-creds
       - name: version_number
