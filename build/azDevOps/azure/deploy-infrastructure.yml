@@ -221,7 +221,7 @@ stages:
 
         - deployment: ${{ stage.deployment_apps }}
           dependsOn: ${{ stage.deployment_infra }}
-          condition: eq(parameters.deploy, true)
+          condition: and(succeeded(), eq('${{ parameters.deploy }}', true))
           environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
           pool:
             vmImage: $(pool_vm_image)
