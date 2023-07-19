@@ -55,3 +55,7 @@ table:
   head:
     background_color: 6A41EB
     font-color: ffffff
+
+listing:
+  caption:
+    side: bottom

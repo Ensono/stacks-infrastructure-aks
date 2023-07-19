@@ -1,4 +1,5 @@
 digraph G {
+  margin=0
   node[fontpath="../styles/fonts" fontname="OpenSans" fontsize="10"]
   graph[fontpath="../styles/fonts" fontname="OpenSans"]
 
@@ -32,10 +33,13 @@ digraph G {
       tests_nonprod[shape=box, label="Infrastructure Tests\n(tests)"]
       publish_tests_nonprod[shape=box, label="Publish Tests", style="filled", fillcolor="cyan", fontcolor="blue"]
       deploy_helm_nonprod[shape=box, label="Deploy Helm Charts\n(helm:charts)"]
+      destroy_question_nonprod[shape=diamond, label="Destroy\nenvironment?", style="filled", fillcolor="#ff0000"]
+      destroy_environment_nonprod[shape=box, label="Destroy Infrastructure\n(infrastructure_destroy)"]
 
       notes_nonprod[shape=none, label="Only runs\non branches", style="filled", fillcolor="#FFFEC5"]
       
-      setup_nonprod -> infra_nonprod -> tests_nonprod -> publish_tests_nonprod -> deploy_helm_nonprod
+      setup_nonprod -> destroy_question_nonprod -> infra_nonprod -> tests_nonprod -> publish_tests_nonprod -> deploy_helm_nonprod
+      destroy_question_nonprod -> destroy_environment_nonprod -> infra_nonprod
 
       deploy_helm_nonprod -> notes_nonprod [style="invis"]
   }
@@ -55,10 +59,13 @@ digraph G {
       tests_prod[shape=box, label="Infrastructure Tests\n(tests)"];
       publish_tests_prod[shape=box, label="Publish Tests", style="filled", fillcolor="cyan", fontcolor="blue"];
       deploy_helm_prod[shape=box, label="Deploy Helm Charts\n(helm:charts)"]
+      destroy_question_prod[shape=diamond, label="Destroy\nenvironment?", style="filled", fillcolor="#ff0000"]
+      destroy_environment_prod[shape=box, label="Destroy Infrastructure\n(infrastructure_destroy)"]
 
       notes_prod[shape=none, label="Only runs on the\ntrunk branch", style="filled", fillcolor="#FFFEC5"]
       
-      setup_prod -> infra_prod -> tests_prod -> publish_tests_prod -> deploy_helm_prod;
+      setup_prod -> destroy_question_prod -> infra_prod -> tests_prod -> publish_tests_prod -> deploy_helm_prod;
+      destroy_question_prod -> destroy_environment_prod -> infra_prod
 
       deploy_helm_prod -> notes_prod [style="invis"]
   }
@@ -77,7 +84,10 @@ digraph G {
       setup_release[shape=box, label="Install Taskctl", style="filled", fillcolor="cyan", fontcolor="blue"];
       release[shape=box, label="Perform GitHub Release\n(release)"]
 
+      notes_release[shape=box, label="Only runs on trunk\nand if release enabled", style="filled", fillcolor="#FFFEC5"]
+
       setup_release -> release
+      release -> notes_release[style="invis"]
   }
 
   

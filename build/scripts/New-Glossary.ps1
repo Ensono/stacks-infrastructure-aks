@@ -51,6 +51,14 @@ $acronyms = @{
         expansion = "Azure Kubernetes Service"
         description = "Microsoft managed Kubernetes control plane"
     }
+    "RBAC" = @{
+        expansion = "Role Based Access Control"
+        description = "Allow access to a resource with the appopriate level of control for a specific user or role"
+    }
+    "SKU" == @{
+        expansion = "Stock Keeping Unit"
+        description = "Used to denote the size of a resource to be deployed"
+    }
 }
 
 # Ensure that the path for the document to append to exists

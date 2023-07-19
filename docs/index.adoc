@@ -29,4 +29,8 @@ include::pipeline.adoc[]
 
 <<<
 
+include::tests.adoc[]
+
+<<<
+
 include::glossary.adoc[]
