@@ -34,17 +34,17 @@ if k8s_versions.include? k8s_version
     # Determine what the impact will be depending on the version of kubernetes that is running
     if current.include? k8s_version
         description = "Running the current version of Kubernetes"
-        impact_value = 0.0
+        impact = 0.0
         suffix = "Current"
         version_list = current
     elsif previous.include? k8s_version
         description = "Running the previous version of Kubernetes"
-        impact_value = 0.7
+        impact = 0.7
         suffix = "Previous"
         version_list = previous
     else
         description = "Running the last supported version of Kubernetes, please consider upgrading"
-        impact_value = 1.0
+        impact = 1.0
         suffix = "Last"
         version_list = last
     end
