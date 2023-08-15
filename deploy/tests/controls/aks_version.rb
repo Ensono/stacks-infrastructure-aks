@@ -39,7 +39,7 @@ if k8s_versions.include? k8s_version
         version_list = current
     elsif previous.include? k8s_version
         description = "Running the previous version of Kubernetes"
-        impact_value = 0.6
+        impact_value = 0.3
         suffix = "Previous"
         version_list = previous
     else
