@@ -1,3 +1,10 @@
+---
+id: aks_tests
+title: Tests
+description: To keep the resources in a known configuration and assist in keeping the necessary versions of software, e.g. Kubernetes, up to date the project contains infrastructure tests. 
+weight: 70
+---
+
 == Infrastructure Tests
 
 Infrastructure tests have been built into the EDIR pipeline. These tests are designed to check that the deployed resources are configured as expected and that the version of the Azure Kubernetes Service (AKS) is up to date.

@@ -11,6 +11,8 @@
 
 = Ensono Stacks - AKS Cluster
 
+include::_index.adoc[]
+
 include::introduction.adoc[]
 
 include::infrastructure.adoc[]

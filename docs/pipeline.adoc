@@ -1,5 +1,8 @@
 ---
-:linkTitle: Pipeline
+id: aks_pipeline
+title: Pipeline
+description: There are a number of pipelines in the project, but the main one is the Ensono Digital Independent Runner (EDIR). Regardless of the CI/CD system in use, EDIR is always called. Currently only Azure DevOps is supported but there will be pipelines for GitHub Actions and Gitlab Runner in the future.
+weight: 60
 ---
 
 == Pipeline

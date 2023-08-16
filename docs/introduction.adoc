@@ -1,5 +1,8 @@
 ---
-:linkTitle: Introduction
+id: aks_introduction
+title: Introduction
+description: Introduction detailing what the AKS project is for
+weight: 20
 ---
 
 == Introduction

@@ -1,5 +1,8 @@
 ---
-:linkTitle: Helm
+id: aks_helm
+title: Helm Charts
+description: Applications that are recommended for Kubernetes are installed using Helm charts. Different charts can be deployed based on the scenario, this is controlled using a configuration file.
+weight: 50
 ---
 
 == Helm

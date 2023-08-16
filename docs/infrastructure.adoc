@@ -1,5 +1,8 @@
 ---
-:linkTitle: Infrastructure
+id: aks_infrastructure
+title: Infrastructure
+description: Details about how the architecture of the AKS resources
+weight: 30
 ---
 
 == Infrastructure

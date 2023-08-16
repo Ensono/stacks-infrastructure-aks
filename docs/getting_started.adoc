@@ -1,3 +1,10 @@
+---
+id: aks_getting_started
+title: Getting Started
+description: Details about how architecture of the AKS resources and how there are deployed using Terraform.
+weight: 40
+---
+
 == Getting Started
 
 One of the things with the EDIR is that it is designed to make things easier for people to run things locally that will also be run by the CI/CD platform. That is all well and good, but not if it has not been used before. This section provides a quick overview of how to start off with the repo from scratch.
