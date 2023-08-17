@@ -23,3 +23,6 @@ inputs:
   - name: dns_prefix
     description: DNS Prefix to be used with Kubernetes
     value: aks
+  - name: k8s_version_threshold
+    description: Denotes the number versions that are considered valid
+    value: 4

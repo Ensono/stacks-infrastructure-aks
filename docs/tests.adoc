@@ -19,7 +19,7 @@ The tests are located in `deploy/tests` and are https://inspec.io[Inspec] contro
 
 Filename:  `controls/aks_versions.rb` | This control takes the list of supported AKS versions and compares it against the version that is currently running. The list of supported versions is retrieved from the inputs file that is populated, in part, by Terraform outputs.
 
-Microsoft support the current and two previous versions of Kubernetes, so the test will check to see if the version being run is one of the those versions. If current then no action is taken, if on previous then a warning is raised and if on previous + 1 an error is raised. Finally an error is raised if the version is out of support.
+Microsoft support the current and two previous versions of Kubernetes, so the test will check to see if the version being run is one of the those versions. The list iis split up into valid and invalid versions (by default, the current and previous version). If the running version is not int he valid list the test will fail.
 
 This is allows for the planning of upgrades as needed and should make the upgrade process less impactful.
 | Name: `azure-kubernetes-cluster`
