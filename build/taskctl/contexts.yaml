@@ -1,0 +1,108 @@
+contexts:
+  powershell:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --env-file
+        - envfile
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -v
+        - /var/run/docker.sock:/var/run/docker.sock
+        - -e
+        - PSModulePath=/modules
+        - -w
+        - /app
+        - amidostacks/runner-pwsh:0.4.3-stable
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"
+    envfile:
+      generate: true
+      exclude:
+        - path
+        - home
+        - kubeconfig
+
+  infratests:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --env-file
+        - envfile
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -v
+        - /var/run/docker.sock:/var/run/docker.sock
+        - -e
+        - PSModulePath=/modules
+        - -w
+        - /app
+        - amidostacks/runner-pwsh-inspec:0.4.7-unstable
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"
+    envfile:
+      generate: true
+      exclude:
+        - path
+        - home
+        - PSModulePath
+
+  powershell-python:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -v
+        - /var/run/docker.sock:/var/run/docker.sock
+        - -e
+        - PSModulePath=/modules
+        - -w
+        - /app
+        - --env-file
+        - envfile
+        - amidostacks/runner-pwsh-python
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"
+    envfile:
+      generate: true
+      exclude:
+        - path
+        - home
+
+  docsenv:
+    executable:
+      bin: docker
+      args:
+        - run
+        - --rm
+        - -v
+        - ${PWD}:/app
+        - -e
+        - PSModulePath=/modules
+        - -w
+        - /app
+        - --env-file
+        - envfile
+        - amidostacks/runner-pwsh-asciidoctor:0.4.5-unstable
+        - pwsh
+        - -NoProfile
+        - -Command
+    quote: "'"
+    envfile:
+      generate: true
+      exclude:
+        - path
+        - home

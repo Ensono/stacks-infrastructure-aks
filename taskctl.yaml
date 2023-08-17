@@ -1,0 +1,58 @@
+import:
+  - ./build/taskctl/contexts.yaml
+  - ./build/taskctl/tasks.yaml
+
+pipelines:
+  lint:
+    - task: lint:yaml
+    - task: lint:terraform:format
+    - task: lint:terraform:validate
+
+  tests:
+    - task: tests:infra:vendor
+    - task: tests:infra:run
+      depends_on:
+        - tests:infra:vendor
+
+  infrastructure:
+    - task: setup:environment
+    - task: infra:init
+      depends_on:
+        - setup:environment
+    - task: infra:plan
+      depends_on:
+        - infra:init
+    - task: infra:apply
+      depends_on:
+        - infra:plan
+
+  infrastructure_destroy:
+    - task: setup:environment
+    - task: infra:init
+      depends_on:
+        - setup:environment
+    - task: infra:destroy:plan
+      depends_on:
+        - infra:init
+    - task: infra:destroy:apply
+      depends_on:
+        - infra:destroy:plan
+
+
+  docs:
+    - task: build:number
+    - task: _docs
+      depends_on: build:number
+
+  release:
+    - task: build:number
+    - task: _release
+      depends_on:
+        - build:number
+      env:
+        VERSION_NUMBER: $BUILDNUMBER
+        API_KEY: $API_KEY
+        NOTES:
+        COMMIT_ID: $COMMIT_ID
+        ARTIFACTS_DIR: $ARTIFACTS_DIR
+        REPONAME: $REPONAME

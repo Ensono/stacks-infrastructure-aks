@@ -1,0 +1,56 @@
+# Extend the default theme
+extends: default
+
+page:
+  size: A4
+  margin: [2cm, 1.27cm, 1.27cm, 1.27cm]
+  background_image: "image:../../../docs/images/page-image.png[position=top right]"
+
+# Add extra fonts to the catalog
+font:
+  catalog:
+    merge: true
+    Opensans:
+      normal: OpenSans-Regular.ttf
+      italic: OpenSans-Italic.ttf
+      bold: OpenSans-Bold.ttf
+      bold_italic: OpenSans-BoldItalic.ttf
+
+# State what fonts should be used
+base:
+  font-family: Opensans
+
+# Configure the header to add a logo
+header:
+  height: $base_line_height_length * 3.5
+  border_width: 0.25
+  border_color: dddddd
+  recto:
+    columns: "<40% =20% >40%"
+    left:
+      content: "image:../../../docs/images/ensono-digital.svg[Ensono Digital,100]"
+    center:
+      content: ""
+  verso:
+    left:
+      content: $header_recto_left_content
+    center:
+      content: $header_recto_center_content
+
+# Define the table style
+table:
+  caption:
+    side: bottom
+  head:
+    background-color: "#08c1a7"
+    font-color: "#ffffff"
+
+role:
+  highlight:
+    background-color: "#fe6e69"
+  notes:
+    background_color: "#6941eb"
+    font_color: "#00ff00"
+
+heading:
+  font-color: "#6941eb"

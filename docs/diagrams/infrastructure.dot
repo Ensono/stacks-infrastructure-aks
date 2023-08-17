@@ -1,0 +1,16 @@
+digraph G {
+  rankdir=LR
+  node[fontsize="10"]
+  
+  start [shape=oval, label="Start"];
+  end [shape=oval, label="End"];
+  
+setup[shape=box, label="setup:environment"]
+init[shape=box, label="infra:init"]
+
+plan[shape=box, label="infra:plan"]
+apply[shape=box, label="infra:apply"]
+
+  start -> setup -> init -> plan -> apply -> end
+
+}

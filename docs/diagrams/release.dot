@@ -1,0 +1,30 @@
+digraph G {
+  rankdir=LR
+  node[fontsize="10"]
+  
+  start [shape=oval, label="Start"];
+  end [shape=oval, label="End"];
+   
+  buildnumber[shape=box, label="build:number"]
+  release[shape=box, label="_release"]
+
+  environment[
+      shape=box, 
+      style="dashed", 
+      fontsize=8,
+      label="Environment Variables
+
+VERSION_NUMBER
+API_KEY
+COMMIT_ID
+ARTIFACTS_DIR
+REPONAME"]
+
+  start -> buildnumber
+  buildnumber -> release 
+  environment -> release [
+      style="dashed"
+  ]
+  release -> end
+
+}

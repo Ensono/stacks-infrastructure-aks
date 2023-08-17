@@ -1,0 +1,54 @@
+# Include necessary variables for this pipeline file
+variables:
+  - group: ensono-sp-creds
+  - template: ../agent-config-vars.yml
+
+  # Cloud
+  - name: CLOUD_PLATFORM
+    value: azure
+
+  # Licensing
+  - name: CHEF_LICENSE
+    value: accept-silent
+
+name: infra-tests-$(Date:yyyyMMdd).$(Rev:r)
+
+# Add schedule to run the infra tests everyday
+schedules:
+  - cron: 0 6 * * *
+    branches:
+      include:
+        - main
+        - feature/independent-runner
+    always: true
+
+stages:
+  - stage: infrastructure_tests
+
+    jobs:
+      - job: aks
+        displayName: AKS
+        pool:
+          vmImage: $(pool_vm_image)
+
+        variables:
+          - template: pipeline-vars.yml
+
+        steps:
+          - template: ../templates/setup.yml
+            parameters:
+              TaskctlVersion: ${{ variables.TaskctlVersion }}
+
+          - template: ../templates/infra-tests.yml
+            parameters:
+              CHEF_LICENSE: $(CHEF_LICENSE)
+              TESTS_PATH: /app/deploy/tests
+              INSPEC_ARGS: "--input resource_group_name=$(resource_group_name) storage_account_name=$(storage_account_name) region=$(location)"
+              REPORT_FILENAME: inspec_azure_aks.xml
+
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFormat: JUnit
+              testResultsFiles: outputs/tests/inspec_azure_aks.xml
+              testRunTitle: AKS Tests
+              failTaskOnFailedTests: true

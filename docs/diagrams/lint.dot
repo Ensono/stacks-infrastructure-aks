@@ -1,0 +1,18 @@
+digraph G {
+
+  node[fontsize="10"]
+
+  start [shape=oval, label="Start"];
+  end [shape=oval, label="End"];
+  
+  subgraph "steps" {
+      yaml [shape=box, label="Yaml Lint"]
+      tf_format [shape=box, label="Terraform Format"]
+      tf_validate [shape=box, label="Terraform Validate"]
+  }
+
+  start -> yaml -> end
+  start -> tf_format -> end
+  start -> tf_validate -> end
+
+}

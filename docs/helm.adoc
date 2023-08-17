@@ -1,0 +1,68 @@
+---
+id: aks_helm
+title: Helm Charts
+description: Applications that are recommended for Kubernetes are installed using Helm charts. Different charts can be deployed based on the scenario, this is controlled using a configuration file.
+weight: 50
+---
+
+== Helm
+
+There are a number of applications, some installed by default and others mandatory, that are installed using https://helm.sh[Helm]. Helm is a package deployment application for Kubernetes. The packages that install applications are called charts in Helm.
+
+The following table shows the charts that are available.
+
+[cols="1,3,1",options="header",stripes=even]
+|===
+| Name | Description | Default install?
+| AAD Pod Identity | AAD Pod Identity enables Kubernetes applications to access cloud resources securely with Azure Active Directory | icon:check[]
+| Cluster Setup | Local chart that configures the necessary identities within AKS | icon:check[]
+| External DNS | ExternalDNS synchronizes exposed Kubernetes Services and Ingresses with DNS providers. | icon:check[]
+| Ingress Nginx | The NGINX Ingress Controller for Kubernetes  that enables the routing and load balancing of incoming traffic to services within a Kubernetes cluster. It acts as a layer 7 (application layer) load balancer, facilitating the management of external access to Kubernetes services. | icon:check[]
+| Argo Rollouts |Argo Rollouts is a Kubernetes controller used for progressive delivery and is part of the Argo open source project. It includes a set of custom resource definitions (CRDs) that introduce advanced deployment capabilities to Kubernetes with features like progressive delivery, blue-green deployment, canary releases, and canary analysis. | icon:times[]
+| Grafana | Grafana is an open-source analytics and visualization platform that allows users to query, visualize, and understand data from multiple sources. It provides a powerful and flexible way to create customizable dashboards, graphs, and alerts for monitoring and analyzing various systems and metrics. | icon:times[]
+| Velero | Velero is an open source tool to safely backup and restore, perform disaster recovery, and migrate Kubernetes cluster resources and persistent volumes. | icon:times[]
+| Prometheus | Prometheus is an open-source systems monitoring and alerting toolkit. It records real-time metrics in a time series database built using a HTTP pull model, with flexible queries and real-time alerting. | icon:times[]
+|===
+
+=== Configuration
+
+The independent runner uses a file to determine which applications to install. Each application is defined as an item in a YAML list. Each application has an `enabled` flag, set according to the table above.
+
+Applications can be enabled as required and other ones added as needed.
+
+[,yaml]
+----
+include::../deploy/helm/k8s_apps.yml[]
+----
+
+This file is read by the `Deploy-Helm` cmdlet in the Independent Runner PowerShell module. The cmdlet cna handle installing from a remote chart repository or from a local one contained on the file system.
+
+The following table describes the parameters that can be set.
+
+.Kubernetes Helm Chart application parameters
+[cols="1,3",options="header",stripes=even]
+|===
+| Name | Description
+| `name` | Name of the chart
+| `location` | When installing from a the filesystem this is the path to the chart. 
+
+When installing from a remote repository this is the alias of the repo.
+| `enabled` | State if this will be installed
+| `repo` | URL for the remote location of the chart(s)
+| `values_template` | Path to the file that will be used to pass in the values for the chart. This file can be templated so that values in the pipeline are added to the file.
+| `clouds` | List of clouds that this chart is applicable to. If none specified then it will be installed in all cases.
+|===
+
+=== Values Template file
+
+This file is what is passed to Helm when the application is installed on Kubernetes. During the build a number of variables are exposed that allows values to be put into the file at required locations.
+
+For example, the following is the file that is used to deploy the bindings for identities:
+
+[source,yaml,linenums]
+----
+include::../deploy/helm/values/cluster_setup.yml[]
+----
+
+As can be seen the output values from Terraform are required. Here there are prefixed with `TFOUT_` and substituted into the file before the chart is deployed.
+

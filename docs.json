@@ -1,0 +1,29 @@
+{
+    "title": "Stacks Infrastructure AKS",
+    "output": "{{ basepath }}/outputs/docs/{{ format }}",
+    "trunkBranch": "main",
+    "path": "{{ basepath }}/docs/index.adoc",
+    "libs": [
+        "asciidoctor-diagram"
+    ],
+    "pdf": {
+        "attributes": [
+            "pdf-theme={{ basepath }}/build/config/pdf/theme.yml",
+            "pdf-fontsdir=\"{{ basepath }}/docs/styles/fonts;GEM_FONTS_DIR\"",
+            "allow-uri-read",
+            "blockdiag=/usr/bin/blockdiag",
+            "skip-front-matter",
+            "graphvizdot=/usr/bin/dot"
+        ]
+    },
+    "html": {
+        "attributes": [
+            "stylesheet={{ basepath }}/conf/html/style.css",
+            "allow-uri-read",
+            "toc=left",
+            "java=/usr/bin/java",
+            "graphvizdot=/usr/bin/dot",
+            "skip-front-matter"
+        ]
+    }
+}
