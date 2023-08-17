@@ -42,8 +42,8 @@ else
     k8s_version_threshold = 0
 end
 
-valid_versions = [0..(k8s_version_threshold - 1)]
-invalid_versions = [(k8s_version_threshold)..(k8s_version_count)]
+valid_versions = k8s_versions[0..(k8s_version_threshold - 1)]
+invalid_versions = k8s_versions[(k8s_version_threshold)..(k8s_version_count)]
 
 # If the current version is valid then pass the test, otherwise error
 control "azure-kubernetes-version" do
