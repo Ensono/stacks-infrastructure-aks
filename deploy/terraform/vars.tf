@@ -92,6 +92,11 @@ variable "create_acr" {
   type = bool
 }
 
+variable "create_ssl_gateway" {
+  type    = bool
+  default = true
+}
+
 variable "acr_resource_group" {
   type = string
 }

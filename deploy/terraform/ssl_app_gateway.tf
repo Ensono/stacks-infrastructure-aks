@@ -1,4 +1,5 @@
 module "ssl_app_gateway" {
+  count                     = var.create_ssl_gateway ? 1 : 0
   source                    = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=feature/update-tf-structure"
   resource_namer            = module.default_label.id
   resource_group_name       = module.aks_bootstrap.resource_group_name
