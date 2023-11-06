@@ -1,6 +1,6 @@
 
 module "aks_bootstrap" {
-  source                  = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-aks?ref=feature/update-tf-structure"
+  source                  = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-aks?ref=v2.0.4"
   resource_namer          = module.default_label.id
   resource_group_location = var.resource_group_location
   spn_object_id           = data.azurerm_client_config.current.object_id
