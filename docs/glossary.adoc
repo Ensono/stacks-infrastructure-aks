@@ -1,0 +1,13 @@
+---
+id: aks_glossary
+title: Glossary
+description: A table of terms that have been discussed in this section.
+weight: 70
+---
+
+== Glossary
+
+The following table shows all of the acronyms that are used in the document and what they mean.
+
+include::../tmp/glossary.adoc[]
+

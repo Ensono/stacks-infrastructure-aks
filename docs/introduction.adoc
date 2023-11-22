@@ -1,0 +1,12 @@
+---
+id: aks_introduction
+title: Introduction
+description: Introduction detailing what the AKS project is for
+weight: 20
+---
+
+== Introduction
+
+When using the .NET and Java workloads of {company} Stacks, it is expected that the applications will be deployed to a Kubernetes cluster. Whilst the ethos behind Stacks is to allow people to use it in whatever way they need, the AKS Infrastructure will deploy a Kubernetes cluster with, optionally, a number of applications using Helm.
+
+This cluster can then be used to deploy any number of workloads, including our .NET and Java Web APIs as well as front end applications and data workers.

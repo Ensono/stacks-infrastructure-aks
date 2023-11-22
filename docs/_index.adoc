@@ -1,0 +1,14 @@
+---
+id: stacks_infrastructure_aks
+title: AKS Infrastructure
+description: Build pipeline for Terraform to deploy an Azure Kubernetes Service (AKS) cluster into Azure. The pipeline also has testing for the infrastructure to help reduce configuration drift as well as software versioning.
+tags:
+  - kubernetes
+  - azure
+categories:
+  - Infrastructure
+---
+
+The AKS Infrastructure project contains all of the Terraform templates, build pipelines (for Independent Runner and Azure DevOps) to deploy the templates as well as tests to ensure that the infrastructure that is deployed is what is expected.
+
+The tests are designed to be run on a regular basis, indeed the Azure DevOps pipeline file for the tests is set to run at 0600 every morning. This is to allow developers and engineers to check that the resources are configured correctly. The tests also check that the cluster is running the correct supported version of Kubernetes, and will error if not on the current or previous version of Kubernetes (as supported by Microsoft).

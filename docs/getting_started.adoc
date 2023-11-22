@@ -1,0 +1,89 @@
+---
+id: aks_getting_started
+title: Getting Started
+description: Details about how architecture of the AKS resources and how there are deployed using Terraform.
+weight: 40
+---
+
+== Getting Started
+
+One of the things with the EDIR is that it is designed to make things easier for people to run things locally that will also be run by the CI/CD platform. That is all well and good, but not if it has not been used before. This section provides a quick overview of how to start off with the repo from scratch.
+
+=== Prerequisites
+
+Please ensure that the following prerequisites are satisfied:
+
+* Docker Engine
+** This can be Docker, Rancher Desktop or Podman
+* Taskctl (https://github.com/russellseymour/taskctl/releases)
+
+NOTE: Taskctl has been forked to add some new functionality to the tool that this repository uses.
+
+=== Setup
+
+In order to run the pipeline locally a number of environment variables are required. These are used to pass variable values to Terraform. The following table shows what these variables are.
+
+[cols="2,4,1",options="header",stripes=even]
+|===
+| Envvar Name | Description | Required
+| `TF_FILE_LOCATION` | Path to the Terraform template files | [green]#icon:check[]#
+| `TF_BACKEND_INIT` | Arguments that should be passed to Terraform during the init process | [green]#icon:check[]#
+| `TF_BACKEND_PLAN` | Arguments that should be passed to Terraform during the plan process | [red]#icon:times[]#
+| `TF_VAR_name_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
+| `TF_VAR_name_project` | Name of the project | [green]#icon:check[]#
+| `TF_VAR_name_component` |  | [green]#icon:check[]#
+| `TF_VAR_name_environment` |  | [green]#icon:check[]#
+| `TF_VAR_stage` |  | [green]#icon:check[]#
+| `TF_VAR_attributes` |  | [red]#icon:times[]#
+| `TF_VAR_tags` |  | [red]#icon:times[]#
+| `TF_VAR_resource_group_location` | Location that the cluster should be deployed to | [green]#icon:check[]#
+| `TF_VAR_dns_zone` | Public DNS zone that should be used for URLs | [green]#icon:check[]#
+| `TF_VAR_internal_dns_zone` | Private DNS zone for internal services | [green]#icon:check[]#
+| `TF_VAR_pfx_password` | Password for the certificate deployed into Kubernetes | [green]#icon:check[]#
+| `TF_VAR_dns_resource_group` | Resource group that contains the DNS zones to update | [green]#icon:check[]#
+| `TF_VAR_create_dns_zone` | State if the DNS zone should be created | [green]#icon:check[]#
+| `TF_VAR_create_aksvnet` | State if the virtual network for AKS should be created | [green]#icon:check[]#
+| `TF_VAR_cluster_version` | Version of Kubernetes to deploy | [green]#icon:check[]#
+| `TF_VAR_create_acr` | State if a container registry should be created | [green]#icon:check[]#
+| `TF_VAR_acr_resource_group` | Resource group that the ACR can be found if not being created | [green]#icon:check[]#
+| `TF_VAR_acr_name` | Name of the ACR to create | [green]#icon:check[]#
+| `TF_VAR_is_cluster_private` | Can the API be accessed remotely | [green]#icon:check[]#
+| `TF_VAR_key_vault_name` | Name of the key vault to create | [red]#icon:times[]#
+| `TF_VAR_acme_email` | Email address for Acme certificate registration, must be a valid email | [green]#icon:check[]#
+| `TF_VAR_create_user_identity` |  | [green]#icon:check[]#
+|===
+
+==== PowerShell
+
+If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner module that reads the `build/config/stage_envvars.yml` and creates a skeleton PowerShell script which will setup the variables.
+
+[source,powershell,linenums]
+---
+New-EnvConfig -Path .\build\config\stage_envvars.yml -scriptPath local -Cloud Azure -Stage stacks-aks
+---
+
+The resultant script will be `local/envvar-azure-stacks-aks.ps1`. The naming convention is `envvar-<CLOUD>-<STAGE>.ps1`.
+
+.Environment variable script
+image::images/envvar-script.png[width=500]
+
+Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then setup the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by Taskctl.
+
+==== Bash
+
+Currently we do not have an option when running in `bash` for creating such a script file. We have some ideas on how this will be done, but the biggest issue is how this will be distributed.
+
+=== Running the Pipelines
+
+Now that the environment has been configured the pipelines can be run.
+
+[cols="1,4",options=header,stripes=even]
+|===
+| # | Command
+| 1 | `taskctl lint`
+| 2 | `taskctl infrastructure`
+| 3 | `taskctl tests`
+| 4 | `taskctl docs`
+|===
+
+These pipelines can be run in any order based on the task that needs to be accomplished. In addition to these any of the tasks, as described in <<Pipeline>> can be executed.

@@ -1,0 +1,86 @@
+---
+id: aks_tests
+title: Tests
+description: To keep the resources in a known configuration and assist in keeping the necessary versions of software, e.g. Kubernetes, up to date the project contains infrastructure tests. 
+weight: 70
+---
+
+== Infrastructure Tests
+
+Infrastructure tests have been built into the EDIR pipeline. These tests are designed to check that the deployed resources are configured as expected and that the version of the Azure Kubernetes Service (AKS) is up to date.
+
+The tests are located in `deploy/tests` and are https://inspec.io[Inspec] controls. The following table shows the tests that are being performed.
+
+.InSpec Controls
+[cols="1,3a",options="header",stripes=even]
+|===
+| Details| Description
+| Name: `azure-kubernetes-version`
+
+Filename:  `controls/aks_versions.rb` | This control takes the list of supported AKS versions and compares it against the version that is currently running. The list of supported versions is retrieved from the inputs file that is populated, in part, by Terraform outputs.
+
+Microsoft support the current and two previous versions of Kubernetes, so the test will check to see if the version being run is one of the those versions. The list iis split up into valid and invalid versions (by default, the current and previous version). If the running version is not int he valid list the test will fail.
+
+This is allows for the planning of upgrades as needed and should make the upgrade process less impactful.
+| Name: `azure-kubernetes-cluster`
+
+Filename: `controls/aks.rb` | Checks that the cluster is deployed as expected.
+
+- it should exist
+- it is in the correct region
+- its deployment succeeded
+- the dnsPrefix is set correctly
+- whether or not it is a private cluster
+- RBAC is enabled
+- The admin username is `ubuntu`
+- Number of agent pools that have been deployed
+| Name: `container_registry`
+
+Filename: `controls/container_registry.rb`
+| If a Container Registry has been requested this checks its properties
+
+- it should exist
+- it is in the correct location
+- the deployment succeeded
+- it should be configured with the correct Stock Keeping Unit (SKU)
+| Name: `azure-key-vaults`
+
+Filename: `controls/key_vault.rb`
+
+| If a Key Vault is requested the control checks the following properties
+
+- the correct number of key vaults has been deployed
+- it exists
+- it is in the correct region
+- it has the correct SKU
+- the deployment succeeded
+- there should be at least one access policy
+
+For each access policy check that
+
+- secrets should have 'Get' and 'List'
+| Name: `azure-kubernetes-public-ip`
+
+Filename: `controls/public_ip.rb`
+
+| This control is currently disabled because the AKS Terraform module we are using does not yet output the details of the Public IP address that is required for the tests to run properly.
+
+This control checks that
+
+- the ip address exists
+- it is in the correct region
+- its deployment should have succeeded
+- has a SKU of Basic
+| Name: `azure-resource-group`
+
+Filename: `controls/resource_group.rb`
+
+The resource group that everything is deployed to, the control checks:
+
+- the group exists
+- it is in the correct region
+- its deployment succeeded
+- it should include the `created_by` tag
+|===
+
+NOTE: There is an ADO pipeline that runs these tests on a schedule at 0600 which can be added to Azure DevOps. The file for this pipeline is `build/azDevOps/azure/infrastructure-tests.yml`.

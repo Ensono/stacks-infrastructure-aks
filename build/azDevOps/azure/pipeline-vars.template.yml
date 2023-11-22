@@ -1,0 +1,78 @@
+variables:
+  # ------- General Agent Setup
+  # set the location that the resources should be deployed to
+  - name: region
+    value: {{ .Project.Cloud.Region }}
+
+  # ------- Stacks configuration
+  # name of the company that owns the project
+  - name: company
+    value: {{ .Input.Business.Company }}
+
+  # name of the project
+  - name: project
+    value: {{ .Project.Name }}
+
+  # which domain fo the company is this. e.g. core resources, or front end
+  # This is not a network domain
+  - name: domain
+    value: {{ .Input.Business.Domain }}
+
+  # the email address to use when creating the SSL certificate
+  - name: acme_email
+    value:
+
+  # -------- Cluster information
+  # version of AKS to deploy
+  - name: aks_cluster_version
+    value: 1.24.9
+
+  # Should a valid certificate be obtained, or use a self signed one
+  - name: create_valid_cert
+    value: false
+
+  # Additional node pools for kubernetes
+  - name: aks_node_pools
+    value: {}
+
+  # -------- Terraform remote state
+  # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
+  # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
+  # there are some best practices around this if you are going for feature based environments
+  # avoid running anything past dev that is not on master
+  - name: tf_state_rg
+    value: {{ .Input.Terraform.Backend.Group }}
+  - name: tf_state_storage
+    value: {{ .Input.Terraform.Backend.Storage }}
+  - name: tf_state_container
+    value: {{ .Input.Terraform.Backend.Container }}
+  - name: tf_state_key
+    value: core
+
+  # -------- Network Domain names
+  - name: base_domain_nonprod
+    value: nonprod.{{.Input.Network.Base.Domain.External}}
+  - name: base_domain_internal_nonprod
+    value: nonprod.{{.Input.Network.Base.Domain.Internal}}
+  - name: base_domain_prod
+    value: prod.{{.Input.Network.Base.Domain.External}}
+  - name: base_domain_internal_prod
+    value: prod.{{.Input.Network.Base.Domain.Internal}}
+
+  # ------- DNS configuration
+  - name: dns_zone_resource_group
+    value:
+  - name: create_dns_zone
+    value: false
+
+  # ------- GitHub
+  - name: create_release
+    value: false
+  - name: github_release_service_connection
+    value:
+  - name: github_org
+    value: $(company)
+
+  # ------- Resource Tags
+  - name: team_owner
+    value:

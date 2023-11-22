@@ -1,0 +1,14 @@
+pipeline:
+  - type: azdo
+    files:
+      - name: build
+        path: build/azDevOps/azure/deploy-infrastructure.yml
+      - name: variable
+        path: build/azDevOps/azure/pipeline-vars.yml
+    templates:
+      - name: variable
+        path: build/azDevOps/azure/pipeline-vars.template.yml
+
+setup:
+  operations:
+    - action: copy

@@ -1,0 +1,6 @@
+aks:
+  user:
+    identity_id: ${TFOUT_aks_default_user_identity_id}
+  identity:
+    client_id: ${TFOUT_aks_default_user_identity_client_id}
+    username: ${TFOUT_aks_default_user_identity_name}

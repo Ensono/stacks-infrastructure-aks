@@ -1,0 +1,17 @@
+domainFilters:
+  - ${env:BASE_DOMAIN}
+
+provider: ${env:CLOUD_PLATFORM}
+
+extraArgs:
+  - "--azure-resource-group=${env:TFOUT_resource_group_name}"
+
+extraVolumeMounts:
+  - name: azure-config-file
+    mountPath: /etc/kubernetes
+    readOnly: true
+
+extraVolumes:
+  - name: azure-config-file
+    secret:
+      secretName: azure-config-file

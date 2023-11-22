@@ -1,0 +1,15 @@
+parameters:
+  TaskctlVersion: 1.5.0
+
+steps:
+  # Checkout self repo
+  - checkout: self
+
+  # Install Taskfile so that the tests can be run
+  - task: Bash@3
+    displayName: "Install: Taskctl"
+    inputs:
+      targetType: inline
+      script: |
+        wget https://github.com/russellseymour/taskctl/releases/download/v${{ parameters.TaskctlVersion }}/taskctl_${{ parameters.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
+        tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl
