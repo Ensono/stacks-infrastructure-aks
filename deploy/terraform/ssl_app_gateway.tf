@@ -16,4 +16,9 @@ module "ssl_app_gateway" {
   subnet_names              = ["k8s1"]
   acme_email                = var.acme_email
   create_valid_cert         = var.create_valid_cert
+
+  ssl_policy = {
+    "policy_type" = "Predefined",
+    "policy_name" = "AppGwSslPolicy220170401S",
+  }
 }
