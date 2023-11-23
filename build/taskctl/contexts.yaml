@@ -15,7 +15,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - amidostacks/runner-pwsh:0.4.53-stable
+        - amidostacks/runner-pwsh:0.4.60-stable
         - pwsh
         - -NoProfile
         - -Command
@@ -43,7 +43,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - amidostacks/runner-pwsh-inspec:0.4.53-stable
+        - amidostacks/runner-pwsh-inspec:0.4.60-stable
         - pwsh
         - -NoProfile
         - -Command
@@ -71,7 +71,7 @@ contexts:
         - /app
         - --env-file
         - envfile
-        - amidostacks/runner-pwsh:0.4.53-stable
+        - amidostacks/runner-pwsh:0.4.60-stable
         - pwsh
         - -NoProfile
         - -Command
@@ -96,7 +96,7 @@ contexts:
         - /app
         - --env-file
         - envfile
-        - amidostacks/runner-pwsh-asciidoctor:0.4.53-stable
+        - amidostacks/runner-pwsh-asciidoctor:0.4.60-stable
         - pwsh
         - -NoProfile
         - -Command
