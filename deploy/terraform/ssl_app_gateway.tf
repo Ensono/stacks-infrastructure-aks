@@ -19,6 +19,6 @@ module "ssl_app_gateway" {
 
   ssl_policy = {
     "policy_type" = "Predefined",
-    "policy_name" = "AppGwSslPolicy220170401S",
+    "policy_name" = "AppGwSslPolicy20170401S",
   }
 }
