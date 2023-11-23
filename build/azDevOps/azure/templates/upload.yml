@@ -1,4 +1,3 @@
-
 steps:
   - task: CopyFiles@2
     displayName: "DEBUG: Copy files to staging directory"

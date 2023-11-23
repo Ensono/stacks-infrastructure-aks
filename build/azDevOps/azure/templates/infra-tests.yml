@@ -5,9 +5,9 @@ parameters:
   CHEF_LICENSE:
   REPORT_FILENAME:
   TF_FILE_LOCATION:
-  TF_VAR_name_environment: 
+  TF_VAR_name_environment:
   TF_VAR_resource_group_location:
-  TF_VAR_is_cluster_private: 
+  TF_VAR_is_cluster_private:
 
 steps:
   - task: Bash@3
