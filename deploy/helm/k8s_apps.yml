@@ -1,7 +1,7 @@
 charts:
   - name: aad-pod-identity
     location: aad-pod-identity
-    enabled: true
+    enabled: false
     repo: https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
     values_template: deploy/helm/values/aad_pod_identity.yml
     clouds:
