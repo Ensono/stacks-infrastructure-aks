@@ -9,7 +9,7 @@ charts:
 
   - name: cluster-setup
     location: ./deploy/helm/charts
-    enabled: true
+    enabled: false
     values_template: deploy/helm/values/cluster_setup.yml
     clouds:
       - azure
