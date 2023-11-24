@@ -87,12 +87,16 @@ variables:
     value: false
 
   # ------- GitHub
-  - name: create_release
-    value: true
-  - name: github_release_service_connection
-    value: GitHubReleases
-  - name: github_org
-    value: $(company)
+  - name: VERSION_NUMBER
+    value: $(Build.BuildNumber)
+  - name: COMMIT_ID
+    value: $(Build.SourceVersion)
+  - name: OWNER
+    value: ensono
+  - name: REPOSITORY
+    value: stacks-terraform
+  - name: ARTIFACTS_DIR
+    value: artifacts/
 
   # ------- Resource Tags
   - name: team_owner

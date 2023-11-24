@@ -127,10 +127,10 @@ tasks:
       Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
 
   _release:
-    context: buildenv
+    context: powershell
     command:
-      - |
-        /Publish-GitHubRelease -version $env:BUILDNUMBER `
+      - Publish-GitHubRelease
+        Publish-GitHubRelease -version $env:BUILDNUMBER `
           -commitId $env:COMMIT_ID `
           -apikey $env:API_KEY `
           -artifactsDir $env:ARTIFACTS_DIR `

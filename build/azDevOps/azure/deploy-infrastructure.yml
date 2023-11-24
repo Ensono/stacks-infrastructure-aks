@@ -39,6 +39,10 @@ parameters:
     displayName: Force deploy regardless of branch
     type: boolean
     default: false
+  - name: pre_release
+    displayName: Create a pre-release from feature branch
+    type: boolean
+    default: false
 
   - name: stages
     type: object
@@ -249,9 +253,9 @@ stages:
     dependsOn:
       - Build
       - Prod
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'), eq('${{ parameters.deploy }}', true))
+    condition: and(succeeded(), or(${{ eq(variables['Build.SourceBranch'], 'refs/heads/master') }}, ${{ parameters.pre_release }}))
     variables:
-      - group: ensono-sp-creds
+      - group: amido-stacks-github-credentials
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
@@ -263,18 +267,27 @@ stages:
             parameters:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
-          # Tag the code with the version of the build
           - task: Bash@3
-            displayName: Release
+            displayName: Publish Pre-Release
+            condition: and(succeeded(), eq(${{ parameters.pre_release }}, true))
             inputs:
               targetType: inline
               script: |
                 taskctl release
             env:
-              BUILDNUMBER: $(Build.BuildNumber)
-              API_KEY: $(GITHUB_TOKEN)
-              NOTES:
-              COMMIT_ID: $(Build.SourceVersion)
-              ARTIFACTS_DIR: outputs/docs
-              OWNER: ${{ variables.RepoOwner }}
-              REPONAME: ${{ variables.RepoName }}
+              STAGE: "release"
+              PUBLISH_RELEASE: "true"
+              VERSION_NUMBER: $(BUILD_BUILDNUMBER)
+              PRERELEASE: "true"
+
+          - task: Bash@3
+            displayName: Publish Release
+            condition: and(succeeded(), eq(${{ parameters.pre_release }}, false))
+            inputs:
+              targetType: inline
+              script: |
+                taskctl release
+            env:
+              STAGE: "release"
+              PUBLISH_RELEASE: "true"
+              VERSION_NUMBER: $(BUILD_BUILDNUMBER)
