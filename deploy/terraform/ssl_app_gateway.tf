@@ -1,5 +1,5 @@
 module "ssl_app_gateway" {
-  source                    = "git::https://github.com/amido/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=feature/update-tf-structure"
+  source                    = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=v2.0.23"
   resource_namer            = module.default_label.id
   resource_group_name       = module.aks_bootstrap.resource_group_name
   resource_group_location   = var.resource_group_location
@@ -16,4 +16,9 @@ module "ssl_app_gateway" {
   subnet_names              = ["k8s1"]
   acme_email                = var.acme_email
   create_valid_cert         = var.create_valid_cert
+
+  ssl_policy = {
+    "policy_type" = "Predefined",
+    "policy_name" = "AppGwSslPolicy20170401S",
+  }
 }

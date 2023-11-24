@@ -55,7 +55,7 @@ $acronyms = @{
         expansion = "Role Based Access Control"
         description = "Allow access to a resource with the appopriate level of control for a specific user or role"
     }
-    "SKU" == @{
+    "SKU" = @{
         expansion = "Stock Keeping Unit"
         description = "Used to denote the size of a resource to be deployed"
     }
@@ -100,7 +100,7 @@ $table = [System.Text.StringBuilder]::new()
 
 # iterate around the found items and add to the table
 foreach ($item in $found.GetEnumerator()) {
-    
+
     $row = "| {0} | {1} | {2}" -f $item.Name, $item.Value.expansion, $item.Value.description
     [void]$table.AppendLine($row)
 }

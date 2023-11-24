@@ -113,137 +113,137 @@ stages:
 
   # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
   - ${{ each stage in parameters.stages }}:
-    - stage: ${{ stage.stage }}
-      dependsOn: ${{ stage.dependsOn }}
-      condition: and(succeeded(), or(${{ stage.condition }}, ${{ parameters.force_deploy }}))
-      variables:
-        # Pull in the non-production credentials for the build to use
-        - group: ensono-sp-creds
-      jobs:
-        - deployment: ${{ stage.deployment_infra }}
-          environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
-          pool:
-            vmImage: $(pool_vm_image)
+      - stage: ${{ stage.stage }}
+        dependsOn: ${{ stage.dependsOn }}
+        condition: and(succeeded(), or(${{ stage.condition }}, ${{ parameters.force_deploy }}))
+        variables:
+          # Pull in the non-production credentials for the build to use
+          - group: ensono-sp-creds
+        jobs:
+          - deployment: ${{ stage.deployment_infra }}
+            environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
+            pool:
+              vmImage: $(pool_vm_image)
 
-          strategy:
-            runOnce:
-              deploy:
-                steps:
-                  - template: templates/setup.yml
-                    parameters:
-                      TaskctlVersion: ${{ variables.TaskctlVersion }}
-
-                  # Create a tfvars file for the values
-                  # This is so that variables can be set and reused as required
-                  - task: Bash@3
-                    displayName: Create Terraform variables file
-                    inputs:
-                      targetType: inline
-                      script: |
-                        taskctl infra:vars
-                    env:
-                      TF_FILE_LOCATION: /app/deploy/terraform
-                      TF_VAR_resource_group_location: $(region)
-                      TF_VAR_name_company: $(company)
-                      TF_VAR_name_project: $(project)
-                      TF_VAR_name_component: $(domain)
-                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
-                      TF_VAR_acme_email: $(acme_email)
-                      TF_VAR_is_cluster_private: $(private_cluster)
-                      TF_VAR_cluster_version: $(aks_cluster_version)
-                      TF_VAR_aks_node_pools: $(aks_node_pools)
-                      TF_VAR_stage: ${{ stage.environment_shortname }}
-                      TF_VAR_create_dns_zone: $(create_dns_zone)
-                      TF_VAR_dns_zone: $(base_domain_nonprod)
-                      TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
-                      TF_VAR_dns_resource_group: $(dns_resource_group)
-                      TF_VAR_create_key_vault: $(create_key_vault)
-                      TF_VAR_create_aksvnet: $(create_aksvnet)
-                      TF_VAR_create_user_identity: $(create_user_identity)
-                      TF_VAR_create_acr: $(create_acr)
-                      TF_VAR_acr_resource_group: $(acr_resource_group)
-                      TF_VAR_acr_name: $(acr_name)
-                      TF_VAR_pfx_password: Password1
-                      TF_VAR_create_valid_cert: $(create_valid_cert)
-                      TF_VAR_tag_team_owner: $(team_owner)
-
-                  # Upload the Terraform variables file and the plan for debugging
-                  - ${{ if eq(parameters.upload, true) }}:
-                    - template: templates/upload.yml
-
-                  # Remove the infrastructure if the parameter has been set
-                  - ${{ if eq(parameters.destroy, true) }}:
-                    - task: Bash@3
-                      displayName: Destroy environment
-                      inputs:
-                        targetType: inline
-                        script: |
-                          taskctl infrastructure_destroy
-                      env:
-                        TF_FILE_LOCATION: /app/deploy/terraform
-                        TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""                        
-                        TF_VAR_name_environment: ${{ stage.environment_shortname }}
-
-                  # Create the resources for the Kubernetes cluster
-                  - ${{ if eq(parameters.deploy, true) }}:
-                    - task: Bash@3
-                      displayName: Deploy AKS
-                      inputs:
-                        targetType: inline
-                        script: |
-                          taskctl infrastructure
-                      env:
-                        TF_FILE_LOCATION: /app/deploy/terraform
-                        TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
-                        TF_VAR_name_environment: ${{ stage.environment_shortname }}
-
-                  # Perform infrastructure tests
-                  - ${{ if eq(parameters.deploy, true) }}:
-                    - template: templates/infra-tests.yml
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - template: templates/setup.yml
                       parameters:
-                        CHEF_LICENSE: $(CHEF_LICENSE)
-                        TESTS_PATH: /app/deploy/tests
-                        REPORT_FILENAME: inspec_azure_aks.xml
+                        TaskctlVersion: ${{ variables.TaskctlVersion }}
+
+                    # Create a tfvars file for the values
+                    # This is so that variables can be set and reused as required
+                    - task: Bash@3
+                      displayName: Create Terraform variables file
+                      inputs:
+                        targetType: inline
+                        script: |
+                          taskctl infra:vars
+                      env:
+                        TF_FILE_LOCATION: /app/deploy/terraform
+                        TF_VAR_resource_group_location: $(region)
+                        TF_VAR_name_company: $(company)
+                        TF_VAR_name_project: $(project)
+                        TF_VAR_name_component: $(domain)
+                        TF_VAR_name_environment: ${{ stage.environment_shortname }}
+                        TF_VAR_acme_email: $(acme_email)
+                        TF_VAR_is_cluster_private: $(private_cluster)
+                        TF_VAR_cluster_version: $(aks_cluster_version)
+                        TF_VAR_aks_node_pools: $(aks_node_pools)
+                        TF_VAR_stage: ${{ stage.environment_shortname }}
+                        TF_VAR_create_dns_zone: $(create_dns_zone)
+                        TF_VAR_dns_zone: $(base_domain_nonprod)
+                        TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
+                        TF_VAR_dns_resource_group: $(dns_resource_group)
+                        TF_VAR_create_key_vault: $(create_key_vault)
+                        TF_VAR_create_aksvnet: $(create_aksvnet)
+                        TF_VAR_create_user_identity: $(create_user_identity)
+                        TF_VAR_create_acr: $(create_acr)
+                        TF_VAR_acr_resource_group: $(acr_resource_group)
+                        TF_VAR_acr_name: $(acr_name)
+                        TF_VAR_pfx_password: Password1
+                        TF_VAR_create_valid_cert: $(create_valid_cert)
+                        TF_VAR_tag_team_owner: $(team_owner)
+
+                    # Upload the Terraform variables file and the plan for debugging
+                    - ${{ if eq(parameters.upload, true) }}:
+                        - template: templates/upload.yml
+
+                    # Remove the infrastructure if the parameter has been set
+                    - ${{ if eq(parameters.destroy, true) }}:
+                        - task: Bash@3
+                          displayName: Destroy environment
+                          inputs:
+                            targetType: inline
+                            script: |
+                              taskctl infrastructure_destroy
+                          env:
+                            TF_FILE_LOCATION: /app/deploy/terraform
+                            TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                            TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
+                            TF_VAR_name_environment: ${{ stage.environment_shortname }}
+
+                    # Create the resources for the Kubernetes cluster
+                    - ${{ if eq(parameters.deploy, true) }}:
+                        - task: Bash@3
+                          displayName: Deploy AKS
+                          inputs:
+                            targetType: inline
+                            script: |
+                              taskctl infrastructure
+                          env:
+                            TF_FILE_LOCATION: /app/deploy/terraform
+                            TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                            TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                            TF_VAR_name_environment: ${{ stage.environment_shortname }}
+
+                    # Perform infrastructure tests
+                    - ${{ if eq(parameters.deploy, true) }}:
+                        - template: templates/infra-tests.yml
+                          parameters:
+                            CHEF_LICENSE: $(CHEF_LICENSE)
+                            TESTS_PATH: /app/deploy/tests
+                            REPORT_FILENAME: inspec_azure_aks.xml
+                            TF_FILE_LOCATION: /app/deploy/terraform
+                            TF_VAR_name_environment: ${{ stage.environment_shortname }}
+                            TF_VAR_resource_group_location: $(region)
+                            TF_VAR_is_cluster_private: $(private_cluster)
+
+                    - ${{ if eq(parameters.deploy, true) }}:
+                        - task: PublishTestResults@2
+                          inputs:
+                            testResultsFormat: JUnit
+                            testResultsFiles: outputs/tests/inspec_azure_aks.xml
+                            testRunTitle: Terraform AKS Tests
+                            failTaskOnFailedTests: true
+
+          - deployment: ${{ stage.deployment_apps }}
+            dependsOn: ${{ stage.deployment_infra }}
+            condition: and(succeeded(), eq('${{ parameters.deploy }}', true))
+            environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
+            pool:
+              vmImage: $(pool_vm_image)
+
+            strategy:
+              runOnce:
+                deploy:
+                  steps:
+                    - template: templates/setup.yml
+                      parameters:
+                        TaskctlVersion: ${{ variables.TaskctlVersion }}
+
+                    - task: Bash@3
+                      displayName: Deploy Helm Charts
+                      inputs:
+                        targetType: inline
+                        script: |
+                          taskctl helm:charts
+                      env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
-                        TF_VAR_resource_group_location: $(region)
-                        TF_VAR_is_cluster_private: $(private_cluster)
-
-                  - ${{ if eq(parameters.deploy, true) }}:
-                    - task: PublishTestResults@2
-                      inputs:
-                        testResultsFormat: JUnit
-                        testResultsFiles: outputs/tests/inspec_azure_aks.xml
-                        testRunTitle: Terraform AKS Tests
-                        failTaskOnFailedTests: true
-
-        - deployment: ${{ stage.deployment_apps }}
-          dependsOn: ${{ stage.deployment_infra }}
-          condition: and(succeeded(), eq('${{ parameters.deploy }}', true))
-          environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
-          pool:
-            vmImage: $(pool_vm_image)
-
-          strategy:
-            runOnce:
-              deploy:
-                steps:
-                  - template: templates/setup.yml
-                    parameters:
-                      TaskctlVersion: ${{ variables.TaskctlVersion }}
-
-                  - task: Bash@3
-                    displayName: Deploy Helm Charts
-                    inputs:
-                      targetType: inline
-                      script: |
-                        taskctl helm:charts
-                    env:
-                      TF_FILE_LOCATION: /app/deploy/terraform
-                      TF_VAR_name_environment: ${{ stage.environment_shortname }}
-                      TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                        TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
 
   - stage: Release
     dependsOn:

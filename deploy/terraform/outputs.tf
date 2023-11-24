@@ -97,6 +97,11 @@ output "app_gateway_ip" {
   value       = module.ssl_app_gateway.app_gateway_ip
 }
 
+output "app_gateway_public_ip_name" {
+  description = "The Public IP associated to the Application Gateway"
+  value       = module.ssl_app_gateway.app_gateway_ip_name
+}
+
 output "dns_resource_group_name" {
   description = "Resource group name for the DNS zones"
   value       = module.aks_bootstrap.dns_resource_group_name
