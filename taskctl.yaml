@@ -45,14 +45,4 @@ pipelines:
       depends_on: build:number
 
   release:
-    - task: build:number
     - task: _release
-      depends_on:
-        - build:number
-      env:
-        VERSION_NUMBER: $BUILDNUMBER
-        API_KEY: $API_KEY
-        NOTES:
-        COMMIT_ID: $COMMIT_ID
-        ARTIFACTS_DIR: $ARTIFACTS_DIR
-        REPONAME: $REPONAME

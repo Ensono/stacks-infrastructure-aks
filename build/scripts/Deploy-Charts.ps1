@@ -4,36 +4,36 @@ param (
 
     [string]
     # Path to the configuration file stating which charts should be deployed
-    $path = $env:HELM_CHARTS,
+    $Path = $env:HELM_CHARTS,
 
     [string[]]
     # Names of charts that should be deployed.
     # This does not override the enabled flag, but allows a subset of enabled chartts
     # to be deployed
-    $names,
+    $Names,
 
     [string]
     # Path to temporary directory for writing out templates
-    $tempdir = "tmp/",
+    $Tempdir = "tmp/",
 
     [string]
-    # Cloud provider being targetted
-    $provider = $env:CLOUD_PLATFORM,
+    # Cloud provider being targeted
+    $Provider = $env:CLOUD_PROVIDER,
 
     [string]
-    [Alias("resourcegroup")]
+    [Alias("ResourceGroup")]
     # Identifier for finding the cluster
     # In the case of Azure this is the resource group name
-    $identifier,
+    $Identifier,
 
     [string]
     [Alias("aksname")]
     # Name of the cluster
-    $clustername,
+    $Clustername,
 
     [switch]
     # Specify a dryrun, which will output the helm command to run
-    $dryrun
+    $Dryrun
 )
 
 # Set defaults on undefined parameters
@@ -48,20 +48,33 @@ if (!(Test-Path -Path $path)) {
 }
 
 # Determine if the tempdir path exists, if not create it
-if (!(Test-Path -Path $tempdir)) {
-    Write-Information ("Creating temporary dir: {0}" -f $tempdir)
-    New-Item -Type Directory -Path $tempdir | Out-Null
+if (!(Test-Path -Path $Tempdir)) {
+    Write-Information ("Creating temporary dir: {0}" -f $Tempdir)
+    New-Item -Type Directory -Path $Tempdir | Out-Null
 }
 
-# Read in the configuration
-$helm = Get-Content -Path $path -Raw | ConvertFrom-Yaml
+# Read in the configuration, replacing parameters as necessary
+$template_name = Split-Path -Path $path -Leaf
+$target = [IO.Path]::Join($Tempdir, $template_name)
+
+# Expand the template for the values
+$template = Get-Content -Path $path -Raw
+if ([String]::IsNullOrEmpty($template)) {
+    New-Item -Type File -Path $target -Force | Out-Null
+} else {
+    Expand-Template -Template $template -Target $target
+}
+
+$helm = Get-Content -Path $target -Raw | ConvertFrom-Yaml
+
+Write-Host $(Get-Content -Path $target -Raw)
 
 # Iterate around all the charts in the object
 foreach ($chart in $helm.charts) {
-    
+
     # if any names have been specified only run if the current chart is in that list
-    if ($names.length -gt 0 -and $names -notcontains $chart.name) {
-        Write-Warning -Message ("Skipping chart due to names list: {0} not in [{1}]" -f $chart.name, ($names -join ","))
+    if ($Names.length -gt 0 -and $Names -notcontains $chart.name) {
+        Write-Warning -Message ("Skipping chart due to names list: {0} not in [{1}]" -f $chart.name, ($Names -join ","))
     }
 
     # Skip the chart if not enabled
@@ -87,14 +100,25 @@ foreach ($chart in $helm.charts) {
         $namespace = $chart.namespace
     }
 
+    # If a repo has been set, run the command to add the repo to helm
+    if (![String]::IsNullOrEmpty($chart.repo)) {
+        $command = "Invoke-Helm -Repo -RepositoryName {0} -RepositoryUrl {1}" -f $chart.location, $chart.repo
+
+        if ($Dryrun) {
+            Write-Host $command
+        } else {
+            Invoke-Expression $command
+        }
+    }
+
     # Configure an array to hold the pareameters for the helm cmdlet
     $helm_args = @()
     $helm_args += "-install"
     $helm_args += "-chartpath `"{0}/{1}`"" -f $chart.location, $chart.name
-    $helm_args += "-identifier {0}" -f $identifier
-    $helm_args += "-target {0}" -f $clustername
+    $helm_args += "-identifier {0}" -f $Identifier
+    $helm_args += "-target {0}" -f $Clustername
     $helm_args += "-namespace {0}" -f $namespace
-    $helm_args += "-provider {0}" -f $provider
+    $helm_args += "-provider {0}" -f $Provider
 
     # Determine the release name
     $release_name = $chart.release_name
@@ -108,7 +132,7 @@ foreach ($chart in $helm.charts) {
     # Only if a values template has been specified
     if (![String]::IsNullOrEmpty($chart.values_template)) {
         $template_name = Split-Path -Path $chart.values_template -Leaf
-        $target = [IO.Path]::Join($tempdir, $template_name)
+        $target = [IO.Path]::Join($Tempdir, $template_name)
 
         # Expand the template for the values
         $template = Get-Content -Path $chart.values_template -Raw
@@ -121,29 +145,16 @@ foreach ($chart in $helm.charts) {
         $helm_args += "-valuepath {0}" -f $target
     }
 
-    # If a repo has been set, run the command to add the repo to helm
-    if (![String]::IsNullOrEmpty($chart.repo)) {
-        $command = @"
-Invoke-Helm -custom -arguments "repo add {0} {1}" -target foobar -provider azure -identifier foobar -namespace foobar -releasename foobar
-"@ -f $chart.name, $chart.repo
-
-        if ($dryrun) {
-            Write-Host $command
-        } else {
-            Invoke-Expression $command 
-        }
-    } 
-
     # Build up the command to run
     $command = "Invoke-Helm {0}" -f ($helm_args -join " ")
 
-#    $command = @"
-#Invoke-Helm -custom -arguments "upgrade", "{0}", "{1}/{2}", "--install", "--namespace", "{3}", "--create-namespace", "--atomic", "--values", "{4}
-#"@ -f $release_name, $chart.location, $chart.name, $chart.namespace, $target
+    Write-Host ("DEPLOYING: '{0}/{1}'" -f $chart.location, $chart.name)
 
-    if ($dryrun) {
+    if ($Dryrun) {
         Write-Host $command
     } else {
-        Invoke-Expression $command 
+        Invoke-Expression $command
     }
+
+    Write-Host ("DEPLOYING FINISHED: '{0}/{1}'" -f $chart.location, $chart.name)
 }

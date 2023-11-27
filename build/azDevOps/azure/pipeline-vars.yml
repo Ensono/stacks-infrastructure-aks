@@ -94,7 +94,7 @@ variables:
   - name: OWNER
     value: ensono
   - name: REPOSITORY
-    value: stacks-terraform
+    value: stacks-infrastructure-aks
   - name: ARTIFACTS_DIR
     value: artifacts/
 

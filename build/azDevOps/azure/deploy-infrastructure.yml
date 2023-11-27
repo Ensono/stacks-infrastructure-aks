@@ -251,9 +251,11 @@ stages:
 
   - stage: Release
     dependsOn:
-      - Build
-      - Prod
-    condition: and(succeeded(), or(${{ eq(variables['Build.SourceBranch'], 'refs/heads/master') }}, ${{ parameters.pre_release }}))
+      - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+          - NonProd
+      - ${{ else }}:
+          - Prod
+    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true))
     variables:
       - group: amido-stacks-github-credentials
       - name: version_number
@@ -268,21 +270,7 @@ stages:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
           - task: Bash@3
-            displayName: Publish Pre-Release
-            condition: and(succeeded(), eq(${{ parameters.pre_release }}, true))
-            inputs:
-              targetType: inline
-              script: |
-                taskctl release
-            env:
-              STAGE: "release"
-              PUBLISH_RELEASE: "true"
-              VERSION_NUMBER: $(BUILD_BUILDNUMBER)
-              PRERELEASE: "true"
-
-          - task: Bash@3
             displayName: Publish Release
-            condition: and(succeeded(), eq(${{ parameters.pre_release }}, false))
             inputs:
               targetType: inline
               script: |
@@ -290,4 +278,5 @@ stages:
             env:
               STAGE: "release"
               PUBLISH_RELEASE: "true"
-              VERSION_NUMBER: $(BUILD_BUILDNUMBER)
+              ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+                PRERELEASE: "true"
