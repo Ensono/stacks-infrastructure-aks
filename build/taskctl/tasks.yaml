@@ -134,7 +134,7 @@ tasks:
       - Publish-GitHubRelease `
           -version $env:BUILD_BUILDNUMBER `
           -commitId $env:COMMIT_ID `
-          -apikey $env:API_KEY `
+          -apikey $env:GITHUB_TOKEN `
           -artifactsDir $env:ARTIFACTS_DIR `
           -Owner $env:OWNER `
           -repository $env:REPOSITORY
