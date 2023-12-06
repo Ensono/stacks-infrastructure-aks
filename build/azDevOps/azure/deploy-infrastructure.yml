@@ -257,7 +257,8 @@ stages:
           - Prod
     condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true))
     variables:
-      - group: amido-stacks-github-credentials
+      # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
+      - group: amido-stacks-webapp
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
