@@ -255,7 +255,7 @@ stages:
           - NonProd
       - ${{ else }}:
           - Prod
-    condition: or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
       # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
       - group: amido-stacks-webapp
