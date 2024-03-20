@@ -39,6 +39,10 @@ parameters:
     displayName: Force deploy regardless of branch
     type: boolean
     default: false
+  - name: pre_release
+    displayName: Create a pre-release from feature branch
+    type: boolean
+    default: false
 
   - name: stages
     type: object
@@ -247,11 +251,14 @@ stages:
 
   - stage: Release
     dependsOn:
-      - Build
-      - Prod
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(variables['create_release'], 'true'), eq('${{ parameters.deploy }}', true))
+      - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+          - NonProd
+      - ${{ else }}:
+          - Prod
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
-      - group: ensono-sp-creds
+      # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
+      - group: amido-stacks-webapp
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
@@ -263,18 +270,15 @@ stages:
             parameters:
               TaskctlVersion: ${{ variables.TaskctlVersion }}
 
-          # Tag the code with the version of the build
           - task: Bash@3
-            displayName: Release
+            displayName: Publish Release
             inputs:
               targetType: inline
               script: |
                 taskctl release
             env:
-              BUILDNUMBER: $(Build.BuildNumber)
-              API_KEY: $(GITHUB_TOKEN)
-              NOTES:
-              COMMIT_ID: $(Build.SourceVersion)
-              ARTIFACTS_DIR: outputs/docs
-              OWNER: ${{ variables.RepoOwner }}
-              REPONAME: ${{ variables.RepoName }}
+              STAGE: "release"
+              PUBLISH_RELEASE: "true"
+              GITHUB_TOKEN: "$(GITHUB_TOKEN)"
+              ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+                PRERELEASE: "true"
