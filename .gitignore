@@ -6,7 +6,7 @@ tfplan
 
 local
 
-envfile
+envfile*
 
 vendor
 

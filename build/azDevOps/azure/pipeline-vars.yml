@@ -20,12 +20,12 @@ variables:
 
   # the email address to use when creating the SSL certificate
   - name: acme_email
-    value: stacks@amido.com
+    value: stacks@ensono.com
 
   # -------- Cluster information
   # version of AKS to deploy
   - name: aks_cluster_version
-    value: 1.26.12
+    value: 1.27.9
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
@@ -80,7 +80,7 @@ variables:
   - name: acr_resource_group
     value: stacks-ancillary-resources
   - name: acr_name
-    value: ensonodigitaleuw
+    value: ensonoeuw
 
   # ------ Key Vault
   - name: create_key_vault

@@ -122,7 +122,7 @@ stages:
         condition: and(succeeded(), or(${{ stage.condition }}, ${{ parameters.force_deploy }}))
         variables:
           # Pull in the non-production credentials for the build to use
-          - group: ensono-sp-creds
+          - group: azure-sp-creds
         jobs:
           - deployment: ${{ stage.deployment_infra }}
             environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
@@ -186,7 +186,7 @@ stages:
                           env:
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
+                            TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                     # Create the resources for the Kubernetes cluster
@@ -200,7 +200,7 @@ stages:
                           env:
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
+                            TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                     # Perform infrastructure tests
@@ -208,7 +208,7 @@ stages:
                         - template: templates/infra-tests.yml
                           parameters:
                             CHEF_LICENSE: $(CHEF_LICENSE)
-                            TESTS_PATH: /app/deploy/tests
+                            INSPEC_FILES: /app/deploy/tests
                             REPORT_FILENAME: inspec_azure_aks.xml
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -258,7 +258,6 @@ stages:
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
       # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
-      - group: amido-stacks-webapp
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:

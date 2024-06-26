@@ -62,7 +62,6 @@ tasks:
     command:
       - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
 
-
   infra:output:
     context: powershell
     description: Terraform Outputs
@@ -93,9 +92,9 @@ tasks:
     command:
       - Invoke-Inspec -vendor -args "--overwrite"
 
-  tests:infra:run:
-    context: infratests
-    description: Execute infrastructure tests against deployed Cloud resources
+  tests:infra:inputs:
+    context: powershell
+    description: Create file to use as the input for the Inspec tests
     command:
       - |
         Import-Module Az.Aks
@@ -104,7 +103,12 @@ tasks:
         Get-AzureServiceVersions -service aks -location $env:TF_VAR_resource_group_location | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml -Append
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "region: ${env:TF_VAR_resource_group_location}"
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "kubernetes_private_cluster: ${env:TF_VAR_is_cluster_private}"
-        Invoke-Inspec -execute -arguments "--input-file ${PWD}/inspec_inputs.yml"
+
+  tests:infra:run:
+    context: infratests
+    description: Execute infrastructure tests against deployed Cloud resources
+    command:
+      - Invoke-Inspec -execute -arguments "--input-file ${PWD}/inspec_inputs.yml"
 
   helm:charts:
     context: powershell
@@ -132,9 +136,9 @@ tasks:
     context: powershell
     command:
       - Publish-GitHubRelease `
-          -version $env:BUILD_BUILDNUMBER `
-          -commitId $env:COMMIT_ID `
-          -apikey $env:GITHUB_TOKEN `
-          -artifactsDir $env:ARTIFACTS_DIR `
-          -Owner $env:OWNER `
-          -repository $env:REPOSITORY
+        -version $env:BUILD_BUILDNUMBER `
+        -commitId $env:COMMIT_ID `
+        -apikey $env:GITHUB_TOKEN `
+        -artifactsDir $env:ARTIFACTS_DIR `
+        -Owner $env:OWNER `
+        -repository $env:REPOSITORY

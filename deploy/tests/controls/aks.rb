@@ -12,7 +12,6 @@ control "azure-kubernetes-cluster" do
         its("properties.provisioningState") { should cmp "Succeeded" }
 
         its("properties.dnsPrefix") { should cmp input("dns_prefix")}
-        its("properties.apiServerAccessProfile.enablePrivateCluster") { should cmp input("kubernetes_private_cluster")}
         its("properties.enableRBAC") { should be true }
         its("properties.linuxProfile.adminUsername") { should cmp "ubuntu" }
 

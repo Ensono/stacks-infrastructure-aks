@@ -15,7 +15,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - amidostacks/runner-pwsh:0.4.60-stable
+        - ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
         - pwsh
         - -NoProfile
         - -Command
@@ -43,7 +43,7 @@ contexts:
         - PSModulePath=/modules
         - -w
         - /app
-        - amidostacks/runner-pwsh-inspec:0.4.60-stable
+        - ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91
         - pwsh
         - -NoProfile
         - -Command
@@ -96,7 +96,7 @@ contexts:
         - /app
         - --env-file
         - envfile
-        - amidostacks/runner-pwsh-asciidoctor:0.4.60-stable
+        - ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
         - pwsh
         - -NoProfile
         - -Command
