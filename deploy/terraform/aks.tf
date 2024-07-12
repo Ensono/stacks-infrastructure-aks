@@ -1,6 +1,6 @@
 
 module "aks_bootstrap" {
-  source                  = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v2.0.23"
+  source                  = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=feat/expose-sku-type"
   resource_namer          = module.default_label.id
   resource_group_location = var.resource_group_location
   spn_object_id           = data.azurerm_client_config.current.object_id

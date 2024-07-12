@@ -58,7 +58,7 @@ parameters:
       - stage: Prod
         dependsOn: Build
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-        environment_shortname: prodtemp
+        environment_shortname: prod
         dns_zone: $(base_domain_prod)
         domain_internal: $(base_domain_internal_prod)
         deployment_infra: InfraProd
