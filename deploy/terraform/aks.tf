@@ -6,6 +6,7 @@ module "aks_bootstrap" {
   spn_object_id           = data.azurerm_client_config.current.object_id
   tenant_id               = data.azurerm_client_config.current.tenant_id
   cluster_version         = var.cluster_version
+  cluster_sku_tier        = var.cluster_sku_tier
   name_environment        = var.name_environment
   name_project            = var.name_project
   name_company            = var.name_company

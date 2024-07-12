@@ -27,6 +27,10 @@ variables:
   - name: aks_cluster_version
     value: 1.27.9
 
+  ## The Cluster Control Plane SKU Tier. One of: Free, Standard, or Premium
+  - name: aks_cluster_sku_tier
+    value: Standard
+
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
     value: false

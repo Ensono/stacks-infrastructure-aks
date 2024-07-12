@@ -89,6 +89,16 @@ variable "cluster_version" {
   type = string
 }
 
+variable "cluster_sku_tier" {
+  description = "The Control Plane SKU Tier"
+  type        = string
+
+  validation {
+    condition     = contains(["Free", "Standard", "Premium"], var.cluster_sku_tier)
+    error_message = "Must be one of Free, Standard, or Premium."
+  }
+}
+
 variable "create_acr" {
   type = bool
 }
