@@ -120,10 +120,10 @@ tasks:
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
         Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
         /app/build/scripts/Deploy-Charts.ps1 `
-              -Path /app/deploy/helm/k8s_apps.yml `
-              -ResourceGroup ${env:TFOUT_resource_group_name} `
-              -Clustername ${env:TFOUT_aks_cluster_name} `
-              -Provider ${env:CLOUD_PLATFORM}
+          -Path /app/deploy/helm/k8s_apps.yml `
+          -ResourceGroup ${env:TFOUT_resource_group_name} `
+          -Clustername ${env:TFOUT_aks_cluster_name} `
+          -Provider ${env:CLOUD_PLATFORM}
 
   _docs:
     description: Build Docs for AKS
@@ -136,9 +136,9 @@ tasks:
     context: powershell
     command:
       - Publish-GitHubRelease `
-        -version $env:BUILD_BUILDNUMBER `
-        -commitId $env:COMMIT_ID `
-        -apikey $env:GITHUB_TOKEN `
-        -artifactsDir $env:ARTIFACTS_DIR `
-        -Owner $env:OWNER `
-        -repository $env:REPOSITORY
+          -version $env:BUILD_BUILDNUMBER `
+          -commitId $env:COMMIT_ID `
+          -apikey $env:GITHUB_TOKEN `
+          -artifactsDir $env:ARTIFACTS_DIR `
+          -Owner $env:OWNER `
+          -repository $env:REPOSITORY
