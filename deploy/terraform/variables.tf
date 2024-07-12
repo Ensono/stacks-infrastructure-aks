@@ -69,6 +69,7 @@ variable "aks_node_pools" {
   description = "Additional node pools as required by the platform"
   default     = {}
 }
+
 # ###########################
 # # CONDITIONALS
 # ##########################
@@ -146,4 +147,3 @@ variable "vnet_cidr" {
 variable "tag_team_owner" {
   default = ""
 }
-
