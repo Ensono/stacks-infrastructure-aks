@@ -33,7 +33,7 @@ variables:
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
@@ -74,9 +74,11 @@ variables:
 
   # ------- DNS configuration
   - name: create_dns_zone
-    value: false
+    value: true
   - name: dns_resource_group
     value: stacks-ancillary-resources
+  - name: dns_parent_zone
+    value: stacks.ensono.com
 
   # ------- Container registry
   - name: create_acr

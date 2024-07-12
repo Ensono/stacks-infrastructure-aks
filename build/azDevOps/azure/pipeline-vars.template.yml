@@ -29,7 +29,7 @@ variables:
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
