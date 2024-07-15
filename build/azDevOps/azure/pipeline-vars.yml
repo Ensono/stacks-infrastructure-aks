@@ -77,6 +77,11 @@ variables:
     value: false
   - name: dns_resource_group
     value: stacks-ancillary-resources
+  ## dns_zone is in the stages variable in the pipeline
+  - name: dns_create_parent_zone_ns_records
+    value: false
+  - name: dns_parent_resource_group
+    value: stacks-ancillary-resources
   - name: dns_parent_zone
     value: stacks.ensono.com
 

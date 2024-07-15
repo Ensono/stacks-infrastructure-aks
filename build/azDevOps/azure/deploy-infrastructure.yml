@@ -161,9 +161,12 @@ stages:
                         TF_VAR_aks_node_pools: $(aks_node_pools)
                         TF_VAR_stage: ${{ stage.environment_shortname }}
                         TF_VAR_create_dns_zone: $(create_dns_zone)
+                        TF_VAR_dns_resource_group: $(dns_resource_group)
                         TF_VAR_dns_zone: ${{ stage.dns_zone }}
                         TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
-                        TF_VAR_dns_resource_group: $(dns_resource_group)
+                        TF_VAR_dns_create_parent_zone_ns_records: $(dns_create_parent_zone_ns_records)
+                        TF_VAR_dns_parent_resource_group: $(dns_parent_resource_group)
+                        TF_VAR_dns_parent_zone: $(dns_parent_zone)
                         TF_VAR_create_key_vault: $(create_key_vault)
                         TF_VAR_create_aksvnet: $(create_aksvnet)
                         TF_VAR_create_user_identity: $(create_user_identity)
