@@ -38,7 +38,6 @@ pipelines:
       depends_on:
         - infra:destroy:plan
 
-
   docs:
     - task: build:number
     - task: _docs

@@ -110,17 +110,15 @@ tasks:
     command:
       - Invoke-Inspec -execute -arguments "--input-file ${PWD}/inspec_inputs.yml"
 
-  helm:charts:
+  infra:helm:apply:
     context: powershell
     description: Deploy Helm charts to the cluster as defined by configuration file
     command:
       - |
         Import-Module Az.Aks
-        Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
-        Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
         Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
-        /app/build/scripts/Deploy-Charts.ps1 `
-          -Path /app/deploy/helm/k8s_apps.yml `
+        /app/build/scripts/Deploy-HelmCharts.ps1 `
+          -Path /app/deploy/helm/k8s_apps.yaml `
           -ResourceGroup ${env:TFOUT_resource_group_name} `
           -Clustername ${env:TFOUT_aks_cluster_name} `
           -Provider ${env:CLOUD_PLATFORM}

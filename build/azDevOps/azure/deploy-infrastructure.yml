@@ -253,7 +253,8 @@ stages:
                       inputs:
                         targetType: inline
                         script: |
-                          taskctl helm:charts
+                          taskctl infra:init
+                          taskctl infra:helm:apply
                       env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
