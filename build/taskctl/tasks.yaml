@@ -115,8 +115,12 @@ tasks:
     description: Deploy Helm charts to the cluster as defined by configuration file
     command:
       - |
+        $ErrorActionPreference = "Stop"
+
         Import-Module Az.Aks
+
         Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
+
         /app/build/scripts/Deploy-HelmCharts.ps1 `
           -Path /app/deploy/helm/k8s_apps.yaml `
           -ResourceGroup ${env:TFOUT_resource_group_name} `

@@ -22,7 +22,7 @@ variables:
   - name: acme_email
     value: stacks@ensono.com
 
-  # -------- Cluster information
+  # ------- Cluster information
   # version of AKS to deploy
   - name: aks_cluster_version
     value: 1.27.9
@@ -48,7 +48,7 @@ variables:
   - name: create_user_identity
     value: true
 
-  # -------- Terraform remote state
+  # ------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
   # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
   # there are some best practices around this if you are going for feature based environments
@@ -93,9 +93,17 @@ variables:
   - name: acr_name
     value: ensonoeuw
 
-  # ------ Key Vault
+  # ------- Key Vault
   - name: create_key_vault
     value: false
+
+  # ------- Kured
+  - name: kured_end_time
+    value: 04:00
+  - name: kured_start_time
+    value: 00:00
+  - name: kured_timezone
+    value: Europe/London
 
   # ------- GitHub
   - name: VERSION_NUMBER

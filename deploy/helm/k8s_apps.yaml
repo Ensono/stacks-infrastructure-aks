@@ -3,49 +3,67 @@ charts:
     location: aad-pod-identity
     enabled: false
     repo: https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
-    values_template: deploy/helm/values/aad_pod_identity.yml
+    values_template: deploy/helm/values/aad_pod_identity.yaml
     clouds:
       - azure
 
   - name: cluster-setup
     location: ./deploy/helm/charts
     enabled: false
-    values_template: deploy/helm/values/cluster_setup.yml
+    values_template: deploy/helm/values/cluster_setup.yaml
     clouds:
       - azure
 
   - name: external-dns
+    namespace: external-dns
     location: external-dns
     repo: https://kubernetes-sigs.github.io/external-dns/
     enabled: false
-    values_template: deploy/helm/values/external_dns.yml
+    values_template: deploy/helm/values/external_dns.yaml
 
   - name: ingress-nginx
+    namespace: ingress-nginx
     location: ingress-nginx
     enabled: true
     repo: https://kubernetes.github.io/ingress-nginx
-    values_template: deploy/helm/values/ingress_nginx.yml
+    values_template: deploy/helm/values/ingress_nginx.yaml
+    version: 4.11.0
+
+  - name: kured
+    namespace: kured
+    location: kured
+    enabled: true
+    repo: https://kubereboot.github.io/charts
+    values_template: deploy/helm/values/kured.yaml
+    rollout_checks:
+      - name: daemonset/kured
+        timeout: 60s
+    version: 5.4.5
 
   - name: argo-rollouts
+    namespace: argo-rollouts
     location: argo-rollouts
     enabled: false
     repo: https://argoproj.github.io/argo-helm
-    values_template: deploy/helm/values/argo_rollouts.yml
+    values_template: deploy/helm/values/argo_rollouts.yaml
 
   - name: grafana
+    namespace: grafana
     location: grafana
     enabled: false
     repo: https://grafana.github.io/helm-charts
-    values_repo: deploy/helm/values/grafana.yml
+    values_repo: deploy/helm/values/grafana.yaml
 
   - name: velero
+    namespace: valero
     location: vmware-tanzu
     enabled: false
     repo: https://vmware-tanzu.github.io/helm-charts
-    values_repo: deploy/helm/values/velero.yml
+    values_repo: deploy/helm/values/velero.yaml
 
   - name: prometheus
+    namesapce: prometheus
     location: prometheus-community
     enabled: false
     repo: https://prometheus-community.github.io/helm-charts
-    values_repo: deploy/helm/values/prometheus.yml
+    values_repo: deploy/helm/values/prometheus.yaml

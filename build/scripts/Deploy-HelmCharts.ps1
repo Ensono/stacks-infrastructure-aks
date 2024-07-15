@@ -130,7 +130,11 @@ foreach ($chart in $helm.charts)
 	# if `wrap_raw_yaml` is true then download YAML file and wrap in a dummy chart
 	if (! [String]::IsNullOrEmpty($chart.wrap_raw_yaml) -and $chart.wrap_raw_yaml -eq $true)
 	{
-		Remove-Item -Path "${Tempdir}/$($chart.name)" -Recurse
+		if (Test-Path -Path "${Tempdir}/$($chart.name)")
+		{
+			Remove-Item -Path "${Tempdir}/$($chart.name)" -Recurse
+		}
+
 		New-Item -ItemType "Directory" -Path $Tempdir -Name $chart.name
 		New-Item -ItemType "Directory" -Path "${Tempdir}/$($chart.name)" -Name templates
 		$chartYaml = @"

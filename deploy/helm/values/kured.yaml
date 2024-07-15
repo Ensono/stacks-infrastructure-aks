@@ -1,0 +1,4 @@
+configuration:
+  endTime: '${env:KURED_END_TIME}'
+  startTime: '${env:KURED_START_TIME}'
+  timeZone: '${env:KURED_TIMEZONE}'
