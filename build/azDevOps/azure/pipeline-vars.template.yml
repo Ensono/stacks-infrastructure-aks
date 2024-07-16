@@ -22,20 +22,20 @@ variables:
   - name: acme_email
     value:
 
-  # -------- Cluster information
+  # ------- Cluster information
   # version of AKS to deploy
   - name: aks_cluster_version
     value: 1.24.9
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
     value: {}
 
-  # -------- Terraform remote state
+  # ------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
   # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
   # there are some best practices around this if you are going for feature based environments
@@ -49,7 +49,7 @@ variables:
   - name: tf_state_key
     value: core
 
-  # -------- Network Domain names
+  # ------- Network Domain names
   - name: base_domain_nonprod
     value: nonprod.{{.Input.Network.Base.Domain.External}}
   - name: base_domain_internal_nonprod
@@ -60,10 +60,25 @@ variables:
     value: prod.{{.Input.Network.Base.Domain.Internal}}
 
   # ------- DNS configuration
-  - name: dns_zone_resource_group
-    value:
   - name: create_dns_zone
     value: false
+  - name: dns_resource_group
+    value:
+  ## dns_zone is in the stages variable in the pipeline
+  - name: dns_create_parent_zone_ns_records
+    value: false
+  - name: dns_parent_resource_group
+    value:
+  - name: dns_parent_zone
+    value:
+
+  # ------- Kured
+  - name: kured_end_time
+    value: 04:00
+  - name: kured_start_time
+    value: 00:00
+  - name: kured_timezone
+    value: Europe/London
 
   # ------- GitHub
   - name: create_release

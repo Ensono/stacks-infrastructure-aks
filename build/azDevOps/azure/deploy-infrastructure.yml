@@ -51,6 +51,7 @@ parameters:
         dependsOn: Build
         condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
         environment_shortname: nonprod
+        dns_zone: $(base_domain_nonprod)
         domain_internal: $(base_domain_internal_nonprod)
         deployment_infra: InfraNonProd
         deployment_apps: K8sNonProd
@@ -58,6 +59,7 @@ parameters:
         dependsOn: Build
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
         environment_shortname: prod
+        dns_zone: $(base_domain_prod)
         domain_internal: $(base_domain_internal_prod)
         deployment_infra: InfraProd
         deployment_apps: K8sProd
@@ -122,7 +124,7 @@ stages:
         condition: and(succeeded(), or(${{ stage.condition }}, ${{ parameters.force_deploy }}))
         variables:
           # Pull in the non-production credentials for the build to use
-          - group: ensono-sp-creds
+          - group: azure-sp-creds
         jobs:
           - deployment: ${{ stage.deployment_infra }}
             environment: ${{ variables.domain }}-${{ stage.environment_shortname }}
@@ -155,12 +157,16 @@ stages:
                         TF_VAR_acme_email: $(acme_email)
                         TF_VAR_is_cluster_private: $(private_cluster)
                         TF_VAR_cluster_version: $(aks_cluster_version)
+                        TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
                         TF_VAR_aks_node_pools: $(aks_node_pools)
                         TF_VAR_stage: ${{ stage.environment_shortname }}
                         TF_VAR_create_dns_zone: $(create_dns_zone)
-                        TF_VAR_dns_zone: $(base_domain_nonprod)
-                        TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
                         TF_VAR_dns_resource_group: $(dns_resource_group)
+                        TF_VAR_dns_zone: ${{ stage.dns_zone }}
+                        TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
+                        TF_VAR_dns_create_parent_zone_ns_records: $(dns_create_parent_zone_ns_records)
+                        TF_VAR_dns_parent_resource_group: $(dns_parent_resource_group)
+                        TF_VAR_dns_parent_zone: $(dns_parent_zone)
                         TF_VAR_create_key_vault: $(create_key_vault)
                         TF_VAR_create_aksvnet: $(create_aksvnet)
                         TF_VAR_create_user_identity: $(create_user_identity)
@@ -186,29 +192,33 @@ stages:
                           env:
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            TF_BACKEND_DESTROY_PLAN: "-input=false,-out=\"destroy.tfplan\""
+                            TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                     # Create the resources for the Kubernetes cluster
-                    - ${{ if eq(parameters.deploy, true) }}:
-                        - task: Bash@3
-                          displayName: Deploy AKS
-                          inputs:
-                            targetType: inline
-                            script: |
-                              taskctl infrastructure
-                          env:
-                            TF_FILE_LOCATION: /app/deploy/terraform
-                            TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            TF_BACKEND_PLAN: "-input=false,-out=\"deploy.tfplan\""
-                            TF_VAR_name_environment: ${{ stage.environment_shortname }}
+                    - task: Bash@3
+                      displayName: Deploy AKS
+                      inputs:
+                        targetType: inline
+                        ${{ if eq(parameters.deploy, true) }}:
+                          script: |
+                            taskctl infrastructure
+                        ${{ else }}:
+                          script: |
+                            taskctl infra:init
+                            taskctl infra:plan
+                      env:
+                        TF_FILE_LOCATION: /app/deploy/terraform
+                        TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                        TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
+                        TF_VAR_name_environment: ${{ stage.environment_shortname }}
 
                     # Perform infrastructure tests
                     - ${{ if eq(parameters.deploy, true) }}:
                         - template: templates/infra-tests.yml
                           parameters:
                             CHEF_LICENSE: $(CHEF_LICENSE)
-                            TESTS_PATH: /app/deploy/tests
+                            INSPEC_FILES: /app/deploy/tests
                             REPORT_FILENAME: inspec_azure_aks.xml
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -243,7 +253,8 @@ stages:
                       inputs:
                         targetType: inline
                         script: |
-                          taskctl helm:charts
+                          taskctl infra:init
+                          taskctl infra:helm:apply
                       env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -258,7 +269,6 @@ stages:
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
       # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
-      - group: amido-stacks-webapp
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:

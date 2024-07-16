@@ -69,6 +69,7 @@ variable "aks_node_pools" {
   description = "Additional node pools as required by the platform"
   default     = {}
 }
+
 # ###########################
 # # CONDITIONALS
 # ##########################
@@ -86,6 +87,16 @@ variable "create_user_identity" {
 
 variable "cluster_version" {
   type = string
+}
+
+variable "cluster_sku_tier" {
+  description = "The Control Plane SKU Tier"
+  type        = string
+
+  validation {
+    condition     = contains(["Free", "Standard", "Premium"], var.cluster_sku_tier)
+    error_message = "Must be one of Free, Standard, or Premium."
+  }
 }
 
 variable "create_acr" {
@@ -146,4 +157,3 @@ variable "vnet_cidr" {
 variable "tag_team_owner" {
   default = ""
 }
-

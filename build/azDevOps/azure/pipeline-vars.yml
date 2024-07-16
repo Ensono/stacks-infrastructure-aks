@@ -20,16 +20,20 @@ variables:
 
   # the email address to use when creating the SSL certificate
   - name: acme_email
-    value: stacks@amido.com
+    value: stacks@ensono.com
 
-  # -------- Cluster information
+  # ------- Cluster information
   # version of AKS to deploy
   - name: aks_cluster_version
-    value: 1.26.12
+    value: 1.27.9
+
+  ## The Cluster Control Plane SKU Tier. One of: Free, Standard, or Premium
+  - name: aks_cluster_sku_tier
+    value: Standard
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
@@ -44,7 +48,7 @@ variables:
   - name: create_user_identity
     value: true
 
-  # -------- Terraform remote state
+  # ------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition
   # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
   # there are some best practices around this if you are going for feature based environments
@@ -73,6 +77,13 @@ variables:
     value: false
   - name: dns_resource_group
     value: stacks-ancillary-resources
+  ## dns_zone is in the stages variable in the pipeline
+  - name: dns_create_parent_zone_ns_records
+    value: false
+  - name: dns_parent_resource_group
+    value: stacks-ancillary-resources
+  - name: dns_parent_zone
+    value: stacks.ensono.com
 
   # ------- Container registry
   - name: create_acr
@@ -80,11 +91,19 @@ variables:
   - name: acr_resource_group
     value: stacks-ancillary-resources
   - name: acr_name
-    value: ensonodigitaleuw
+    value: ensonoeuw
 
-  # ------ Key Vault
+  # ------- Key Vault
   - name: create_key_vault
     value: false
+
+  # ------- Kured
+  - name: kured_end_time
+    value: 04:00
+  - name: kured_start_time
+    value: 00:00
+  - name: kured_timezone
+    value: Europe/London
 
   # ------- GitHub
   - name: VERSION_NUMBER

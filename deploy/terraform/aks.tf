@@ -1,11 +1,13 @@
 
 module "aks_bootstrap" {
-  source                  = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v2.0.23"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v4.0.6"
+
   resource_namer          = module.default_label.id
   resource_group_location = var.resource_group_location
   spn_object_id           = data.azurerm_client_config.current.object_id
   tenant_id               = data.azurerm_client_config.current.tenant_id
   cluster_version         = var.cluster_version
+  cluster_sku_tier        = var.cluster_sku_tier
   name_environment        = var.name_environment
   name_project            = var.name_project
   name_company            = var.name_company
