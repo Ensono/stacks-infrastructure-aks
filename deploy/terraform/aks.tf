@@ -1,6 +1,6 @@
 
 module "aks_bootstrap" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v4.0.6"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v6.0.33"
 
   resource_namer          = module.default_label.id
   resource_group_location = var.resource_group_location
