@@ -1,0 +1,22 @@
+contexts:
+  powershell:
+    container:
+      name: ensono/eir-infrastructure
+      shell: pwsh
+      shell_args:
+        - Command
+    envfile:
+      exclude:
+        - sourceversionmessage
+        - posh_azure_subscription        
+
+  docs:
+    container:
+      name: ensono/eir-asciidoctor
+      shell: pwsh
+      shell_args:
+        - -Command
+    envfile:
+      exclude:
+        - sourceversionmessage
+

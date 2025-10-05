@@ -4,7 +4,6 @@ tasks:
     description: Update the build number
     command:
       - Update-BuildNumber
-    exportAs: BUILDNUMBER
 
   lint:yaml:
     context: powershell
