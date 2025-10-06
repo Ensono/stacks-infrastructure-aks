@@ -1,10 +1,10 @@
 module "ssl_app_gateway" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=v4.0.6"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=v8.0.14"
 
-  resource_namer            = module.default_label.id
+  resource_namer            = module.naming.names[var.project].application_gateway.name
   resource_group_name       = module.aks_bootstrap.resource_group_name
-  resource_group_location   = var.resource_group_location
-  dns_resource_group        = var.dns_resource_group
+  resource_group_location   = var.location
+  dns_resource_group        = var.dns_resource_group == "" ? module.aks_bootstrap.resource_group_name : var.dns_resource_group
   create_ssl_cert           = true
   vnet_name                 = module.aks_bootstrap.vnet_name
   vnet_cidr                 = var.vnet_cidr

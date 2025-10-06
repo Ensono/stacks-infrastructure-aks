@@ -28,7 +28,7 @@ tasks:
     description: Initialise Terraform for chosen templates
     command:
       - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
-      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
+      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_environment -Path $env:TF_FILE_LOCATION
 
   infra:vars:
     context: powershell
@@ -41,7 +41,7 @@ tasks:
     context: powershell
     description: Plan Terraform
     command:
-      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_PLAN -Debug
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-input=false","-out=`"deploy.tfplan`""
 
   infra:apply:
     context: powershell
@@ -53,7 +53,7 @@ tasks:
     context: powershell
     description: Destroy Environment.ShortName
     command:
-      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-destroy,${env:TF_BACKEND_DESTROY_PLAN}" -debug
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-destroy,-input=false,-out=`"destroy.tfplan`"" -debug
 
   infra:destroy:apply:
     context: powershell
@@ -128,7 +128,7 @@ tasks:
 
   _docs:
     description: Build Docs for AKS
-    context: docsenv
+    context: docs
     command: |
       /app/build/scripts/New-Glossary.ps1 -docpath /app/docs -path /app/tmp/glossary.adoc
       Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug

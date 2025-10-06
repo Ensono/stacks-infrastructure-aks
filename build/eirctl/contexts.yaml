@@ -4,11 +4,21 @@ contexts:
       name: ensono/eir-infrastructure
       shell: pwsh
       shell_args:
-        - Command
+        - -Command
     envfile:
       exclude:
         - sourceversionmessage
         - posh_azure_subscription        
+
+  infratests:
+    container:
+      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91
+      shell: pwsh
+      shell_args:
+        - -Command
+    envfile:
+      exclude:
+        - sourceversionmessage
 
   docs:
     container:
