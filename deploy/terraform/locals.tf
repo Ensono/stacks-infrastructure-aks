@@ -13,6 +13,8 @@ locals {
     }
   }
 
+  # If the DNS resource group is empty, use the resource group that has been defined for the deployment
+  dns_resource_group = var.dns_resource_group != "" ? var.dns_resource_group : module.aks_bootstrap.resource_group_name
 
   # Create a list of the envs to deploy
   # This list determines if the environment is for a production subscription or not

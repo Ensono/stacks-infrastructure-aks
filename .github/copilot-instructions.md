@@ -25,10 +25,10 @@ This is an enterprise Terraform-based Azure Kubernetes Service (AKS) infrastruct
 
 ```bash
 # Local development pipeline execution
-taskctl lint                    # YAML + Terraform linting
-taskctl infrastructure          # Full infra deployment: setup → init → plan → apply
-taskctl tests                   # InSpec compliance testing
-taskctl docs                    # Generate documentation
+eirctl lint                    # YAML + Terraform linting
+eirctl infrastructure          # Full infra deployment: setup → init → plan → apply
+eirctl tests                   # InSpec compliance testing
+eirctl docs                    # Generate documentation
 
 # Environment setup (PowerShell)
 . ./local/envvar-azure-<stage>.ps1  # Load required TF_VAR_* environment variables

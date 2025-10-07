@@ -4,7 +4,7 @@ module "ssl_app_gateway" {
   resource_namer               = module.naming.names[var.project].application_gateway.name
   resource_group_name          = module.aks_bootstrap.resource_group_name
   resource_group_location      = var.location
-  dns_resource_group           = var.dns_resource_group == "" ? module.aks_bootstrap.resource_group_name : var.dns_resource_group
+  dns_resource_group           = var.dns_resource_group
   create_ssl_cert              = true
   vnet_name                    = module.aks_bootstrap.vnet_name
   vnet_cidr                    = var.vnet_cidr
