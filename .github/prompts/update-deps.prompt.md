@@ -15,7 +15,7 @@ Follow this EXACT workflow:
    - Terraform modules in #file:../../deploy/terraform/aks.tf (check git refs like `?ref=v4.0.6`)
    - Terraform provider versions in #file:../../deploy/terraform/provider.tf
    - Helm chart versions in #file:../../deploy/helm/k8s_apps.yaml
-   - Docker images in #file:../../build/taskctl/contexts.yaml
+   - Docker images in #file:../../build/eirctl/contexts.yaml
    - AKS cluster version in #file:../../build/azDevOps/azure/pipeline-vars.yml (`aks_cluster_version`)
 
 2. Determine updates available:
@@ -23,7 +23,7 @@ Follow this EXACT workflow:
    - Check [cloudposse/terraform-null-label releases](https://github.com/cloudposse/terraform-null-label/releases)
    - Check Helm chart repos for newer versions (ingress-nginx, kured, external-dns, etc.)
    - Check [Azure AKS supported versions](https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions)
-   - Check Docker image tags in Azure Container Registry
+   - Check container tags (eir-infrastructure, eir-inspec, runner-pwsh) in your ACR and upstream releases (GitHub/Docker Hub)
 
 3. Report:
    - A clear list of dependencies and their current → latest versions.
@@ -69,10 +69,14 @@ When proceeding:
    - Review chart values templates in #file:../../deploy/helm/values/ for deprecated fields
    - Check if new values need to be added
 
+3. **Container Images:**
+   - Update container tags in #file:../../build/eirctl/contexts.yaml (eir-infrastructure, eir-inspec, runner-pwsh)
+   - Prefer latest stable tags; confirm they exist in the target registry (e.g., your org ACR) before updating
+
 3. **Run validation:**
-   - `taskctl lint` - Validate YAML and Terraform formatting
-   - `taskctl infra:init` - Initialize Terraform (check provider downloads)
-   - `taskctl infra:plan` - Generate plan to verify no unexpected changes
+   - `eirctl run lint` - Validate YAML and Terraform formatting
+   - `eirctl run infra:init` - Initialize Terraform (check provider downloads)
+   - `eirctl run infra:plan` - Generate plan to verify no unexpected changes
    - Review plan output carefully for resource replacements
 
 4. If breakages occur:
@@ -98,16 +102,16 @@ If updates introduce behavior changes, new features, or new configuration option
 Before committing:
 
 - Run full validation:
-  - `taskctl lint` - All linting passes
-  - `taskctl infra:plan` - Plan shows only expected changes (or no changes)
-  - Review #file:../../build/azDevOps/azure/deploy-infrastructure.yml for any hardcoded versions
+   - `eirctl run lint` - All linting passes
+   - `eirctl run infra:plan` - Plan shows only expected changes (or no changes)
+   - Review #file:../../build/azDevOps/azure/deploy-infrastructure.yml for any hardcoded versions
 
 - Verify that:
-  - No unintended resource replacements in Terraform plan
-  - Helm chart values templates are valid
-  - Docker contexts use accessible image tags
-  - AKS version is in supported range
-  - No breaking changes to pipeline variables
+   - No unintended resource replacements in Terraform plan
+   - Helm chart values templates are valid
+   - Docker/eirctl contexts use accessible image tags
+   - AKS version is in supported range
+   - No breaking changes to pipeline variables
 
 ## 6. COMMIT – Produce a clean, descriptive commit
 

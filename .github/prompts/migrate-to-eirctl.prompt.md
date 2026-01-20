@@ -25,6 +25,52 @@ Fetch and review the official migration guide:
 
 If documentation is unavailable or unclear, STOP and ask me for clarification.
 
+### 1.1b Check for Latest Container Versions
+
+Identify and document the latest versions of all containers in use:
+
+```bash
+# Check current Ensono ACR images (note: ensonostackseuweirdfmu.azurecr.io is org-specific)
+# Current versions in use:
+#   - ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
+#   - ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91
+
+# Check Ensono Stacks organization for release information
+curl -s https://api.github.com/repos/Ensono/stacks/releases/latest | grep -E '"tag_name"|"body"' | head -5
+
+# Check latest runner-pwsh on Docker Hub
+curl -s https://registry.hub.docker.com/v2/repositories/amidostacks/runner-pwsh/tags/ 2>/dev/null | grep -o '"name":"[^"]*"' | head -10
+```
+
+Current versions in use:
+- `eir-infrastructure:1.1.91`
+- `eir-inspec:1.1.91`
+- `runner-pwsh:0.4.60-stable`
+
+Update these if newer stable versions are available.
+
+### 1.1c Check for GitHub Actions and GitLab CI
+
+Search the repository for GitHub Actions workflows and GitLab CI/CD configurations:
+
+```bash
+# Check for GitHub Actions workflows
+find .github/workflows -name "*.yml" -o -name "*.yaml" 2>/dev/null | head -20
+
+# Check for GitLab CI
+find . -name ".gitlab-ci.yml" -o -name ".gitlab" -type d 2>/dev/null
+
+# Check dependabot configuration
+cat .github/dependabot.yml 2>/dev/null || echo "No dependabot.yml found"
+```
+
+Expected findings:
+- GitHub Actions: Check if taskctl is referenced in any workflows
+- GitLab CI: Check if taskctl is referenced in .gitlab-ci.yml
+- Dependabot: May need updates for new container image versions
+
+Document any taskctl references for updating in Phase 4.
+
 ### 1.2 Inventory All taskctl Files
 
 Create a complete inventory of files to migrate:
@@ -46,13 +92,13 @@ Examine the following in detail:
    - Check for `-NoProfile` flags in PowerShell contexts (CRITICAL: must be removed)
 
 2. **Tasks** (in [build/taskctl/tasks.yaml](../../build/taskctl/tasks.yaml)):
-   - Count tasks: Expect ~18 tasks
+  - Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, _docs, _release)
    - List all script paths (e.g., `/app/build/scripts/Set-TFVars.ps1`)
    - Identify Terraform file location references (`/app/deploy/terraform`)
    - Note environment variable dependencies
 
 3. **Pipelines** (in [taskctl.yaml](../../taskctl.yaml)):
-   - Count pipelines: Expect 5 (lint, tests, infrastructure, infrastructure_destroy, docs, release)
+   - Count pipelines: Expect 6 (lint, tests, infrastructure, infrastructure_destroy, docs, release)
    - Document pipeline dependencies and execution order
 
 4. **CI/CD Integration**:
@@ -67,7 +113,9 @@ Before proceeding, report:
 - Total contexts, tasks, and pipelines found
 - Number of files requiring updates
 - Critical issues discovered (missing files, unexpected structure)
-- Container images that may need version updates
+- Latest container image versions available
+- Any GitHub Actions workflows or GitLab CI configurations that need updating
+- Container versions to update to
 
 **STOP HERE** and wait for my confirmation before proceeding to Phase 2.
 
@@ -193,17 +241,18 @@ Now update file locations, path references, and task definitions.
 
 ### 3.1 Rename Configuration Files
 
-Execute these renames:
+Execute the following commands to migrate the configuration:
 
 ```bash
-# Backup first
-cp taskctl.yaml taskctl.yaml.backup
-cp -r build/taskctl build/taskctl.backup
-
-# Rename files
+# Rename files (no backup needed - git maintains history)
 mv taskctl.yaml eirctl.yaml
 mv build/taskctl build/eirctl
+
+# Remove old taskctl directory from git
+git rm -r build/taskctl
 ```
+
+This clean migration approach removes the old taskctl configuration while git maintains full history for recovery if needed.
 
 ### 3.2 Update Import Statements
 
@@ -327,6 +376,9 @@ ls -la build/eirctl/
 # Verify no references to old structure remain
 grep -r "taskctl" build/eirctl/ || echo "✓ No taskctl references in build/eirctl/"
 grep -r "/app/" build/eirctl/ || echo "✓ No /app/ paths in build/eirctl/"
+
+# Verify old taskctl directory is removed (only in git, working directory may have backups)
+ls -la build/taskctl 2>/dev/null && echo "Warning: taskctl directory still exists" || echo "✓ taskctl directory cleaned"
 ```
 
 **CHECKPOINT**: Confirm file renames and path updates complete before proceeding.
@@ -335,17 +387,67 @@ grep -r "/app/" build/eirctl/ || echo "✓ No /app/ paths in build/eirctl/"
 
 ## 4. INTEGRATE – Update CI/CD pipelines
 
-Update Azure DevOps pipelines to use eirctl instead of taskctl.
+Update Azure DevOps pipelines, GitHub Actions, and any other CI/CD systems to use eirctl instead of taskctl.
 
-### 4.1 Determine Latest eirctl Version
+### 4.1 Determine Latest eirctl Version and Container Versions
 
-Get the latest release version:
+Get the latest release versions:
 
 ```bash
-curl -s https://api.github.com/repos/ensono/eirctl/releases/latest | grep '"tag_name"' | cut -d'"' -f4
+# Get latest eirctl version
+EIRCTL_VERSION=$(curl -s https://api.github.com/repos/ensono/eirctl/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+echo "Latest eirctl: $EIRCTL_VERSION"
+
+# Check for latest container versions (documented from Phase 1.1b)
+# Use the versions identified in the discovery phase
 ```
 
-Expected format: `v1.x.x` (e.g., `v1.2.3`)
+Expected format for eirctl: `v0.x.x` (e.g., `v0.9.7`)
+
+### 4.1b Update Container Image Versions
+
+Update all container image versions to the latest stable versions identified in Phase 1.1b:
+
+```bash
+# In build/eirctl/contexts.yaml, update:
+# - eir-infrastructure to latest stable version
+# - eir-inspec to latest stable version
+# - runner-pwsh to latest stable version
+
+# Example patterns to find and update:
+# Old: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
+# New: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:<NEW_VERSION>
+```
+
+### 4.1c Check GitHub Actions Workflows
+
+Search for and update any GitHub Actions workflows that reference taskctl:
+
+```bash
+# Find GitHub Actions workflows
+find .github/workflows -name "*.yml" -o -name "*.yaml" 2>/dev/null
+
+# Search for taskctl references in workflows
+grep -r "taskctl" .github/workflows/ 2>/dev/null || echo "✓ No taskctl references in GitHub Actions"
+
+# Update any found references:
+# Replace: taskctl <pipeline>
+# With:    eirctl run <pipeline>
+```
+
+### 4.1d Check GitLab CI Configuration
+
+If GitLab CI exists, search for and update taskctl references:
+
+```bash
+# Check for GitLab CI files
+[ -f ".gitlab-ci.yml" ] && echo "Found .gitlab-ci.yml" || echo "No .gitlab-ci.yml"
+
+# Search for taskctl references
+grep -r "taskctl" .gitlab-ci.yml 2>/dev/null || echo "✓ No taskctl references in GitLab CI"
+
+# Update any found references similar to GitHub Actions
+```
 
 ### 4.2 Update Version Variable
 
@@ -424,7 +526,7 @@ In [build/azDevOps/azure/deploy-infrastructure.yml](../../build/azDevOps/azure/d
 **Pattern to find:** `taskctl <pipeline_name>`
 **Replace with:** `eirctl run <pipeline_name>`
 
-Expected replacements (21 total):
+Expected replacements - count taskctl references in all CI/CD files:
 
 - `taskctl lint` → `eirctl run lint`
 - `taskctl docs` → `eirctl run docs`
@@ -451,11 +553,17 @@ grep -n "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 Check completeness:
 
 ```bash
-# Should return 0 matches
-grep -r "taskctl" build/azDevOps/ | grep -v "backup" | wc -l
+# Should return 0 matches in Azure DevOps
+grep -r "taskctl" build/azDevOps/ 2>/dev/null | wc -l
 
-# Should find multiple "eirctl run" matches
-grep -r "eirctl run" build/azDevOps/ | wc -l
+# Should return 0 matches in GitHub Actions (if present)
+grep -r "taskctl" .github/workflows/ 2>/dev/null | wc -l
+
+# Should return 0 matches in GitLab CI (if present)
+grep -r "taskctl" .gitlab-ci.yml 2>/dev/null | wc -l
+
+# Should find multiple "eirctl run" matches in Azure DevOps
+grep -r "eirctl run" build/azDevOps/ 2>/dev/null | wc -l
 ```
 
 **CHECKPOINT**: Verify all pipeline references updated before proceeding.
@@ -724,51 +832,47 @@ Create a dedicated migration guide with before/after examples.
 
 ## 7. FINALIZE – Create rollback plan and final report
 
-### 7.1 Create Rollback Script
+### 7.1 Clean git history
 
-Before committing, create a quick rollback mechanism:
-
-```bash
-# Create rollback script
-cat > rollback-to-taskctl.sh << 'EOF'
-#!/bin/bash
-set -e
-
-echo "Rolling back to taskctl..."
-
-# Restore from backups
-cp taskctl.yaml.backup taskctl.yaml
-rm -f eirctl.yaml
-rm -rf build/eirctl
-cp -r build/taskctl.backup build/taskctl
-
-# Restore CI/CD files from git
-git checkout build/azDevOps/azure/
-
-echo "✓ Rollback complete. Review git status and test."
-EOF
-
-chmod +x rollback-to-taskctl.sh
-```
-
-### 7.2 Test Rollback (Optional)
-
-If we want to test rollback works:
+Remove the old taskctl configuration from git:
 
 ```bash
-# Create a test branch
-git checkout -b test-rollback
+# Verify taskctl directory is already marked for removal
+git status | grep "deleted:"
 
-# Test the rollback script
-./rollback-to-taskctl.sh
-
-# Verify taskctl works
-taskctl lint
-
-# Return to migration branch
-git checkout -
+# If not already removed, remove it
+git rm -r build/taskctl 2>/dev/null || echo "Already removed or not in staging"
 ```
 
+This clean approach means:
+- Old taskctl configuration is removed from the repository
+- Full git history is preserved for recovery if needed
+- No backup files to maintain or document
+
+### 7.2 Update Rollback Documentation (Optional)
+
+In case rollback is needed after the migration, document the process:
+
+```bash
+# Rollback to previous commit (git maintains full history)
+git revert <commit_hash>
+
+# Or checkout the previous version from git history
+git checkout HEAD~1 -- build/taskctl/
+git checkout HEAD~1 -- taskctl.yaml
+
+# Verify rollback by restoring the old taskctl directory
+git restore build/taskctl/
+```
+
+Since no backup files are stored, use git's history and version control system for recovery.
+This is cleaner and more maintainable than local backup files.
+
+Before committing:
+
+**Configuration:**
+
+- [ ] `eirctl.yaml` exists at root
 ### 7.3 Final Pre-Commit Checklist
 
 Before committing:
@@ -778,15 +882,19 @@ Before committing:
 - [ ] `eirctl.yaml` exists at root
 - [ ] `build/eirctl/contexts.yaml` has all 4 contexts converted
 - [ ] `build/eirctl/tasks.yaml` has all tasks with updated paths
+- [ ] `build/taskctl/` is removed from git (cleaned up via git rm)
 - [ ] No `-NoProfile` flags in any context
 - [ ] Import statements updated to `build/eirctl/`
+- [ ] Container image versions updated to latest stable
 
 **CI/CD:**
 
 - [ ] `agent-config-vars.yml` has `EirctlVersion` variable
 - [ ] `templates/setup.yml` installs eirctl with correct version
 - [ ] `deploy-infrastructure.yml` uses `eirctl run` commands (21+ updates)
-- [ ] No remaining `taskctl` references in `build/azDevOps/`
+- [ ] GitHub Actions workflows updated (if present)
+- [ ] GitLab CI configuration updated (if present)
+- [ ] No remaining `taskctl` references in any CI/CD files
 
 **Documentation:**
 
@@ -801,12 +909,12 @@ Before committing:
 - [ ] `eirctl run infra:init` works
 - [ ] `eirctl run infra:plan` generates valid plan
 - [ ] `eirctl run docs` builds documentation
-- [ ] All 5 pipelines validated
+- [ ] All 6 pipelines validated
 
 **Cleanup:**
 
-- [ ] Rollback script created
-- [ ] Backup files documented or removed
+- [ ] Old `build/taskctl/` removed from git
+- [ ] No backup files in the commit
 - [ ] No unintended file changes
 
 ### 7.4 Commit Strategy
@@ -817,6 +925,9 @@ Recommended commit structure:
 # Stage migration files
 git add eirctl.yaml
 git add build/eirctl/
+
+# Stage removal of old taskctl directory
+git add -u build/taskctl/  # Stages deletion
 
 # Stage CI/CD updates
 git add build/azDevOps/
@@ -830,21 +941,28 @@ git add docs/
 git commit -m "Migrate from taskctl to eirctl
 
 - Rename taskctl.yaml → eirctl.yaml
+- Remove build/taskctl/ directory (clean migration)
+- Create build/eirctl/ with modernized configuration
 - Convert all 4 contexts to eirctl container-first syntax
 - Remove -NoProfile flags from PowerShell contexts (required for eirctl)
 - Update all task paths from /app/ to relative paths
+- Update container image versions to latest stable
 - Update CI/CD pipelines to use eirctl run commands
-- Update EirctlVersion to v${EIRCTL_VERSION}
+- Update GitHub Actions workflows (if present)
+- Update GitLab CI configuration (if present)
+- Update EirctlVersion to v\${EIRCTL_VERSION}
 - Update all documentation references
 
 Breaking changes:
 - Commands now use: eirctl run <pipeline> (not taskctl <pipeline>)
 - Configuration moved: build/taskctl/ → build/eirctl/
+- Container images updated to latest stable versions
 
 Validated:
-- All 5 pipelines tested locally
-- Terraform plan generates correctly
+- All 6 pipelines parse correctly
+- Terraform operations validated
 - Lint and docs pipelines pass
+- Full git history preserved for recovery
 "
 ```
 
@@ -904,12 +1022,19 @@ Installed: `v<version>`
 
 ### Rollback Plan
 
-If issues arise:
+If issues arise, use git to restore the previous state:
 
 ```bash
-./rollback-to-taskctl.sh
-# Or: git revert <commit_hash>
+# Revert the migration commit
+git revert <commit_hash>
+
+# Or restore from git history
+git checkout HEAD~1 -- build/taskctl/ taskctl.yaml build/azDevOps/
+
+# No local backup files to manage - git maintains complete history
 ```
+
+The git-based approach is cleaner and more maintainable than local backups.
 
 ### Known Considerations
 
