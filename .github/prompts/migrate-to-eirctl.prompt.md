@@ -254,11 +254,8 @@ Execute the following commands to migrate the configuration:
 
 ```bash
 # Rename files (no backup needed - git maintains history)
-mv taskctl.yaml eirctl.yaml
-mv build/taskctl build/eirctl
-
-# Remove old taskctl directory from git
-git rm -r build/taskctl
+git mv taskctl.yaml eirctl.yaml
+git mv build/taskctl build/eirctl
 ```
 
 This clean migration approach removes the old taskctl configuration while git maintains full history for recovery if needed.
