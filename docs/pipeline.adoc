@@ -43,7 +43,7 @@ Currently knows how to set the build number for Azure DevOps.
 | `_release` | Create a tag in the GitHub repo when the code is run on the main branch
 |===
 
-The tasks are defined in `build/taskctl/tasks.yaml`
+The tasks are defined in `build/eirctl/tasks.yaml`
 
 .EDIR Pipelines
 [cols="1,2,2a",options="header",stripes="even"]

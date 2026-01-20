@@ -1,0 +1,64 @@
+contexts:
+  powershell:
+    container:
+      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
+      shell: pwsh
+      shell_args:
+        - -Command
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    quote: "'"
+    envfile:
+      exclude:
+        - path
+        - home
+        - kubeconfig
+    env:
+      PSModulePath: /modules
+
+  infratests:
+    container:
+      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91
+      shell: pwsh
+      shell_args:
+        - -Command
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    quote: "'"
+    envfile:
+      exclude:
+        - path
+        - home
+        - PSModulePath
+    env:
+      PSModulePath: /modules
+
+  powershell-python:
+    container:
+      name: amidostacks/runner-pwsh:0.4.60-stable
+      shell: pwsh
+      shell_args:
+        - -Command
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    quote: "'"
+    envfile:
+      exclude:
+        - path
+        - home
+    env:
+      PSModulePath: /modules
+
+  docsenv:
+    container:
+      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
+      shell: pwsh
+      shell_args:
+        - -Command
+    quote: "'"
+    envfile:
+      exclude:
+        - path
+        - home
+    env:
+      PSModulePath: /modules

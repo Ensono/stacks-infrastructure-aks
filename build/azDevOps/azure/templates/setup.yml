@@ -1,15 +1,15 @@
 parameters:
-  TaskctlVersion: 1.5.0
+  EirctlVersion: 0.9.7
 
 steps:
   # Checkout self repo
   - checkout: self
 
-  # Install Taskfile so that the tests can be run
+  # Install eirctl task automation tool
   - task: Bash@3
-    displayName: "Install: Taskctl"
+    displayName: "Install: eirctl"
     inputs:
       targetType: inline
       script: |
-        wget https://github.com/russellseymour/taskctl/releases/download/v${{ parameters.TaskctlVersion }}/taskctl_${{ parameters.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
-        tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl
+        sudo wget https://github.com/Ensono/eirctl/releases/download/v${{ parameters.EirctlVersion }}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
+        sudo chmod +x /usr/local/bin/eirctl

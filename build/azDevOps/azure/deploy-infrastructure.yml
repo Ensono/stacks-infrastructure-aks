@@ -92,7 +92,7 @@ stages:
         steps:
           - template: templates/setup.yml
             parameters:
-              TaskctlVersion: ${{ variables.TaskctlVersion }}
+              EirctlVersion: ${{ variables.EirctlVersion }}
 
           # lint files in the repo
           - task: Bash@3
@@ -100,7 +100,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                taskctl lint
+                eirctl run lint
 
           # Create the documentation for the repo
           - task: Bash@3
@@ -108,7 +108,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                taskctl docs
+                eirctl run docs
 
           # Upload the documentation as a build artifact
           - task: PublishBuildArtifacts@1
@@ -137,7 +137,7 @@ stages:
                   steps:
                     - template: templates/setup.yml
                       parameters:
-                        TaskctlVersion: ${{ variables.TaskctlVersion }}
+                        EirctlVersion: ${{ variables.EirctlVersion }}
 
                     # Create a tfvars file for the values
                     # This is so that variables can be set and reused as required
@@ -146,7 +146,7 @@ stages:
                       inputs:
                         targetType: inline
                         script: |
-                          taskctl infra:vars
+                          eirctl run infra:vars
                       env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_VAR_resource_group_location: $(region)
@@ -188,7 +188,7 @@ stages:
                           inputs:
                             targetType: inline
                             script: |
-                              taskctl infrastructure_destroy
+                              eirctl run infrastructure_destroy
                           env:
                             TF_FILE_LOCATION: /app/deploy/terraform
                             TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
@@ -202,11 +202,11 @@ stages:
                         targetType: inline
                         ${{ if eq(parameters.deploy, true) }}:
                           script: |
-                            taskctl infrastructure
+                            eirctl run infrastructure
                         ${{ else }}:
                           script: |
-                            taskctl infra:init
-                            taskctl infra:plan
+                            eirctl run infra:init
+                            eirctl run infra:plan
                       env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
@@ -246,15 +246,15 @@ stages:
                   steps:
                     - template: templates/setup.yml
                       parameters:
-                        TaskctlVersion: ${{ variables.TaskctlVersion }}
+                        EirctlVersion: ${{ variables.EirctlVersion }}
 
                     - task: Bash@3
                       displayName: Deploy Helm Charts
                       inputs:
                         targetType: inline
                         script: |
-                          taskctl infra:init
-                          taskctl infra:helm:apply
+                          eirctl run infra:init
+                          eirctl run infra:helm:apply
                       env:
                         TF_FILE_LOCATION: /app/deploy/terraform
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -278,14 +278,14 @@ stages:
         steps:
           - template: templates/setup.yml
             parameters:
-              TaskctlVersion: ${{ variables.TaskctlVersion }}
+              EirctlVersion: ${{ variables.EirctlVersion }}
 
           - task: Bash@3
             displayName: Publish Release
             inputs:
               targetType: inline
               script: |
-                taskctl release
+                eirctl run release
             env:
               STAGE: "release"
               PUBLISH_RELEASE: "true"
