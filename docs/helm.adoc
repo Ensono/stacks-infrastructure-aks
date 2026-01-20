@@ -44,7 +44,7 @@ The following table describes the parameters that can be set.
 |===
 | Name | Description
 | `name` | Name of the chart
-| `location` | When installing from a the filesystem this is the path to the chart. 
+| `location` | When installing from a the filesystem this is the path to the chart.
 
 When installing from a remote repository this is the alias of the repo.
 | `enabled` | State if this will be installed
@@ -65,4 +65,3 @@ include::../deploy/helm/values/cluster_setup.yml[]
 ----
 
 As can be seen the output values from Terraform are required. Here there are prefixed with `TFOUT_` and substituted into the file before the chart is deployed.
-

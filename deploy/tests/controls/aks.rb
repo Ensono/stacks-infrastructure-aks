@@ -22,8 +22,3 @@ control "azure-kubernetes-cluster" do
         its("identity.type") { should cmp "SystemAssigned" }
     end
 end
-
-
-
-
-
