@@ -132,7 +132,7 @@ tasks:
     context: docsenv
     command: |
       ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
-      Invoke-AsciiDoc -PDF -basepath . -config ./docs.json -debug
+      Build-Documentation -Config /eirctl/manual.json
 
   _release:
     context: powershell

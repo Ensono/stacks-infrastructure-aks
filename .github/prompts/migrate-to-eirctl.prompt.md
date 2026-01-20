@@ -30,22 +30,23 @@ If documentation is unavailable or unclear, STOP and ask me for clarification.
 Identify and document the latest versions of all containers in use:
 
 ```bash
-# Check current Ensono ACR images (note: ensonostackseuweirdfmu.azurecr.io is org-specific)
-# Current versions in use:
-#   - ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
-#   - ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91
-
 # Check Ensono Stacks organization for release information
 curl -s https://api.github.com/repos/Ensono/stacks/releases/latest | grep -E '"tag_name"|"body"' | head -5
 
 # Check latest runner-pwsh on Docker Hub
 curl -s https://registry.hub.docker.com/v2/repositories/amidostacks/runner-pwsh/tags/ 2>/dev/null | grep -o '"name":"[^"]*"' | head -10
+
+# Check Ensono images on Docker Hub
+curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-infrastructure/tags/ 2>/dev/null | grep -o '"name":"[^"]*"' | head -10
+curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-inspec/tags/ 2>/dev/null | grep -o '"name":"[^"]*"' | head -10
+curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-asciidoctor/tags/ 2>/dev/null | grep -o '"name":"[^"]*"' | head -10
 ```
 
 Current versions in use:
-- `eir-infrastructure:1.1.91`
-- `eir-inspec:1.1.91`
-- `runner-pwsh:0.4.60-stable`
+- `docker.io/ensono/eir-infrastructure:1.2.39`
+- `docker.io/ensono/eir-inspec:1.2.39`
+- `docker.io/ensono/eir-asciidoctor:1.2.39`
+- `amidostacks/runner-pwsh:0.4.60-stable`
 
 Update these if newer stable versions are available.
 
@@ -180,10 +181,12 @@ contexts:
 contexts:
   powershell:
     container:
-      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
+      name: docker.io/ensono/eir-infrastructure:1.2.39
       shell: pwsh
       shell_args:
         - -Command
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     quote: "'"
     envfile:
       exclude:
@@ -210,15 +213,21 @@ Apply the conversion to:
 1. **powershell** - Primary context for Terraform, linting, Helm
 2. **infratests** - InSpec testing context
 3. **powershell-python** - Hybrid PowerShell/Python context
-4. **docsenv** - Documentation build context
+4. **docsenv** - Documentation build context (uses eir-asciidoctor image)
 
-For contexts with `/var/run/docker.sock` mounts, preserve them as:
+For contexts that need Docker socket access, add volume mounting:
 
 ```yaml
 container:
+  name: <image>
+  shell: pwsh
+  shell_args:
+    - -Command
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
 ```
+
+Contexts needing Docker socket: powershell, infratests, powershell-python (not docsenv)
 
 ### 2.4 Verify Context Conversion
 
@@ -354,14 +363,11 @@ env:
 **Task: `_docs`**
 
 ```yaml
-# Update paths from:
-env:
-  SOURCE: /app/docs
-  OUTPUT: /app/outputs/docs
-# To:
-env:
-  SOURCE: ./docs
-  OUTPUT: ./outputs/docs
+# Uses docsenv context (eir-asciidoctor) instead of powershell
+# Command:
+command: |
+  ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
+  Build-Documentation -Config /eirctl/manual.json
 ```
 
 ### 3.5 Verify File Structure
@@ -410,13 +416,14 @@ Update all container image versions to the latest stable versions identified in 
 
 ```bash
 # In build/eirctl/contexts.yaml, update:
-# - eir-infrastructure to latest stable version
-# - eir-inspec to latest stable version
-# - runner-pwsh to latest stable version
+# - eir-infrastructure (docker.io/ensono/eir-infrastructure) - used by powershell context
+# - eir-inspec (docker.io/ensono/eir-inspec) - used by infratests context
+# - eir-asciidoctor (docker.io/ensono/eir-asciidoctor) - used by docsenv context
+# - runner-pwsh (amidostacks/runner-pwsh) - used by powershell-python context
 
 # Example patterns to find and update:
-# Old: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91
-# New: ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:<NEW_VERSION>
+# Old: docker.io/ensono/eir-infrastructure:1.2.39
+# New: docker.io/ensono/eir-infrastructure:<NEW_VERSION>
 ```
 
 ### 4.1c Check GitHub Actions Workflows
@@ -1004,8 +1011,9 @@ Successfully migrated from taskctl to eirctl with full validation.
 
 Used the following images (verify versions):
 
-- `ensonostackseuweirdfmu.azurecr.io/ensono/eir-infrastructure:1.1.91`
-- `ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.1.91`
+- `docker.io/ensono/eir-infrastructure:1.2.39`
+- `docker.io/ensono/eir-inspec:1.2.39`
+- `docker.io/ensono/eir-asciidoctor:1.2.39`
 - `amidostacks/runner-pwsh:0.4.60-stable`
 
 ### eirctl Version
