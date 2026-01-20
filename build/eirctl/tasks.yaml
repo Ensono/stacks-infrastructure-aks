@@ -132,7 +132,10 @@ tasks:
     context: docsenv
     command: |
       ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
+      echo "Building documentation..."
+      Get-Command Build-Documentation | fl
       Build-Documentation -Config /eirctl/docs.json
+      echo "Documentation build complete."
 
   _release:
     context: powershell

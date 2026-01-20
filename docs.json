@@ -3,6 +3,10 @@
     "output": "{{ basepath }}/outputs/docs/{{ format }}",
     "trunkBranch": "main",
     "path": "{{ basepath }}/docs/index.adoc",
+    "formats": [
+        "pdf",
+        "html"
+    ],
     "libs": [
         "asciidoctor-diagram"
     ],
