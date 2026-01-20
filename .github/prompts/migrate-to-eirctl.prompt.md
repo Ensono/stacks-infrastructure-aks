@@ -367,7 +367,7 @@ env:
 # Command:
 command: |
   ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
-  Build-Documentation -Config /eirctl/manual.json
+  Build-Documentation -Config /eirctl/docs.json
 ```
 
 ### 3.5 Verify File Structure
