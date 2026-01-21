@@ -110,11 +110,23 @@ stages:
               script: |
                 eirctl run docs
 
+          # Search for pdf folder
+          - task: Bash@3
+            displayName: Search for PDF folder
+            inputs:
+              targetType: inline
+              script: |
+                echo "Searching for 'pdf' folders..."
+                find $(Build.SourcesDirectory) -type d -name "pdf" 2>/dev/null
+                echo ""
+                echo "Checking outputs directory:"
+                ls -la $(Build.SourcesDirectory)/outputs 2>/dev/null || echo "outputs directory not found"
+
           # Upload the documentation as a build artifact
           - task: PublishBuildArtifacts@1
             displayName: Publish Documentation
             inputs:
-              pathToPublish: $(Build.SourcesDirectory)/outputs/docs
+              pathToPublish: outputs/docs
               artifactName: docs
 
   # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
