@@ -131,11 +131,18 @@ tasks:
     description: Build Docs for AKS
     context: docsenv
     command: |
+      echo "=== Current directory ==="
+      Get-Location
+      echo "=== Directory contents ==="
+      ls -la
+      echo "=== Creating glossary ==="
       ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
-      echo "Building documentation..."
-      Get-Command Build-Documentation | fl
-      Build-Documentation -Config /eirctl/docs.json
-      echo "Documentation build complete."
+      echo "=== Building documentation ==="
+      Build-Documentation -Config /eirctl/docs.json -Verbose
+      echo "=== Checking outputs ==="
+      ls -la ./outputs 2>$null || echo "No outputs directory"
+      ls -la ./outputs/docs 2>$null || echo "No outputs/docs directory"
+      echo "=== Documentation build complete ==="
 
   _release:
     context: powershell
