@@ -102,6 +102,14 @@ stages:
               script: |
                 eirctl run lint
 
+          # Create the documentation for the repo
+          - task: Bash@3
+            displayName: Documentation
+            inputs:
+              targetType: inline
+              script: |
+                eirctl run docs
+
           # Upload the documentation as a build artifact
           - task: PublishBuildArtifacts@1
             displayName: Publish Documentation

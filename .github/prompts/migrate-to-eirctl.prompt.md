@@ -587,7 +587,7 @@ Before testing, install eirctl:
 EIRCTL_VERSION=$(curl -s https://api.github.com/repos/ensono/eirctl/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
 
 # Download and install
-sudo wget https://github.com/Ensono/eirctl/releases/download/v${EIRCTL_VERSION}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
+sudo wget https://github.com/Ensono/eirctl/releases/download/${EIRCTL_VERSION}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
 sudo chmod +x /usr/local/bin/eirctl
 
 # Verify installation
