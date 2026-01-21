@@ -43,6 +43,7 @@ curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-asciidoctor/t
 ```
 
 Current versions in use:
+
 - `docker.io/ensono/eir-infrastructure:1.2.39`
 - `docker.io/ensono/eir-inspec:1.2.39`
 - `docker.io/ensono/eir-asciidoctor:1.2.39`
@@ -66,6 +67,7 @@ cat .github/dependabot.yml 2>/dev/null || echo "No dependabot.yml found"
 ```
 
 Expected findings:
+
 - GitHub Actions: Check if taskctl is referenced in any workflows
 - GitLab CI: Check if taskctl is referenced in .gitlab-ci.yml
 - Dependabot: May need updates for new container image versions
@@ -93,10 +95,11 @@ Examine the following in detail:
    - Check for `-NoProfile` flags in PowerShell contexts (CRITICAL: must be removed)
 
 2. **Tasks** (in [build/taskctl/tasks.yaml](../../build/taskctl/tasks.yaml)):
-  - Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, _docs, _release)
-   - List all script paths (e.g., `/app/build/scripts/Set-TFVars.ps1`)
-   - Identify Terraform file location references (`/app/deploy/terraform`)
-   - Note environment variable dependencies
+
+- Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, \_docs, \_release)
+- List all script paths (e.g., `/app/build/scripts/Set-TFVars.ps1`)
+- Identify Terraform file location references (`/app/deploy/terraform`)
+- Note environment variable dependencies
 
 3. **Pipelines** (in [taskctl.yaml](../../taskctl.yaml)):
    - Count pipelines: Expect 6 (lint, tests, infrastructure, infrastructure_destroy, docs, release)
@@ -367,6 +370,44 @@ command: |
   Build-Documentation -Config /eirctl/docs.json
 ```
 
+**Task: `infra:apply` (CRITICAL PATH FIX)**
+
+The `Invoke-Terraform -Apply` command with `-Path` sets the working directory to `TF_FILE_LOCATION`. If you also include `TF_FILE_LOCATION` in the plan file path, it creates a double-nested path that doesn't exist.
+
+```yaml
+# WRONG - causes "no such file or directory" error:
+command:
+  - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/deploy.tfplan"
+# This looks for ./deploy/terraform/deploy/terraform/deploy.tfplan
+
+# CORRECT - reference plan file relative to the working directory:
+command:
+  - Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "deploy.tfplan"
+```
+
+**Task: `infra:destroy:apply` (CRITICAL PATH FIX)**
+
+Same issue applies to the destroy apply task:
+
+```yaml
+# WRONG:
+command:
+  - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
+
+# CORRECT:
+command:
+  - Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "destroy.tfplan" -debug
+```
+
+**Verify these tasks are correctly configured:**
+
+```bash
+# Check for incorrect path patterns in apply tasks
+grep -A2 "infra:apply\|infra:destroy:apply" build/eirctl/tasks.yaml | grep -E '\$\{?env:TF_FILE_LOCATION\}?.*\.tfplan'
+
+# If matches found, the paths need fixing - plan files should be passed via -Arguments, not concatenated to -Path
+```
+
 ### 3.5 Verify File Structure
 
 After updates:
@@ -590,11 +631,11 @@ grep -rn "/app/" build/azDevOps/
 
 **Common replacements in pipeline `env:` blocks:**
 
-| Current Value | New Value |
-|---------------|-----------|
+| Current Value                             | New Value                              |
+| ----------------------------------------- | -------------------------------------- |
 | `TF_FILE_LOCATION: /app/deploy/terraform` | `TF_FILE_LOCATION: ./deploy/terraform` |
-| `INSPEC_FILES: /app/deploy/tests` | `INSPEC_FILES: ./deploy/tests` |
-| `INSPEC_OUTPUT_PATH: /app/outputs/tests` | `INSPEC_OUTPUT_PATH: ./outputs/tests` |
+| `INSPEC_FILES: /app/deploy/tests`         | `INSPEC_FILES: ./deploy/tests`         |
+| `INSPEC_OUTPUT_PATH: /app/outputs/tests`  | `INSPEC_OUTPUT_PATH: ./outputs/tests`  |
 
 **Example update in deploy-infrastructure.yml:**
 
@@ -817,10 +858,12 @@ Mark each item when verified:
 - [ ] `eirctl run lint` completes successfully
 - [ ] `eirctl run infra:init` initializes Terraform
 - [ ] `eirctl run infra:plan` generates a plan
+- [ ] `eirctl run infra:apply` applies the plan successfully (no double-path errors)
 - [ ] `eirctl run docs` builds documentation
 - [ ] Environment variables pass correctly to containers
 - [ ] Docker socket mounting works (if needed)
 - [ ] No `/app/` path errors in any task
+- [ ] No double-path errors in `infra:apply` or `infra:destroy:apply` tasks
 - [ ] PowerShell modules load correctly (no `-NoProfile` issues)
 
 **STOP** if any validation fails. Debug and fix before proceeding.
@@ -935,6 +978,7 @@ git rm -r build/taskctl 2>/dev/null || echo "Already removed or not in staging"
 ```
 
 This clean approach means:
+
 - Old taskctl configuration is removed from the repository
 - Full git history is preserved for recovery if needed
 - No backup files to maintain or document
@@ -963,6 +1007,7 @@ Before committing:
 **Configuration:**
 
 - [ ] `eirctl.yaml` exists at root
+
 ### 7.3 Final Pre-Commit Checklist
 
 Before committing:

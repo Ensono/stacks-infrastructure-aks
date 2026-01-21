@@ -48,7 +48,7 @@ tasks:
     context: powershell
     description: Apply Terraform
     command:
-      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/deploy.tfplan"
+      - Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "deploy.tfplan"
 
   infra:destroy:plan:
     context: powershell
@@ -60,7 +60,7 @@ tasks:
     context: powershell
     description: Destroy Environment.ShortName
     command:
-      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
+      - Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "destroy.tfplan" -debug
 
   infra:output:
     context: powershell
