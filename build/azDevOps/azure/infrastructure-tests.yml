@@ -37,12 +37,12 @@ stages:
         steps:
           - template: ../templates/setup.yml
             parameters:
-              TaskctlVersion: ${{ variables.TaskctlVersion }}
+              EirctlVersion: ${{ variables.EirctlVersion }}
 
           - template: ../templates/infra-tests.yml
             parameters:
               CHEF_LICENSE: $(CHEF_LICENSE)
-              INSPEC_FILES: /app/deploy/tests
+              INSPEC_FILES: ./deploy/tests
               INSPEC_ARGS: "--input resource_group_name=$(resource_group_name) storage_account_name=$(storage_account_name) region=$(location)"
               REPORT_FILENAME: inspec_azure_aks.xml
 

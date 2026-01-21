@@ -148,7 +148,7 @@ stages:
                         script: |
                           eirctl run infra:vars
                       env:
-                        TF_FILE_LOCATION: /app/deploy/terraform
+                        TF_FILE_LOCATION: ./deploy/terraform
                         TF_VAR_resource_group_location: $(region)
                         TF_VAR_name_company: $(company)
                         TF_VAR_name_project: $(project)
@@ -190,7 +190,7 @@ stages:
                             script: |
                               eirctl run infrastructure_destroy
                           env:
-                            TF_FILE_LOCATION: /app/deploy/terraform
+                            TF_FILE_LOCATION: ./deploy/terraform
                             TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                             TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -208,7 +208,7 @@ stages:
                             eirctl run infra:init
                             eirctl run infra:plan
                       env:
-                        TF_FILE_LOCATION: /app/deploy/terraform
+                        TF_FILE_LOCATION: ./deploy/terraform
                         TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
@@ -218,9 +218,9 @@ stages:
                         - template: templates/infra-tests.yml
                           parameters:
                             CHEF_LICENSE: $(CHEF_LICENSE)
-                            INSPEC_FILES: /app/deploy/tests
+                            INSPEC_FILES: ./deploy/tests
                             REPORT_FILENAME: inspec_azure_aks.xml
-                            TF_FILE_LOCATION: /app/deploy/terraform
+                            TF_FILE_LOCATION: ./deploy/terraform
                             TF_VAR_name_environment: ${{ stage.environment_shortname }}
                             TF_VAR_resource_group_location: $(region)
                             TF_VAR_is_cluster_private: $(private_cluster)
@@ -256,7 +256,7 @@ stages:
                           eirctl run infra:init
                           eirctl run infra:helm:apply
                       env:
-                        TF_FILE_LOCATION: /app/deploy/terraform
+                        TF_FILE_LOCATION: ./deploy/terraform
                         TF_VAR_name_environment: ${{ stage.environment_shortname }}
                         TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
 

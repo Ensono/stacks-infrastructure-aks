@@ -11,5 +11,24 @@ steps:
     inputs:
       targetType: inline
       script: |
-        sudo wget https://github.com/Ensono/eirctl/releases/download/${{ parameters.EirctlVersion }}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
-        sudo chmod +x /usr/local/bin/eirctl
+        set -euo pipefail
+
+        EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/${{ parameters.EirctlVersion }}/eirctl-linux-amd64"
+        EIRCTL_PATH="/usr/local/bin/eirctl"
+
+        echo "Downloading eirctl ${{ parameters.EirctlVersion }} from ${EIRCTL_URL}..."
+
+        if ! sudo wget --timeout=30 --tries=3 -q "${EIRCTL_URL}" -O "${EIRCTL_PATH}"; then
+          echo "##[error]Failed to download eirctl from ${EIRCTL_URL}"
+          echo "##[error]Please verify the version '${{ parameters.EirctlVersion }}' exists at https://github.com/Ensono/eirctl/releases"
+          exit 1
+        fi
+
+        sudo chmod +x "${EIRCTL_PATH}"
+
+        if ! eirctl version; then
+          echo "##[error]eirctl installation verification failed"
+          exit 1
+        fi
+
+        echo "eirctl installed successfully"

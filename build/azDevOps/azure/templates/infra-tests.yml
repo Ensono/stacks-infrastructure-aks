@@ -1,7 +1,7 @@
 parameters:
   INSPEC_FILES:
   INSPEC_ARGS:
-  INSPEC_OUTPUT_PATH: /app/outputs/tests
+  INSPEC_OUTPUT_PATH: ./outputs/tests
   CHEF_LICENSE:
   REPORT_FILENAME:
   TF_FILE_LOCATION:

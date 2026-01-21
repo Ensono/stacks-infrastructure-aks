@@ -501,8 +501,27 @@ sudo wget https://github.com/Ensono/taskctl/releases/download/v${{ parameters.Ta
 sudo chmod +x /usr/local/bin/taskctl
 
 # After:
-sudo wget https://github.com/Ensono/eirctl/releases/download/v${{ parameters.EirctlVersion }}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
-sudo chmod +x /usr/local/bin/eirctl
+set -euo pipefail
+
+EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/${{ parameters.EirctlVersion }}/eirctl-linux-amd64"
+EIRCTL_PATH="/usr/local/bin/eirctl"
+
+echo "Downloading eirctl ${{ parameters.EirctlVersion }} from ${EIRCTL_URL}..."
+
+if ! sudo wget --timeout=30 --tries=3 -q "${EIRCTL_URL}" -O "${EIRCTL_PATH}"; then
+  echo "##[error]Failed to download eirctl from ${EIRCTL_URL}"
+  echo "##[error]Please verify the version '${{ parameters.EirctlVersion }}' exists at https://github.com/Ensono/eirctl/releases"
+  exit 1
+fi
+
+sudo chmod +x "${EIRCTL_PATH}"
+
+if ! eirctl version; then
+  echo "##[error]eirctl installation verification failed"
+  exit 1
+fi
+
+echo "eirctl installed successfully"
 ```
 
 ### 4.4 Update Template Parameter Usage
@@ -552,13 +571,60 @@ grep -c "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 grep -n "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 ```
 
-### 4.6 Verify CI/CD Updates
+### 4.6 Update `/app/` Paths in CI/CD Pipelines
+
+The CI/CD pipeline files also contain environment variable definitions that reference `/app/`. These must be updated to use relative paths (consistent with the task updates in Phase 3).
+
+**Files to update:**
+
+- [build/azDevOps/azure/deploy-infrastructure.yml](../../build/azDevOps/azure/deploy-infrastructure.yml)
+- [build/azDevOps/azure/templates/infra-tests.yml](../../build/azDevOps/azure/templates/infra-tests.yml)
+- [build/azDevOps/azure/infrastructure-tests.yml](../../build/azDevOps/azure/infrastructure-tests.yml)
+
+**Search for `/app/` references:**
+
+```bash
+# Find all /app/ references in CI/CD files
+grep -rn "/app/" build/azDevOps/
+```
+
+**Common replacements in pipeline `env:` blocks:**
+
+| Current Value | New Value |
+|---------------|-----------|
+| `TF_FILE_LOCATION: /app/deploy/terraform` | `TF_FILE_LOCATION: ./deploy/terraform` |
+| `INSPEC_FILES: /app/deploy/tests` | `INSPEC_FILES: ./deploy/tests` |
+| `INSPEC_OUTPUT_PATH: /app/outputs/tests` | `INSPEC_OUTPUT_PATH: ./outputs/tests` |
+
+**Example update in deploy-infrastructure.yml:**
+
+```yaml
+# Before:
+env:
+  TF_FILE_LOCATION: /app/deploy/terraform
+
+# After:
+env:
+  TF_FILE_LOCATION: ./deploy/terraform
+```
+
+**Verify all `/app/` paths are updated:**
+
+```bash
+# Should return 0 matches
+grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
+```
+
+### 4.7 Verify CI/CD Updates
 
 Check completeness:
 
 ```bash
-# Should return 0 matches in Azure DevOps
+# Should return 0 matches for taskctl in Azure DevOps
 grep -r "taskctl" build/azDevOps/ 2>/dev/null | wc -l
+
+# Should return 0 matches for /app/ paths in Azure DevOps
+grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
 
 # Should return 0 matches in GitHub Actions (if present)
 grep -r "taskctl" .github/workflows/ 2>/dev/null | wc -l
@@ -583,15 +649,35 @@ Thorough testing is CRITICAL. This phase validates the migration before committi
 Before testing, install eirctl:
 
 ```bash
+set -euo pipefail
+
 # Get latest version
-EIRCTL_VERSION=$(curl -s https://api.github.com/repos/ensono/eirctl/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+EIRCTL_VERSION=$(curl -sf https://api.github.com/repos/ensono/eirctl/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | sed 's/v//')
+
+if [[ -z "${EIRCTL_VERSION}" ]]; then
+  echo "Failed to fetch latest eirctl version"
+  exit 1
+fi
+
+echo "Installing eirctl version ${EIRCTL_VERSION}..."
 
 # Download and install
-sudo wget https://github.com/Ensono/eirctl/releases/download/${EIRCTL_VERSION}/eirctl-linux-amd64 -O /usr/local/bin/eirctl
+EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/v${EIRCTL_VERSION}/eirctl-linux-amd64"
+
+if ! sudo wget --timeout=30 --tries=3 -q "${EIRCTL_URL}" -O /usr/local/bin/eirctl; then
+  echo "Failed to download eirctl from ${EIRCTL_URL}"
+  exit 1
+fi
+
 sudo chmod +x /usr/local/bin/eirctl
 
 # Verify installation
-eirctl version
+if ! eirctl version; then
+  echo "eirctl installation verification failed"
+  exit 1
+fi
+
+echo "eirctl installed successfully"
 ```
 
 Expected output: `eirctl version v<version>`
@@ -894,11 +980,13 @@ Before committing:
 **CI/CD:**
 
 - [ ] `agent-config-vars.yml` has `EirctlVersion` variable
-- [ ] `templates/setup.yml` installs eirctl with correct version
-- [ ] `deploy-infrastructure.yml` uses `eirctl run` commands (21+ updates)
+- [ ] `templates/setup.yml` installs eirctl with correct version and error handling
+- [ ] `deploy-infrastructure.yml` uses `eirctl run` commands
+- [ ] All `/app/` paths in CI/CD files updated to relative paths (`./`)
 - [ ] GitHub Actions workflows updated (if present)
 - [ ] GitLab CI configuration updated (if present)
 - [ ] No remaining `taskctl` references in any CI/CD files
+- [ ] No remaining `/app/` references in any CI/CD files
 
 **Documentation:**
 
