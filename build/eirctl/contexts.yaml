@@ -1,3 +1,5 @@
+# Container image versions (latest stable as of 2026-01-20)
+# Check for updates at: https://hub.docker.com/r/ensono/eir-infrastructure
 contexts:
   powershell:
     container:

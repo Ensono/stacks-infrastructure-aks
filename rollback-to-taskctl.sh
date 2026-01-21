@@ -13,11 +13,11 @@ cp -r build/taskctl.backup build/taskctl
 
 # Restore CI/CD files from git history
 echo "Restoring CI/CD files..."
-git checkout build/azDevOps/azure/
+git checkout build/azDevOps/azure/ || { echo "Failed to restore CI/CD files from git history."; exit 1; }
 
 # Restore documentation from git history
 echo "Restoring documentation..."
-git checkout .github/copilot-instructions.md docs/
+git checkout .github/copilot-instructions.md docs/ || { echo "Failed to restore documentation from git history."; exit 1; }
 
 echo ""
 echo "✓ Rollback complete."
