@@ -58,12 +58,10 @@ tasks:
         Write-Host "=== DEBUG: infra:apply path information ==="
         Write-Host "TF_FILE_LOCATION = $env:TF_FILE_LOCATION"
         Write-Host "PWD = ${PWD}"
-        Write-Host "Current directory contents:"
-        Get-ChildItem -Path $env:TF_FILE_LOCATION | Select-Object Name, Length | Format-Table
-        Write-Host "Checking for deploy.tfplan:"
-        Test-Path "${env:TF_FILE_LOCATION}/deploy.tfplan" | ForEach-Object { Write-Host "  deploy.tfplan exists: $_" }
+        Write-Host "Plan file path: ${env:TF_FILE_LOCATION}/deploy.tfplan"
+        Write-Host "Plan file exists: $(Test-Path "${env:TF_FILE_LOCATION}/deploy.tfplan")"
         Write-Host "=== END DEBUG ==="
-        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "deploy.tfplan"
+        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "${env:TF_FILE_LOCATION}/deploy.tfplan"
 
   infra:destroy:plan:
     context: powershell
@@ -79,10 +77,10 @@ tasks:
         Write-Host "=== DEBUG: infra:destroy:apply path information ==="
         Write-Host "TF_FILE_LOCATION = $env:TF_FILE_LOCATION"
         Write-Host "PWD = ${PWD}"
-        Write-Host "Checking for destroy.tfplan:"
-        Test-Path "${env:TF_FILE_LOCATION}/destroy.tfplan" | ForEach-Object { Write-Host "  destroy.tfplan exists: $_" }
+        Write-Host "Plan file path: ${env:TF_FILE_LOCATION}/destroy.tfplan"
+        Write-Host "Plan file exists: $(Test-Path "${env:TF_FILE_LOCATION}/destroy.tfplan")"
         Write-Host "=== END DEBUG ==="
-        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "destroy.tfplan" -debug
+        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "${env:TF_FILE_LOCATION}/destroy.tfplan" -debug
 
   infra:output:
     context: powershell
