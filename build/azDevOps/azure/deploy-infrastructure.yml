@@ -109,6 +109,11 @@ stages:
               targetType: inline
               script: |
                 eirctl run docs
+                echo "=== Checking inside container ==="
+                docker run --rm -v $(pwd):/app docker.io/ensono/eir-asciidoctor:1.2.39 pwsh -Command "ls -la /app/outputs/docs 2>/dev/null || echo 'No outputs in container'"
+                echo "=== Checking host filesystem ==="
+                ls -la outputs/docs 2>/dev/null || echo "No outputs on host"
+                ls -la $(pwd)/outputs/docs 2>/dev/null || echo "No outputs at pwd/outputs/docs"
 
           # Search for pdf folder
           - task: Bash@3
