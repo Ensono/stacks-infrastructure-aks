@@ -583,6 +583,61 @@ parameters:
   EirctlVersion: ${{ variables.EirctlVersion }}
 ```
 
+### 4.4b Add Docker Hub Login Step
+
+To avoid Docker Hub rate limiting (which can cause extremely slow image pulls at ~1Kbps), add a Docker Hub login step to all jobs that run eirctl commands.
+
+**Pre-requisite:** Create a Docker Hub service connection in Azure DevOps named `DockerHubServiceConnection`.
+
+**Add this step after `setup.yml` template in each job:**
+
+```yaml
+# Login to Docker Hub to avoid rate limiting
+- task: Docker@2
+  displayName: Login to Docker Hub
+  inputs:
+    command: login
+    containerRegistry: DockerHubServiceConnection
+```
+
+**Jobs requiring Docker Hub login:**
+
+1. **Build stage** - Setup job (before lint and docs tasks)
+2. **Infrastructure deployment** - InfraNonProd/InfraProd jobs
+3. **Helm deployment** - K8sNonProd/K8sProd jobs
+4. **Release stage** - CreateGitHubRelease job
+
+**Example placement in deploy-infrastructure.yml:**
+
+```yaml
+steps:
+  - template: templates/setup.yml
+    parameters:
+      EirctlVersion: ${{ variables.EirctlVersion }}
+
+  # Login to Docker Hub to avoid rate limiting
+  - task: Docker@2
+    displayName: Login to Docker Hub
+    inputs:
+      command: login
+      containerRegistry: DockerHubServiceConnection
+
+  # Now eirctl commands will pull images with authenticated rate limits
+  - task: Bash@3
+    displayName: Lint
+    inputs:
+      targetType: inline
+      script: |
+        eirctl run lint
+```
+
+**Why this is needed:**
+
+- Docker Hub limits anonymous pulls to 100 per 6 hours per IP
+- Azure DevOps hosted agents share IPs with many other users
+- Authenticated users get 200 pulls per 6 hours
+- Without login, image pulls can be throttled to ~1Kbps
+
 ### 4.5 Update All Pipeline Task Invocations
 
 In [build/azDevOps/azure/deploy-infrastructure.yml](../../build/azDevOps/azure/deploy-infrastructure.yml), find and replace ALL occurrences:
@@ -1027,6 +1082,7 @@ Before committing:
 - [ ] `agent-config-vars.yml` has `EirctlVersion` variable
 - [ ] `templates/setup.yml` installs eirctl with correct version and error handling
 - [ ] `deploy-infrastructure.yml` uses `eirctl run` commands
+- [ ] Docker Hub login step added after setup.yml in all jobs (to avoid rate limiting)
 - [ ] All `/app/` paths in CI/CD files updated to relative paths (`./`)
 - [ ] GitHub Actions workflows updated (if present)
 - [ ] GitLab CI configuration updated (if present)
