@@ -26,7 +26,7 @@ steps:
 
         sudo chmod +x "${EIRCTL_PATH}"
 
-        if ! eirctl version; then
+        if ! eirctl --version; then
           echo "##[error]eirctl installation verification failed"
           exit 1
         fi

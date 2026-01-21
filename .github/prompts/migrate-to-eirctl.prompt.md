@@ -516,7 +516,7 @@ fi
 
 sudo chmod +x "${EIRCTL_PATH}"
 
-if ! eirctl version; then
+if ! eirctl --version; then
   echo "##[error]eirctl installation verification failed"
   exit 1
 fi
@@ -680,7 +680,7 @@ fi
 echo "eirctl installed successfully"
 ```
 
-Expected output: `eirctl version v<version>`
+Expected output: `eirctl --version v<version>`
 
 ### 5.2 Verify Configuration Syntax
 
@@ -811,7 +811,7 @@ eirctl run infra:output  # Or any task that might use Docker
 
 Mark each item when verified:
 
-- [ ] `eirctl version` works
+- [ ] `eirctl --version` works
 - [ ] `eirctl list` shows all 5 pipelines
 - [ ] `eirctl graph <pipeline>` works for each pipeline
 - [ ] `eirctl run lint` completes successfully
