@@ -94,6 +94,13 @@ stages:
             parameters:
               EirctlVersion: ${{ variables.EirctlVersion }}
 
+          # Login to Docker Hub to avoid rate limiting
+          - task: Docker@2
+            displayName: Login to Docker Hub
+            inputs:
+              command: login
+              containerRegistry: DockerHubServiceConnection
+
           # lint files in the repo
           - task: Bash@3
             displayName: Lint
@@ -138,6 +145,13 @@ stages:
                     - template: templates/setup.yml
                       parameters:
                         EirctlVersion: ${{ variables.EirctlVersion }}
+
+                    # Login to Docker Hub to avoid rate limiting
+                    - task: Docker@2
+                      displayName: Login to Docker Hub
+                      inputs:
+                        command: login
+                        containerRegistry: DockerHubServiceConnection
 
                     # Create a tfvars file for the values
                     # This is so that variables can be set and reused as required
@@ -248,6 +262,13 @@ stages:
                       parameters:
                         EirctlVersion: ${{ variables.EirctlVersion }}
 
+                    # Login to Docker Hub to avoid rate limiting
+                    - task: Docker@2
+                      displayName: Login to Docker Hub
+                      inputs:
+                        command: login
+                        containerRegistry: DockerHubServiceConnection
+
                     - task: Bash@3
                       displayName: Deploy Helm Charts
                       inputs:
@@ -279,6 +300,13 @@ stages:
           - template: templates/setup.yml
             parameters:
               EirctlVersion: ${{ variables.EirctlVersion }}
+
+          # Login to Docker Hub to avoid rate limiting
+          - task: Docker@2
+            displayName: Login to Docker Hub
+            inputs:
+              command: login
+              containerRegistry: DockerHubServiceConnection
 
           - task: Bash@3
             displayName: Publish Release
