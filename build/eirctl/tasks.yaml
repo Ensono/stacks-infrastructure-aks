@@ -61,7 +61,7 @@ tasks:
         Write-Host "Plan file path: ${env:TF_FILE_LOCATION}/deploy.tfplan"
         Write-Host "Plan file exists: $(Test-Path "${env:TF_FILE_LOCATION}/deploy.tfplan")"
         Write-Host "=== END DEBUG ==="
-        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "${env:TF_FILE_LOCATION}/deploy.tfplan"
+        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "deploy.tfplan"
 
   infra:destroy:plan:
     context: powershell
@@ -80,7 +80,7 @@ tasks:
         Write-Host "Plan file path: ${env:TF_FILE_LOCATION}/destroy.tfplan"
         Write-Host "Plan file exists: $(Test-Path "${env:TF_FILE_LOCATION}/destroy.tfplan")"
         Write-Host "=== END DEBUG ==="
-        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "${env:TF_FILE_LOCATION}/destroy.tfplan" -debug
+        Invoke-Terraform -Apply -Path $env:TF_FILE_LOCATION -Arguments "destroy.tfplan" -debug
 
   infra:output:
     context: powershell
