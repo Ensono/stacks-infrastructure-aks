@@ -35,20 +35,41 @@ tasks:
     context: powershell
     description: Create Terraform variables file
     command:
-      - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - ./build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
       - dir ${env:TF_FILE_LOCATION}
 
   infra:plan:
     context: powershell
     description: Plan Terraform
     command:
-      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_PLAN -Debug
+      - |
+        Write-Host "=== DEBUG: infra:plan path information ==="
+        Write-Host "TF_FILE_LOCATION = $env:TF_FILE_LOCATION"
+        Write-Host "PWD = ${PWD}"
+        Write-Host "TF_BACKEND_PLAN = $env:TF_BACKEND_PLAN"
+        Write-Host "=== END DEBUG ==="
+        Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_PLAN -Debug
 
   infra:apply:
     context: powershell
     description: Apply Terraform
     command:
-      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/deploy.tfplan"
+      - |
+        Write-Host "=== DEBUG: infra:apply path information ==="
+        Write-Host "TF_FILE_LOCATION = $env:TF_FILE_LOCATION"
+        Write-Host "PWD = ${PWD}"
+        $planFile = Join-Path -Path $env:TF_FILE_LOCATION -ChildPath "deploy.tfplan"
+        Write-Host "Plan file path: $planFile"
+        Write-Host "Plan file exists: $(Test-Path $planFile)"
+        Write-Host "=== END DEBUG ==="
+        Push-Location $env:TF_FILE_LOCATION
+        try {
+          Write-Host "Running: terraform apply deploy.tfplan"
+          terraform apply deploy.tfplan
+          if ($LASTEXITCODE -ne 0) { throw "Terraform apply failed with exit code $LASTEXITCODE" }
+        } finally {
+          Pop-Location
+        }
 
   infra:destroy:plan:
     context: powershell
@@ -60,7 +81,22 @@ tasks:
     context: powershell
     description: Destroy Environment.ShortName
     command:
-      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
+      - |
+        Write-Host "=== DEBUG: infra:destroy:apply path information ==="
+        Write-Host "TF_FILE_LOCATION = $env:TF_FILE_LOCATION"
+        Write-Host "PWD = ${PWD}"
+        $planFile = Join-Path -Path $env:TF_FILE_LOCATION -ChildPath "destroy.tfplan"
+        Write-Host "Plan file path: $planFile"
+        Write-Host "Plan file exists: $(Test-Path $planFile)"
+        Write-Host "=== END DEBUG ==="
+        Push-Location $env:TF_FILE_LOCATION
+        try {
+          Write-Host "Running: terraform apply destroy.tfplan"
+          terraform apply destroy.tfplan
+          if ($LASTEXITCODE -ne 0) { throw "Terraform apply failed with exit code $LASTEXITCODE" }
+        } finally {
+          Pop-Location
+        }
 
   infra:output:
     context: powershell
@@ -72,13 +108,13 @@ tasks:
     context: powershell
     description: Create a shell script to configure the environment variables
     command:
-      - New-EnvConfig -Path /app/build/config/stage_envvars.yml -ScriptPath /app/local
+      - New-EnvConfig -Path ./build/config/stage_envvars.yml -ScriptPath ./local
 
   setup:environment:
     context: powershell
     description: Ensure that the environment is configured correctly
     command:
-      - Confirm-Environment -Path /app/build/config/stage_envvars.yml
+      - Confirm-Environment -Path ./build/config/stage_envvars.yml
 
   tests:infra:init:
     context: infratests
@@ -99,7 +135,7 @@ tasks:
       - |
         Import-Module Az.Aks
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
-        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | ./build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml
         Get-AzureServiceVersions -service aks -location $env:TF_VAR_resource_group_location | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml -Append
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "region: ${env:TF_VAR_resource_group_location}"
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "kubernetes_private_cluster: ${env:TF_VAR_is_cluster_private}"
@@ -119,10 +155,10 @@ tasks:
 
         Import-Module Az.Aks
 
-        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | ./build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
 
-        /app/build/scripts/Deploy-HelmCharts.ps1 `
-          -Path /app/deploy/helm/k8s_apps.yaml `
+        ./build/scripts/Deploy-HelmCharts.ps1 `
+          -Path ./deploy/helm/k8s_apps.yaml `
           -ResourceGroup ${env:TFOUT_resource_group_name} `
           -Clustername ${env:TFOUT_aks_cluster_name} `
           -Provider ${env:CLOUD_PLATFORM}
@@ -130,9 +166,8 @@ tasks:
   _docs:
     description: Build Docs for AKS
     context: docsenv
-    command: |
-      /app/build/scripts/New-Glossary.ps1 -docpath /app/docs -path /app/tmp/glossary.adoc
-      Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
+    command:
+      - ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc && Build-Documentation -Config /eirctl/docs.json -Verbose
 
   _release:
     context: powershell

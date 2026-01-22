@@ -15,9 +15,9 @@ Please ensure that the following prerequisites are satisfied:
 
 * Docker Engine
 ** This can be Docker, Rancher Desktop or Podman
-* Taskctl (https://github.com/russellseymour/taskctl/releases)
+* eirctl (https://github.com/Ensono/eirctl/releases)
 
-NOTE: Taskctl has been forked to add some new functionality to the tool that this repository uses.
+NOTE: eirctl is the officially supported task automation tool for Ensono Stacks projects.
 
 === Setup
 
@@ -67,7 +67,7 @@ The resultant script will be `local/envvar-azure-stacks-aks.ps1`. The naming con
 .Environment variable script
 image::images/envvar-script.png[width=500]
 
-Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then setup the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by Taskctl.
+Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then setup the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
 
 ==== Bash
 
@@ -80,10 +80,10 @@ Now that the environment has been configured the pipelines can be run.
 [cols="1,4",options=header,stripes=even]
 |===
 | # | Command
-| 1 | `taskctl lint`
-| 2 | `taskctl infrastructure`
-| 3 | `taskctl tests`
-| 4 | `taskctl docs`
+| 1 | `eirctl run lint`
+| 2 | `eirctl run infrastructure`
+| 3 | `eirctl run tests`
+| 4 | `eirctl run docs`
 |===
 
 These pipelines can be run in any order based on the task that needs to be accomplished. In addition to these any of the tasks, as described in <<Pipeline>> can be executed.

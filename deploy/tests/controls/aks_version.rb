@@ -1,5 +1,5 @@
 # The following set of controls are designed to test if the version of Kubernetes
-# being run is the current version, previous or 2 behind. These are the version that are supported 
+# being run is the current version, previous or 2 behind. These are the version that are supported
 # by Microsoft
 #
 # Inspec has a two stage approach. The first stage is the compile stage which analyses the controls that
@@ -15,9 +15,9 @@
 # from the Azure region (using the PowerShell Get-AzureServiceVersions cmdlet). Thisis then reversed so that the
 # it is in descending order of versions.
 #
-# The value that is specified for the `k8s_version_threshold` in the inputs, is used to split the array into 
+# The value that is specified for the `k8s_version_threshold` in the inputs, is used to split the array into
 # two - valid and invalid versions. The test is then ruin against the valid versions to determine if it shuld pass
-# or not. 
+# or not.
 #
 # The k8s_version_threshold number allows the test top be modiofied to the meet the needs of the team that are maintaining
 # the project. For example, in this default case the current and previous versions of Kubernetes are valid, but if this

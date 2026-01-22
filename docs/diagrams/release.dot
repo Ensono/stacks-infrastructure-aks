@@ -1,16 +1,16 @@
 digraph G {
   rankdir=LR
   node[fontsize="10"]
-  
+
   start [shape=oval, label="Start"];
   end [shape=oval, label="End"];
-   
+
   buildnumber[shape=box, label="build:number"]
   release[shape=box, label="_release"]
 
   environment[
-      shape=box, 
-      style="dashed", 
+      shape=box,
+      style="dashed",
       fontsize=8,
       label="Environment Variables
 
@@ -21,7 +21,7 @@ ARTIFACTS_DIR
 REPONAME"]
 
   start -> buildnumber
-  buildnumber -> release 
+  buildnumber -> release
   environment -> release [
       style="dashed"
   ]

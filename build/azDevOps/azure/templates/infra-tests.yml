@@ -1,7 +1,7 @@
 parameters:
   INSPEC_FILES:
   INSPEC_ARGS:
-  INSPEC_OUTPUT_PATH: /app/outputs/tests
+  INSPEC_OUTPUT_PATH: ./outputs/tests
   CHEF_LICENSE:
   REPORT_FILENAME:
   TF_FILE_LOCATION:
@@ -14,7 +14,7 @@ steps:
     displayName: Inspec Input Values
     inputs:
       targetType: inline
-      script: taskctl tests:infra:inputs
+      script: eirctl run tests:infra:inputs
     env:
       TF_FILE_LOCATION: ${{ parameters.tf_file_location }}
       TF_VAR_name_environment: ${{ parameters.tf_var_name_environment }}
@@ -29,10 +29,10 @@ steps:
       AZURE_TENANT_ID: $(ARM_TENANT_ID)
 
   - task: Bash@3
-    displayName: "TackCTL: Tests"
+    displayName: "eirctl: Tests"
     inputs:
       targetType: inline
-      script: taskctl tests
+      script: eirctl run tests
     env:
       INSPEC_FILES: ${{ parameters.inspec_files }}
       CHEF_LICENSE: ${{ parameters.chef_license }}

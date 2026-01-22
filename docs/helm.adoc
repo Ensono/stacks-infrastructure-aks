@@ -32,7 +32,7 @@ Applications can be enabled as required and other ones added as needed.
 
 [,yaml]
 ----
-include::../deploy/helm/k8s_apps.yml[]
+include::../deploy/helm/k8s_apps.yaml[]
 ----
 
 This file is read by the `Deploy-Helm` cmdlet in the Independent Runner PowerShell module. The cmdlet cna handle installing from a remote chart repository or from a local one contained on the file system.
@@ -44,7 +44,7 @@ The following table describes the parameters that can be set.
 |===
 | Name | Description
 | `name` | Name of the chart
-| `location` | When installing from a the filesystem this is the path to the chart. 
+| `location` | When installing from a the filesystem this is the path to the chart.
 
 When installing from a remote repository this is the alias of the repo.
 | `enabled` | State if this will be installed
@@ -61,8 +61,7 @@ For example, the following is the file that is used to deploy the bindings for i
 
 [source,yaml,linenums]
 ----
-include::../deploy/helm/values/cluster_setup.yml[]
+include::../deploy/helm/values/cluster_setup.yaml[]
 ----
 
 As can be seen the output values from Terraform are required. Here there are prefixed with `TFOUT_` and substituted into the file before the chart is deployed.
-
