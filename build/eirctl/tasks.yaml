@@ -167,7 +167,7 @@ tasks:
     description: Build Docs for AKS
     context: docsenv
     command:
-      - ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc && Build-Documentation -Config /eirctl/docs.json -Verbose
+      - ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc && Build-Documentation -Config ./docs.json -Verbose
 
   _release:
     context: powershell
