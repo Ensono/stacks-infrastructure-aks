@@ -22,4 +22,7 @@ module "ssl_app_gateway" {
     "policy_type" = "Predefined",
     "policy_name" = "AppGwSslPolicy20170401S",
   }
+
+  # Ensure App Gateway is destroyed before network resources
+  depends_on = [module.aks_bootstrap]
 }
