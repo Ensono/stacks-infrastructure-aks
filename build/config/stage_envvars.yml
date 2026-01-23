@@ -50,6 +50,9 @@ stages:
         description: State if the virtual network for AKS should be created
       - name: TF_VAR_cluster_version
         description: Version of Kubernetes to deploy
+      - name: TF_VAR_cluster_sku_tier
+        description: Control plane SKU tier (Free, Standard, or Premium)
+        required: false
       - name: TF_VAR_create_acr
         description: State if a container registry should be created
       - name: TF_VAR_acr_resource_group
