@@ -40,7 +40,7 @@ After generating the template, populate the environment variables file using val
 | `TF_VAR_dns_resource_group`      | `stacks-ancillary-resources`                                           |
 | `TF_VAR_create_dns_zone`         | `false`                                                                |
 | `TF_VAR_create_aksvnet`          | `true`                                                                 |
-| `TF_VAR_cluster_version`         | `1.27.9` (from `aks_cluster_version`)                                  |
+| `TF_VAR_cluster_version`         | `1.34.1` (from `aks_cluster_version`)                                  |
 | `TF_VAR_cluster_sku_tier`        | `Standard` (from `aks_cluster_sku_tier`)                               |
 | `TF_VAR_create_acr`              | `false`                                                                |
 | `TF_VAR_acr_resource_group`      | `stacks-ancillary-resources`                                           |
@@ -132,7 +132,7 @@ export TF_VAR_create_dns_zone="false"
 
 # AKS configuration
 export TF_VAR_create_aksvnet="true"
-export TF_VAR_cluster_version="1.27.9"
+export TF_VAR_cluster_version="1.34.1"
 export TF_VAR_cluster_sku_tier="Standard"
 export TF_VAR_is_cluster_private="true"
 export TF_VAR_create_user_identity="true"
