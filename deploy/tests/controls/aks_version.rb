@@ -11,19 +11,19 @@
 # NOTE: This Kuberntes version is passed in from the Terraform output because the actual value from the resource
 # cannot be interrogated unless it is inside a "describe" block.
 #
-# The list of Kubernetes vbersions also comes from an external input, in this case from the list that is retrieved
-# from the Azure region (using the PowerShell Get-AzureServiceVersions cmdlet). Thisis then reversed so that the
+# The list of Kubernetes versions also comes from an external input, in this case from the list that is retrieved
+# from the Azure region (using the PowerShell Get-AzureServiceVersions cmdlet). This is then reversed so that the
 # it is in descending order of versions.
 #
 # The value that is specified for the `k8s_version_threshold` in the inputs, is used to split the array into
-# two - valid and invalid versions. The test is then ruin against the valid versions to determine if it shuld pass
+# two - valid and invalid versions. The test is then run against the valid versions to determine if it should pass
 # or not.
 #
-# The k8s_version_threshold number allows the test top be modiofied to the meet the needs of the team that are maintaining
+# The k8s_version_threshold number allows the test to be modified to meet the needs of the team that are maintaining
 # the project. For example, in this default case the current and previous versions of Kubernetes are valid, but if this
 # value were set to 2, only the current versions would be valid.
 #
-# In the past we have tried to have a warnign state for when the version is OK, but work needs to be carried out
+# In the past we have tried to have a warning state for when the version is OK, but work needs to be carried out
 # to upgrade it. Due to the reporting method we have to use, JUnit, we only have the status of passed and failed.
 
 # Ensure the k8s version array is sorted and in reverse order
