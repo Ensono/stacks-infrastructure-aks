@@ -18,6 +18,6 @@ resource "null_resource" "validate_subscription_tag" {
 # Get details about the ADO project, this is required so that Terraform
 # can create the variable group in the correct project and an ID is required for that
 data "azuredevops_project" "project" {
-  count = var.create_ado_variable_group ? 1 : 0
+  count = var.create_ado_variable_group && local.has_ado_pat ? 1 : 0
   name  = var.ado_project_name
 }

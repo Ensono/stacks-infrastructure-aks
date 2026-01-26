@@ -207,6 +207,13 @@ variable "ado_project_name" {
   type        = string
 }
 
+variable "ado_personal_access_token" {
+  description = "The personal access token for Azure DevOps authentication"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "create_ado_variable_group" {
   description = "Flag to indicate if a variable group should be created in Azure DevOps"
   type        = bool

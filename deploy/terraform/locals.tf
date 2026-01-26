@@ -16,6 +16,9 @@ locals {
     var.deploy_all_environments
   )
 
+  # Check if Azure DevOps PAT is provided (avoid using sensitive value in for_each directly)
+  has_ado_pat = try(length(var.ado_personal_access_token) > 0, false)
+
   # Obtain a list of environments from the variables
   # This is a comma separated list which also has a flag to state if it is for the production subscription or not
   environments_all = { for env_definition in split(",", var.environments) :
@@ -53,7 +56,6 @@ locals {
     acr_login_server                    = module.aks_bootstrap.acr_login_server
     acr_registry_name                   = module.aks_bootstrap.acr_registry_name
     acr_resource_group_name             = module.aks_bootstrap.acr_resource_group_name
-    aks_cluster_fqdn                    = module.aks_bootstrap.aks_cluster_fqdn
     aks_cluster_name                    = module.aks_bootstrap.aks_cluster_name
     aks_default_user_identity_client_id = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_client_id : ""
     aks_default_user_identity_id        = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_id : ""
