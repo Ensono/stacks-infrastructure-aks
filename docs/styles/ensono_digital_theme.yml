@@ -27,7 +27,7 @@ header:
   recto:
     columns: "<40% =20% >40%"
     left:
-      content: 'image:../images/ensono_digital_logo.png[]'
+      content: 'image:../images/ensono-digital.svg[]'
     center:
       content: '{document-title}'
   verso:
