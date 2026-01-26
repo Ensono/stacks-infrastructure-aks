@@ -90,14 +90,14 @@ Examine the following in detail:
 1. **Contexts** (in [build/taskctl/contexts.yaml](../../build/taskctl/contexts.yaml)):
    - Count contexts: Expect 3 (powershell, infratests, docs)
    - Note container images and versions
-   - Identify all paths using `/app/` prefix
+   - Identify all paths using `/eirctl/` prefix
    - Check for `-NoProfile` flags in PowerShell contexts (CRITICAL: must be removed)
 
 2. **Tasks** (in [build/taskctl/tasks.yaml](../../build/taskctl/tasks.yaml)):
 
 - Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, \_docs, \_release)
-- List all script paths (e.g., `/app/build/scripts/Set-TFVars.ps1`)
-- Identify Terraform file location references (`/app/deploy/terraform`)
+- List all script paths (e.g., `/eirctl/build/scripts/Set-TFVars.ps1`)
+- Identify Terraform file location references (`/eirctl/deploy/terraform`)
 - Note environment variable dependencies
 
 3. **Pipelines** (in [taskctl.yaml](../../taskctl.yaml)):
@@ -293,17 +293,17 @@ Verify these paths exist in `build/eirctl/tasks.yaml`:
 
 | Path                                         | Purpose                           |
 | -------------------------------------------- | --------------------------------- |
-| `/app/build/scripts/Set-TFVars.ps1`          | Generate tfvars file              |
-| `/app/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs   |
-| `/app/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts                |
-| `/app/deploy/terraform`                      | Terraform templates               |
-| `/app/deploy/tests`                          | InSpec tests                      |
-| `/app/outputs`                               | Build outputs                     |
+| `/eirctl/build/scripts/Set-TFVars.ps1`          | Generate tfvars file              |
+| `/eirctl/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs   |
+| `/eirctl/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts                |
+| `/eirctl/deploy/terraform`                      | Terraform templates               |
+| `/eirctl/deploy/tests`                          | InSpec tests                      |
+| `/eirctl/outputs`                               | Build outputs                     |
 
 **Environment variable defaults:**
 
-- `TF_FILE_LOCATION` should be set to `/app/deploy/terraform`
-- Verify all task commands use `/app/` prefix consistently
+- `TF_FILE_LOCATION` should be set to `/eirctl/deploy/terraform`
+- Verify all task commands use `/eirctl/` prefix consistently
 
 ### 3.4 Update Specific Tasks
 
@@ -312,33 +312,33 @@ Review and verify these tasks in `build/eirctl/tasks.yaml` use correct paths:
 **Task: `infra:vars`**
 
 ```yaml
-# Command should use /app/ prefix:
+# Command should use /eirctl/ prefix:
 command:
-  - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+  - /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
 ```
 
 **Task: `setup:dev`**
 
 ```yaml
-# Command should use /app/ prefix:
+# Command should use /eirctl/ prefix:
 command:
-  - New-EnvConfig -Path /app/build/config/stage_envvars.yml -ScriptPath /app/local
+  - New-Item -ItemType Directory -Path "local" -Force | Out-Null; New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/local -Cloud azure -Stage dev
 ```
 
 **Task: `infra:helm:apply`**
 
 ```yaml
-# Script path should use /app/ prefix:
+# Script path should use /eirctl/ prefix:
 command:
-  - /app/build/scripts/Deploy-HelmCharts.ps1 -Path /app/deploy/helm/k8s_apps.yaml ...
+  - /eirctl/build/scripts/Deploy-HelmCharts.ps1 -Path /eirctl/deploy/helm/k8s_apps.yaml ...
 ```
 
 **Task: `tests:infra:run`**
 
 ```yaml
-# INSPEC_FILES should use /app/ prefix:
+# INSPEC_FILES should use /eirctl/ prefix:
 env:
-  INSPEC_FILES: /app/deploy/tests
+  INSPEC_FILES: /eirctl/deploy/tests
 ```
 
 **Task: `_docs`**
@@ -347,8 +347,8 @@ env:
 # Uses docs context (eir-asciidoctor) instead of powershell
 # Command:
 command: |
-  /app/build/scripts/New-Glossary.ps1 -docpath /app/docs -path /app/tmp/glossary.adoc
-  Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
+  /eirctl/build/scripts/New-Glossary.ps1 -docpath /eirctl/docs -path /eirctl/tmp/glossary.adoc
+  Invoke-AsciiDoc -PDF -basepath /app -config /eirctl/docs.json -debug
 ```
 
 **Task: `infra:apply` (CRITICAL PATH FIX)**
@@ -401,8 +401,8 @@ ls -la build/eirctl/
 # Verify no references to old structure remain
 grep -r "taskctl" build/eirctl/ || echo "✓ No taskctl references in build/eirctl/"
 
-# Verify /app/ paths are used consistently
-grep -r "/app/" build/eirctl/tasks.yaml && echo "✓ /app/ paths found in tasks"
+# Verify /eirctl/ paths are used consistently
+grep -r "/eirctl/" build/eirctl/tasks.yaml && echo "✓ /eirctl/ paths found in tasks"
 
 # Verify old taskctl directory is removed (only in git, working directory may have backups)
 ls -la build/taskctl 2>/dev/null && echo "Warning: taskctl directory still exists" || echo "✓ taskctl directory cleaned"
@@ -650,9 +650,9 @@ grep -c "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 grep -n "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 ```
 
-### 4.6 Verify `/app/` Paths in CI/CD Pipelines
+### 4.6 Verify `/eirctl/` Paths in CI/CD Pipelines
 
-The CI/CD pipeline files should contain environment variable definitions that use `/app/` paths. Verify these are correct:
+The CI/CD pipeline files should contain environment variable definitions that use `/eirctl/` paths. Verify these are correct:
 
 **Files to check:**
 
@@ -664,15 +664,15 @@ The CI/CD pipeline files should contain environment variable definitions that us
 
 | Variable              | Expected Value               |
 | --------------------- | ---------------------------- |
-| `TF_FILE_LOCATION`    | `/app/deploy/terraform`      |
-| `INSPEC_FILES`        | `/app/deploy/tests`          |
-| `INSPEC_OUTPUT_PATH`  | `/app/outputs/tests`         |
+| `TF_FILE_LOCATION`    | `/eirctl/deploy/terraform`      |
+| `INSPEC_FILES`        | `/eirctl/deploy/tests`          |
+| `INSPEC_OUTPUT_PATH`  | `/eirctl/outputs/tests`         |
 
-**Verify /app/ paths exist:**
+**Verify /eirctl/ paths exist:**
 
 ```bash
-# Count /app/ references (should be > 0)
-grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
+# Count /eirctl/ references (should be > 0)
+grep -r "/eirctl/" build/azDevOps/ 2>/dev/null | wc -l
 ```
 
 ### 4.7 Verify CI/CD Updates
@@ -683,8 +683,8 @@ Check completeness:
 # Should return 0 matches for taskctl in Azure DevOps
 grep -r "taskctl" build/azDevOps/ 2>/dev/null | wc -l
 
-# Should return > 0 matches for /app/ paths in Azure DevOps (paths should use /app/)
-grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
+# Should return > 0 matches for /eirctl/ paths in Azure DevOps (paths should use /eirctl/)
+grep -r "/eirctl/" build/azDevOps/ 2>/dev/null | wc -l
 
 # Should return 0 matches in GitHub Actions (if present)
 grep -r "taskctl" .github/workflows/ 2>/dev/null | wc -l
@@ -804,7 +804,7 @@ Test Terraform operations WITHOUT applying:
 
 ```bash
 # Set required environment variables (adjust for your environment)
-export TF_FILE_LOCATION="/app/deploy/terraform"
+export TF_FILE_LOCATION="/eirctl/deploy/terraform"
 export TF_VAR_environment="test"
 export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=<your_storage>,resource_group_name=<your_rg>"
 
@@ -880,7 +880,7 @@ Mark each item when verified:
 - [ ] `eirctl run docs` builds documentation
 - [ ] Environment variables pass correctly to containers
 - [ ] Docker socket mounting works (if needed)
-- [ ] All `/app/` paths resolve correctly in containers
+- [ ] All `/eirctl/` paths resolve correctly in containers
 - [ ] Terraform workspace uses `$env:TF_VAR_environment` correctly
 - [ ] PowerShell modules load correctly (no `-NoProfile` issues)
 
@@ -1034,7 +1034,7 @@ Before committing:
 
 - [ ] `eirctl.yaml` exists at root
 - [ ] `build/eirctl/contexts.yaml` has all 3 contexts converted (powershell, infratests, docs)
-- [ ] `build/eirctl/tasks.yaml` has all tasks with `/app/` paths
+- [ ] `build/eirctl/tasks.yaml` has all tasks with `/eirctl/` paths
 - [ ] `build/taskctl/` is removed from git (cleaned up via git rm)
 - [ ] No `-NoProfile` flags in any context
 - [ ] Import statements updated to `build/eirctl/`
@@ -1046,7 +1046,7 @@ Before committing:
 - [ ] `templates/setup.yml` installs eirctl with correct version and error handling
 - [ ] `deploy-infrastructure.yml` uses `eirctl run` commands
 - [ ] Docker Hub login step added after setup.yml in all jobs (to avoid rate limiting)
-- [ ] All paths in CI/CD files use `/app/` prefix
+- [ ] All paths in CI/CD files use `/eirctl/` prefix
 - [ ] GitHub Actions workflows updated (if present)
 - [ ] GitLab CI configuration updated (if present)
 - [ ] No remaining `taskctl` references in any CI/CD files
@@ -1101,7 +1101,7 @@ git commit -m "Migrate from taskctl to eirctl
 - Create build/eirctl/ with modernized configuration
 - Convert all 3 contexts to eirctl container-first syntax (powershell, infratests, docs)
 - Remove -NoProfile flags from PowerShell contexts (required for eirctl)
-- Verify all task paths use /app/ prefix
+- Verify all task paths use /eirctl/ prefix
 - Update variable naming to simplified convention (company, project, component, location)
 - Update CI/CD pipelines to use eirctl run commands
 - Update GitHub Actions workflows (if present)
@@ -1147,7 +1147,7 @@ Successfully migrated from taskctl to eirctl with full validation.
 ### Key Changes
 
 1. **Context modernization**: Converted 3 contexts to container-first syntax (powershell, infratests, docs)
-2. **Path convention**: Verified all paths use `/app/` prefix
+2. **Path convention**: Verified all paths use `/eirctl/` prefix
 3. **CI/CD integration**: Updated [N] pipeline invocations to use `eirctl run`
 4. **Critical fix**: Removed `-NoProfile` from PowerShell contexts
 5. **Variable naming**: Updated to use `company`, `project`, `component`, `location` (not `name_*` prefix)

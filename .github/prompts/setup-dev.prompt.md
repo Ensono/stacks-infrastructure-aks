@@ -28,7 +28,7 @@ After generating the template, populate the environment variables file using val
 | Variable                         | Source Value                                                           |
 | -------------------------------- | ---------------------------------------------------------------------- |
 | `CLOUD_PLATFORM`                 | `azure`                                                                |
-| `TF_FILE_LOCATION`               | `/app/deploy/terraform`                                                |
+| `TF_FILE_LOCATION`               | `/eirctl/deploy/terraform`                                                |
 | `TF_VAR_company`                 | `ed` (from `company`)                                                  |
 | `TF_VAR_project`                 | `stacks` (from `project`)                                              |
 | `TF_VAR_component`               | `core` (from `domain`)                                                 |
@@ -109,7 +109,7 @@ export ARM_SUBSCRIPTION_ID="<your-azure-subscription-id>"
 export ARM_TENANT_ID="<your-azure-tenant-id>"
 
 # Terraform configuration
-export TF_FILE_LOCATION="/app/deploy/terraform"
+export TF_FILE_LOCATION="/eirctl/deploy/terraform"
 export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
 export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 

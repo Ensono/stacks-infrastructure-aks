@@ -34,7 +34,7 @@ tasks:
     context: powershell
     description: Create Terraform variables file
     command:
-      - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
       - dir ${env:TF_FILE_LOCATION}
 
   infra:plan:
@@ -71,13 +71,13 @@ tasks:
     context: powershell
     description: Create a shell script to configure the environment variables
     command:
-      - New-EnvConfig -Path /app/build/config/stage_envvars.yml -ScriptPath /app/local
+      - New-Item -Type directory /eirctl/local && New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/local -Cloud azure -Stage dev
 
   setup:environment:
     context: powershell
     description: Ensure that the environment is configured correctly
     command:
-      - Confirm-Environment -Path /app/build/config/stage_envvars.yml
+      - Confirm-Environment -Path /eirctl/build/config/stage_envvars.yml
 
   tests:infra:init:
     context: infratests
@@ -98,7 +98,7 @@ tasks:
       - |
         Import-Module Az.Aks
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_name_environment -Path $env:TF_FILE_LOCATION
-        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml
         Get-AzureServiceVersions -service aks -location $env:TF_VAR_resource_group_location | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml -Append
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "region: ${env:TF_VAR_resource_group_location}"
         Add-Content -Path ${PWD}/inspec_inputs.yml -Value "kubernetes_private_cluster: ${env:TF_VAR_is_cluster_private}"
@@ -118,10 +118,10 @@ tasks:
 
         Import-Module Az.Aks
 
-        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /app/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
 
-        /app/build/scripts/Deploy-HelmCharts.ps1 `
-          -Path /app/deploy/helm/k8s_apps.yaml `
+        /eirctl/build/scripts/Deploy-HelmCharts.ps1 `
+          -Path /eirctl/deploy/helm/k8s_apps.yaml `
           -ResourceGroup ${env:TFOUT_resource_group_name} `
           -Clustername ${env:TFOUT_aks_cluster_name} `
           -Provider ${env:CLOUD_PLATFORM}
@@ -130,8 +130,8 @@ tasks:
     description: Build Docs for AKS
     context: docs
     command: |
-      /app/build/scripts/New-Glossary.ps1 -docpath /app/docs -path /app/tmp/glossary.adoc
-      Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
+      /eirctl/build/scripts/New-Glossary.ps1 -docpath /eirctl/docs -path /eirctl/tmp/glossary.adoc
+      Invoke-AsciiDoc -PDF -basepath /app -config /eirctl/docs.json -debug
 
   _release:
     context: powershell
