@@ -28,7 +28,7 @@ tasks:
     description: Initialise Terraform for chosen templates
     command:
       - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
-      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_environment -Path $env:TF_FILE_LOCATION
+      - Invoke-Terraform -Workspace -Arguments $(if ($env:TF_VAR_environment) { $env:TF_VAR_environment } else { "default" }) -Path $env:TF_FILE_LOCATION
 
   infra:vars:
     context: powershell

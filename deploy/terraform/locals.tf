@@ -1,8 +1,20 @@
 locals {
 
+  # First, read and validate the subscription environment tag to avoid silent failures
+  subscription_environment_tag          = lookup(data.azurerm_subscription.current.tags, "environment", "")
+  valid_environment_tag_values          = ["prod", "override", ""]
+  is_valid_subscription_environment_tag = contains(local.valid_environment_tag_values, local.subscription_environment_tag)
+
   # Determine if this is a production subscription or the override is being used
-  is_prod_subscription = lookup(data.azurerm_subscription.current.tags, "environment", "") == "prod" || var.is_prod_subscription
-  deploy_all_envs      = lookup(data.azurerm_subscription.current.tags, "environment", "") == "override" || var.deploy_all_environments
+  is_prod_subscription = (
+    (local.is_valid_subscription_environment_tag && local.subscription_environment_tag == "prod") ||
+    var.is_prod_subscription
+  )
+
+  deploy_all_envs = (
+    (local.is_valid_subscription_environment_tag && local.subscription_environment_tag == "override") ||
+    var.deploy_all_environments
+  )
 
   # Obtain a list of environments from the variables
   # This is a comma separated list which also has a flag to state if it is for the production subscription or not
