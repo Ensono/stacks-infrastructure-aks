@@ -114,7 +114,7 @@ stages:
           - task: PublishBuildArtifacts@1
             displayName: Publish Documentation
             inputs:
-              pathToPublish: $(Build.SourcesDirectory)/outputs/docs
+              pathToPublish: outputs/docs
               artifactName: docs
 
   # Called Non-Prod instead of Dev as all Non-Production stages will deploy to here
