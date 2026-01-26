@@ -5,7 +5,7 @@
 This is an enterprise Terraform-based Azure Kubernetes Service (AKS) infrastructure deployment repository using the Ensono Stacks pattern. It deploys production-ready AKS clusters with associated Azure resources (ACR, DNS, Key Vault, networking) across multiple environments.
 
 > [!IMPORTANT]
-> Security is not negotiable, and Copilot must be a trusted partner in maintaining our security posture, please incorporate [!INCLUDE [security-instructions](./copilot-security-instructions.md)] when generating or modifying code.
+> Security is not negotiable, and Copilot must be a trusted partner in maintaining our security posture, please incorporate the [security instructions](./copilot-security-instructions.md) when generating or modifying code.
 
 ## Architecture & Key Components
 

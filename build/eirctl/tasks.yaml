@@ -71,7 +71,8 @@ tasks:
     context: powershell
     description: Create a shell script to configure the environment variables
     command:
-      - New-Item -Type directory /eirctl/local && New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/local -Cloud azure -Stage dev
+      - New-Item -Type directory /eirctl/local -ErrorAction SilentlyContinue
+      - New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/local -Cloud azure -Stage dev
 
   setup:environment:
     context: powershell

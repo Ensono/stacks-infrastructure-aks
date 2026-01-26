@@ -5,6 +5,16 @@ data "azurerm_client_config" "current" {}
 # is a prod or nonprod sub or it should be overridden
 data "azurerm_subscription" "current" {}
 
+# Validate subscription environment tag to fail fast on misconfiguration
+resource "null_resource" "validate_subscription_tag" {
+  lifecycle {
+    precondition {
+      condition     = contains(["prod", "override", ""], lookup(data.azurerm_subscription.current.tags, "environment", ""))
+      error_message = "Invalid 'environment' subscription tag value '${lookup(data.azurerm_subscription.current.tags, "environment", "")}'. Allowed values are: prod, override, or empty."
+    }
+  }
+}
+
 # Get details about the ADO project, this is required so that Terraform
 # can create the variable group in the correct project and an ID is required for that
 data "azuredevops_project" "project" {
