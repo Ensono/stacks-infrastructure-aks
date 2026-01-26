@@ -108,14 +108,11 @@ stages:
             inputs:
               targetType: inline
               script: |
-                mkdir -p outputs/docs
                 eirctl run docs
-                ls -la outputs/docs || echo "No docs output found"
 
           # Upload the documentation as a build artifact
           - task: PublishBuildArtifacts@1
             displayName: Publish Documentation
-            condition: succeeded()
             inputs:
               pathToPublish: $(Build.SourcesDirectory)/outputs/docs
               artifactName: docs
