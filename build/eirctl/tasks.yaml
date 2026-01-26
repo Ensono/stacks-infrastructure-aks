@@ -131,7 +131,7 @@ tasks:
     context: docs
     command: |
       /eirctl/build/scripts/New-Glossary.ps1 -docpath /eirctl/docs -path /eirctl/tmp/glossary.adoc
-      Invoke-AsciiDoc -PDF -basepath /app -config /eirctl/docs.json -debug
+      Build-Documentation -Config /eirctl/docs.json -Verbose
 
   _release:
     context: powershell
