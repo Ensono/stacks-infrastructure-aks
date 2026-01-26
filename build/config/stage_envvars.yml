@@ -23,18 +23,17 @@ stages:
       - name: TF_BACKEND_PLAN
         description: Arguments that should be passed to Terraform during the plan process
         required: false
-      - name: TF_VAR_name_company
+      - name: TF_VAR_company
         description: Name of the company that the cluster is being built for
-      - name: TF_VAR_name_project
+      - name: TF_VAR_project
         description: Name of the project
-      - name: TF_VAR_name_component
-      - name: TF_VAR_name_environment
+      - name: TF_VAR_component
       - name: TF_VAR_stage
       - name: TF_VAR_attributes
         required: false
       - name: TF_VAR_tags
         required: false
-      - name: TF_VAR_resource_group_location
+      - name: TF_VAR_location
         description: Location that the cluster should be deployed to
       - name: TF_VAR_dns_zone
         description: Public DNS zone that should be used for URLs

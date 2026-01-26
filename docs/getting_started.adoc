@@ -29,14 +29,13 @@ In order to run the pipeline locally a number of environment variables are requi
 | `TF_FILE_LOCATION` | Path to the Terraform template files | [green]#icon:check[]#
 | `TF_BACKEND_INIT` | Arguments that should be passed to Terraform during the init process | [green]#icon:check[]#
 | `TF_BACKEND_PLAN` | Arguments that should be passed to Terraform during the plan process | [red]#icon:times[]#
-| `TF_VAR_name_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
-| `TF_VAR_name_project` | Name of the project | [green]#icon:check[]#
-| `TF_VAR_name_component` |  | [green]#icon:check[]#
-| `TF_VAR_name_environment` |  | [green]#icon:check[]#
+| `TF_VAR_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
+| `TF_VAR_project` | Name of the project | [green]#icon:check[]#
+| `TF_VAR_component` |  | [green]#icon:check[]#
 | `TF_VAR_stage` |  | [green]#icon:check[]#
 | `TF_VAR_attributes` |  | [red]#icon:times[]#
 | `TF_VAR_tags` |  | [red]#icon:times[]#
-| `TF_VAR_resource_group_location` | Location that the cluster should be deployed to | [green]#icon:check[]#
+| `TF_VAR_location` | Location that the cluster should be deployed to | [green]#icon:check[]#
 | `TF_VAR_dns_zone` | Public DNS zone that should be used for URLs | [green]#icon:check[]#
 | `TF_VAR_internal_dns_zone` | Private DNS zone for internal services | [green]#icon:check[]#
 | `TF_VAR_pfx_password` | Password for the certificate deployed into Kubernetes | [green]#icon:check[]#

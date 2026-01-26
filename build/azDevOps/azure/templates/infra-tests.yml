@@ -5,8 +5,8 @@ parameters:
   CHEF_LICENSE:
   REPORT_FILENAME:
   TF_FILE_LOCATION:
-  TF_VAR_name_environment:
-  TF_VAR_resource_group_location:
+  TF_VAR_stage:
+  TF_VAR_location:
   TF_VAR_is_cluster_private:
 
 steps:
@@ -17,8 +17,8 @@ steps:
       script: eirctl run tests:infra:inputs
     env:
       TF_FILE_LOCATION: ${{ parameters.tf_file_location }}
-      TF_VAR_name_environment: ${{ parameters.tf_var_name_environment }}
-      TF_VAR_resource_group_location: ${{ parameters.tf_var_resource_group_location }}
+      TF_VAR_stage: ${{ parameters.tf_var_stage }}
+      TF_VAR_location: ${{ parameters.tf_var_location }}
       TF_VAR_is_cluster_private: ${{ parameters.tf_var_is_private_cluster }}
 
       # Ensure that the env vars are set for access
