@@ -76,3 +76,7 @@ eirctl run docs                    # Generate documentation
 - `deploy/terraform/aks.tf` - AKS cluster configuration with all Azure integrations
 - `build/azDevOps/azure/deploy-infrastructure.yml` - Complete CI/CD pipeline definition
 - `docs/getting_started.adoc` - Complete environment variable reference table
+
+## What to Avoid
+
+- Directly calling tools, i.e. `terraform` - always use `eirctl` tasks i.e. `Invoke-Terraform` for consistency.
