@@ -1,7 +1,7 @@
 # Check the properties of the container registry, if it has been deployed
-# 
+#
 # NOTE: Cannot use the only_if method here because the name of the resource must be
-# specified for the control to pass the compile phase. This means that if the name of the registry 
+# specified for the control to pass the compile phase. This means that if the name of the registry
 # is null and the container registry is false it will still fail to compile.
 
 if input("create_acr")

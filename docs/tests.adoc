@@ -1,7 +1,7 @@
 ---
 id: aks_tests
 title: Tests
-description: To keep the resources in a known configuration and assist in keeping the necessary versions of software, e.g. Kubernetes, up to date the project contains infrastructure tests. 
+description: To keep the resources in a known configuration and assist in keeping the necessary versions of software, e.g. Kubernetes, up to date the project contains infrastructure tests.
 weight: 70
 ---
 

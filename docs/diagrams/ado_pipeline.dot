@@ -7,14 +7,14 @@ digraph G {
       label=< <B>Build</B> >
       style="filled"
       fillcolor="#D52ABF"
-      
+
       setup[shape=box, label="Install Taskctl", style="filled", fillcolor="cyan", fontcolor="blue"]
       lint[shape=box, label="Lint\n(lint)"]
       docs[shape=box, label="Documentation\n(docs)"]
       publish[shape=box, label="Publish Docs", style="filled", fillcolor="cyan", fontcolor="blue"]
-      
-      setup -> lint 
-      lint -> docs 
+
+      setup -> lint
+      lint -> docs
       docs -> publish
   }
 
@@ -37,7 +37,7 @@ digraph G {
       destroy_environment_nonprod[shape=box, label="Destroy Infrastructure\n(infrastructure_destroy)"]
 
       notes_nonprod[shape=none, label="Only runs\non branches", style="filled", fillcolor="#FFFEC5"]
-      
+
       setup_nonprod -> destroy_question_nonprod -> infra_nonprod -> tests_nonprod -> publish_tests_nonprod -> deploy_helm_nonprod
       destroy_question_nonprod -> destroy_environment_nonprod -> infra_nonprod
 
@@ -63,7 +63,7 @@ digraph G {
       destroy_environment_prod[shape=box, label="Destroy Infrastructure\n(infrastructure_destroy)"]
 
       notes_prod[shape=none, label="Only runs on the\ntrunk branch", style="filled", fillcolor="#FFFEC5"]
-      
+
       setup_prod -> destroy_question_prod -> infra_prod -> tests_prod -> publish_tests_prod -> deploy_helm_prod;
       destroy_question_prod -> destroy_environment_prod -> infra_prod
 
@@ -90,6 +90,6 @@ digraph G {
       release -> notes_release[style="invis"]
   }
 
-  
+
 
 }

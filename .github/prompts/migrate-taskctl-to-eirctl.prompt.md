@@ -45,7 +45,7 @@ curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-asciidoctor/t
 Current versions in use:
 
 - `ensono/eir-infrastructure` (powershell context)
-- `ensono/eir-inspec` (infratests context)  
+- `ensono/eir-inspec` (infratests context)
 - `ensono/eir-asciidoctor` (docs context)
 
 Note: Container image versions may be unpinned to use latest. Consider pinning to specific versions for production stability.

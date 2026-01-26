@@ -35,7 +35,7 @@ Currently knows how to set the build number for Azure DevOps.
 | `infra:output` | Present the Terraform outputs as a JSON string
 | `setup:dev` | Create a shell script which will configure the environment variables based on the `build/config/stage_envvars.yaml`
 | `setup:environment` | Ensure that the environment is configured correctly. This can be used to ensure that all the necessary environment variables have been set.
-| `tests:infra:init` | Initialse the Inspec test profile. 
+| `tests:infra:init` | Initialse the Inspec test profile.
 | `tests:infra:vendor` | This will analyse the profile and download the required providers to run the tests
 | `tests:infra:run` | Execute infrastructure tests against the deployed Cloud Resources using Inspec
 | `helm:charts` | Deploy enabled charts to the Kubernetes cluster. More information can be found in the <<Helm>> section.
@@ -57,7 +57,7 @@ All of the steps in the pipeline are run in parallel where possible. |
 ----
 include::diagrams/lint.dot[]
 ----
-| tests | Perform infrastructure tests | 
+| tests | Perform infrastructure tests |
 [graphviz]
 ----
 include::diagrams/tests.dot[]
@@ -104,7 +104,7 @@ These values can be set, either when running the pipeline from the ADO portal or
 
 [cols="1a,1a",frame=none,grid=none]
 |===
-| 
+|
 .Executing pipeline from the portal
 image::images/ado_portal_pipeline_run.png[width=300]
 |
@@ -132,7 +132,7 @@ These options allow environments to be managed from any branch if required. The 
 | `true` | `false` | `true` | Non-prod and prod environments will both be deployed
 | `true` | `true` | `true` | Rebuild all environments
 | `false` | `true` | `true` | Destroy all environments
-| `false` | `false` | `true` | No-op 
+| `false` | `false` | `true` | No-op
 |===
 
 
