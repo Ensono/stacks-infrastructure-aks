@@ -12,7 +12,7 @@ steps:
       targetType: inline
       script: |
         set -euo pipefail
-        EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/v${{ parameters.EirctlVersion }}/eirctl-linux-amd64"
+        EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/${{ parameters.EirctlVersion }}/eirctl-linux-amd64"
         EIRCTL_PATH="/usr/local/bin/eirctl"
         echo "Downloading eirctl ${{ parameters.EirctlVersion }} from ${EIRCTL_URL}..."
         if ! sudo wget --timeout=30 --tries=3 -q "${EIRCTL_URL}" -O "${EIRCTL_PATH}"; then
