@@ -44,12 +44,11 @@ curl -s https://registry.hub.docker.com/v2/repositories/ensono/eir-asciidoctor/t
 
 Current versions in use:
 
-- `docker.io/ensono/eir-infrastructure:1.2.39`
-- `docker.io/ensono/eir-inspec:1.2.39`
-- `docker.io/ensono/eir-asciidoctor:1.2.39`
-- `amidostacks/runner-pwsh:0.4.60-stable`
+- `ensono/eir-infrastructure` (powershell context)
+- `ensono/eir-inspec` (infratests context)
+- `ensono/eir-asciidoctor` (docs context)
 
-Update these if newer stable versions are available.
+Note: Container image versions may be unpinned to use latest. Consider pinning to specific versions for production stability.
 
 ### 1.1c Check for GitHub Actions and GitLab CI
 
@@ -89,7 +88,7 @@ Create a complete inventory of files to migrate:
 Examine the following in detail:
 
 1. **Contexts** (in [build/taskctl/contexts.yaml](../../build/taskctl/contexts.yaml)):
-   - Count contexts: Expect 4 (powershell, infratests, powershell-python, docsenv)
+   - Count contexts: Expect 3 (powershell, infratests, docs)
    - Note container images and versions
    - Identify all paths using `/app/` prefix
    - Check for `-NoProfile` flags in PowerShell contexts (CRITICAL: must be removed)
@@ -209,14 +208,15 @@ contexts:
 - ✅ Removed `envfile.generate: true` (automatic in eirctl)
 - ✅ Removed manual Docker volume mounts (automatic in eirctl)
 
-### 2.3 Convert All 4 Contexts
+### 2.3 Convert All 3 Contexts
 
 Apply the conversion to:
 
 1. **powershell** - Primary context for Terraform, linting, Helm
 2. **infratests** - InSpec testing context
-3. **powershell-python** - Hybrid PowerShell/Python context
-4. **docsenv** - Documentation build context (uses eir-asciidoctor image)
+3. **docs** - Documentation build context (uses eir-asciidoctor image)
+
+**Note**: The `powershell-python` context has been removed. If Python functionality is needed, use the `powershell` context which has Python available.
 
 For contexts that need Docker socket access, add volume mounting:
 
@@ -230,13 +230,13 @@ container:
     - /var/run/docker.sock:/var/run/docker.sock
 ```
 
-Contexts needing Docker socket: powershell, infratests, powershell-python (not docsenv)
+Contexts needing Docker socket: powershell, infratests (not docs)
 
 ### 2.4 Verify Context Conversion
 
 Check each converted context:
 
-- [ ] All 4 contexts converted
+- [ ] All 3 contexts converted (powershell, infratests, docs)
 - [ ] No `-NoProfile` flags remain
 - [ ] Container images specified correctly
 - [ ] Environment variables moved to `env:` section
@@ -283,91 +283,72 @@ import:
   - ./build/eirctl/tasks.yaml
 ```
 
-### 3.3 Update Path References in Tasks
+### 3.3 Verify Path References in Tasks
 
-**Path Migration Strategy:**
+**Path Convention:**
 
-eirctl changed the default container working directory from `/app` to `/eirctl`. You have two options:
+The containers mount the workspace at `/app`. All paths should use this absolute prefix for consistency with the container environment.
 
-| Option                     | Approach             | Example                                | Pros              | Cons                  |
-| -------------------------- | -------------------- | -------------------------------------- | ----------------- | --------------------- |
-| **Option A** (RECOMMENDED) | Use relative paths   | `./build/scripts/Set-TFVars.ps1`       | Portable, cleaner | None                  |
-| **Option B**               | Update to `/eirctl/` | `/eirctl/build/scripts/Set-TFVars.ps1` | Explicit          | Harder to run locally |
+Verify these paths exist in `build/eirctl/tasks.yaml`:
 
-**Choose Option A (relative paths) unless there's a specific reason not to.**
-
-Search for these patterns in `build/eirctl/tasks.yaml` and update:
-
-| Current Path                                 | New Path (Option A)                       |
-| -------------------------------------------- | ----------------------------------------- |
-| `/app/build/scripts/Set-TFVars.ps1`          | `./build/scripts/Set-TFVars.ps1`          |
-| `/app/build/scripts/Set-EnvironmentVars.ps1` | `./build/scripts/Set-EnvironmentVars.ps1` |
-| `/app/build/scripts/Deploy-HelmCharts.ps1`   | `./build/scripts/Deploy-HelmCharts.ps1`   |
-| `/app/deploy/terraform`                      | `./deploy/terraform`                      |
-| `/app/deploy/tests`                          | `./deploy/tests`                          |
-| `/app/outputs`                               | `./outputs`                               |
+| Path                                         | Purpose                           |
+| -------------------------------------------- | --------------------------------- |
+| `/app/build/scripts/Set-TFVars.ps1`          | Generate tfvars file              |
+| `/app/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs   |
+| `/app/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts                |
+| `/app/deploy/terraform`                      | Terraform templates               |
+| `/app/deploy/tests`                          | InSpec tests                      |
+| `/app/outputs`                               | Build outputs                     |
 
 **Environment variable defaults:**
 
-- If `TF_FILE_LOCATION` is set to `/app/deploy/terraform`, update to `./deploy/terraform`
-- Check task commands for other hardcoded `/app/` references
+- `TF_FILE_LOCATION` should be set to `/app/deploy/terraform`
+- Verify all task commands use `/app/` prefix consistently
 
 ### 3.4 Update Specific Tasks
 
-Review and update these tasks in `build/eirctl/tasks.yaml`:
+Review and verify these tasks in `build/eirctl/tasks.yaml` use correct paths:
 
 **Task: `infra:vars`**
 
 ```yaml
-# Update command from:
+# Command should use /app/ prefix:
 command:
-  - /app/build/scripts/Set-TFVars.ps1 | Out-File ...
-# To:
-command:
-  - ./build/scripts/Set-TFVars.ps1 | Out-File ...
+  - /app/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
 ```
 
 **Task: `setup:dev`**
 
 ```yaml
-# Update command from:
+# Command should use /app/ prefix:
 command:
-  - /app/build/scripts/Set-EnvironmentVars.ps1
-# To:
-command:
-  - ./build/scripts/Set-EnvironmentVars.ps1
+  - New-EnvConfig -Path /app/build/config/stage_envvars.yml -ScriptPath /app/local
 ```
 
 **Task: `infra:helm:apply`**
 
 ```yaml
-# Update script path from:
+# Script path should use /app/ prefix:
 command:
-  - /app/build/scripts/Deploy-HelmCharts.ps1
-# To:
-command:
-  - ./build/scripts/Deploy-HelmCharts.ps1
+  - /app/build/scripts/Deploy-HelmCharts.ps1 -Path /app/deploy/helm/k8s_apps.yaml ...
 ```
 
 **Task: `tests:infra:run`**
 
 ```yaml
-# Update INSPEC_FILES from:
+# INSPEC_FILES should use /app/ prefix:
 env:
   INSPEC_FILES: /app/deploy/tests
-# To:
-env:
-  INSPEC_FILES: ./deploy/tests
 ```
 
 **Task: `_docs`**
 
 ```yaml
-# Uses docsenv context (eir-asciidoctor) instead of powershell
+# Uses docs context (eir-asciidoctor) instead of powershell
 # Command:
 command: |
-  ./build/scripts/New-Glossary.ps1 -docpath ./docs -path ./tmp/glossary.adoc
-  Build-Documentation -Config /eirctl/docs.json
+  /app/build/scripts/New-Glossary.ps1 -docpath /app/docs -path /app/tmp/glossary.adoc
+  Invoke-AsciiDoc -PDF -basepath /app -config /app/docs.json -debug
 ```
 
 **Task: `infra:apply` (CRITICAL PATH FIX)**
@@ -419,7 +400,9 @@ ls -la build/eirctl/
 
 # Verify no references to old structure remain
 grep -r "taskctl" build/eirctl/ || echo "✓ No taskctl references in build/eirctl/"
-grep -r "/app/" build/eirctl/ || echo "✓ No /app/ paths in build/eirctl/"
+
+# Verify /app/ paths are used consistently
+grep -r "/app/" build/eirctl/tasks.yaml && echo "✓ /app/ paths found in tasks"
 
 # Verify old taskctl directory is removed (only in git, working directory may have backups)
 ls -la build/taskctl 2>/dev/null && echo "Warning: taskctl directory still exists" || echo "✓ taskctl directory cleaned"
@@ -667,47 +650,28 @@ grep -c "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 grep -n "taskctl " build/azDevOps/azure/deploy-infrastructure.yml
 ```
 
-### 4.6 Update `/app/` Paths in CI/CD Pipelines
+### 4.6 Verify `/app/` Paths in CI/CD Pipelines
 
-The CI/CD pipeline files also contain environment variable definitions that reference `/app/`. These must be updated to use relative paths (consistent with the task updates in Phase 3).
+The CI/CD pipeline files should contain environment variable definitions that use `/app/` paths. Verify these are correct:
 
-**Files to update:**
+**Files to check:**
 
 - [build/azDevOps/azure/deploy-infrastructure.yml](../../build/azDevOps/azure/deploy-infrastructure.yml)
 - [build/azDevOps/azure/templates/infra-tests.yml](../../build/azDevOps/azure/templates/infra-tests.yml)
 - [build/azDevOps/azure/infrastructure-tests.yml](../../build/azDevOps/azure/infrastructure-tests.yml)
 
-**Search for `/app/` references:**
+**Verify these paths in pipeline `env:` blocks:**
+
+| Variable              | Expected Value               |
+| --------------------- | ---------------------------- |
+| `TF_FILE_LOCATION`    | `/app/deploy/terraform`      |
+| `INSPEC_FILES`        | `/app/deploy/tests`          |
+| `INSPEC_OUTPUT_PATH`  | `/app/outputs/tests`         |
+
+**Verify /app/ paths exist:**
 
 ```bash
-# Find all /app/ references in CI/CD files
-grep -rn "/app/" build/azDevOps/
-```
-
-**Common replacements in pipeline `env:` blocks:**
-
-| Current Value                             | New Value                              |
-| ----------------------------------------- | -------------------------------------- |
-| `TF_FILE_LOCATION: /app/deploy/terraform` | `TF_FILE_LOCATION: ./deploy/terraform` |
-| `INSPEC_FILES: /app/deploy/tests`         | `INSPEC_FILES: ./deploy/tests`         |
-| `INSPEC_OUTPUT_PATH: /app/outputs/tests`  | `INSPEC_OUTPUT_PATH: ./outputs/tests`  |
-
-**Example update in deploy-infrastructure.yml:**
-
-```yaml
-# Before:
-env:
-  TF_FILE_LOCATION: /app/deploy/terraform
-
-# After:
-env:
-  TF_FILE_LOCATION: ./deploy/terraform
-```
-
-**Verify all `/app/` paths are updated:**
-
-```bash
-# Should return 0 matches
+# Count /app/ references (should be > 0)
 grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
 ```
 
@@ -719,7 +683,7 @@ Check completeness:
 # Should return 0 matches for taskctl in Azure DevOps
 grep -r "taskctl" build/azDevOps/ 2>/dev/null | wc -l
 
-# Should return 0 matches for /app/ paths in Azure DevOps
+# Should return > 0 matches for /app/ paths in Azure DevOps (paths should use /app/)
 grep -r "/app/" build/azDevOps/ 2>/dev/null | wc -l
 
 # Should return 0 matches in GitHub Actions (if present)
@@ -840,10 +804,9 @@ Test Terraform operations WITHOUT applying:
 
 ```bash
 # Set required environment variables (adjust for your environment)
-export TF_FILE_LOCATION="./deploy/terraform"
-export TF_VAR_name_environment="test"
+export TF_FILE_LOCATION="/app/deploy/terraform"
+export TF_VAR_environment="test"
 export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=<your_storage>,resource_group_name=<your_rg>"
-export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 
 # Set other required TF_VAR_* variables from build/config/stage_envvars.yml
 # (This is a comprehensive list - consult the file for all required variables)
@@ -908,17 +871,17 @@ eirctl run infra:output  # Or any task that might use Docker
 Mark each item when verified:
 
 - [ ] `eirctl --version` works
-- [ ] `eirctl list` shows all 5 pipelines
+- [ ] `eirctl list` shows all 6 pipelines
 - [ ] `eirctl graph <pipeline>` works for each pipeline
 - [ ] `eirctl run lint` completes successfully
 - [ ] `eirctl run infra:init` initializes Terraform
 - [ ] `eirctl run infra:plan` generates a plan
-- [ ] `eirctl run infra:apply` applies the plan successfully (no double-path errors)
+- [ ] `eirctl run infra:apply` applies the plan successfully
 - [ ] `eirctl run docs` builds documentation
 - [ ] Environment variables pass correctly to containers
 - [ ] Docker socket mounting works (if needed)
-- [ ] No `/app/` path errors in any task
-- [ ] No double-path errors in `infra:apply` or `infra:destroy:apply` tasks
+- [ ] All `/app/` paths resolve correctly in containers
+- [ ] Terraform workspace uses `$env:TF_VAR_environment` correctly
 - [ ] PowerShell modules load correctly (no `-NoProfile` issues)
 
 **STOP** if any validation fails. Debug and fix before proceeding.
@@ -1070,12 +1033,12 @@ Before committing:
 **Configuration:**
 
 - [ ] `eirctl.yaml` exists at root
-- [ ] `build/eirctl/contexts.yaml` has all 4 contexts converted
-- [ ] `build/eirctl/tasks.yaml` has all tasks with updated paths
+- [ ] `build/eirctl/contexts.yaml` has all 3 contexts converted (powershell, infratests, docs)
+- [ ] `build/eirctl/tasks.yaml` has all tasks with `/app/` paths
 - [ ] `build/taskctl/` is removed from git (cleaned up via git rm)
 - [ ] No `-NoProfile` flags in any context
 - [ ] Import statements updated to `build/eirctl/`
-- [ ] Container image versions updated to latest stable
+- [ ] Container images specified (pinned or latest)
 
 **CI/CD:**
 
@@ -1083,11 +1046,11 @@ Before committing:
 - [ ] `templates/setup.yml` installs eirctl with correct version and error handling
 - [ ] `deploy-infrastructure.yml` uses `eirctl run` commands
 - [ ] Docker Hub login step added after setup.yml in all jobs (to avoid rate limiting)
-- [ ] All `/app/` paths in CI/CD files updated to relative paths (`./`)
+- [ ] All paths in CI/CD files use `/app/` prefix
 - [ ] GitHub Actions workflows updated (if present)
 - [ ] GitLab CI configuration updated (if present)
 - [ ] No remaining `taskctl` references in any CI/CD files
-- [ ] No remaining `/app/` references in any CI/CD files
+- [ ] Variable names use new convention (`company`, `project`, `component`, `location`)
 
 **Documentation:**
 
@@ -1136,10 +1099,10 @@ git commit -m "Migrate from taskctl to eirctl
 - Rename taskctl.yaml → eirctl.yaml
 - Remove build/taskctl/ directory (clean migration)
 - Create build/eirctl/ with modernized configuration
-- Convert all 4 contexts to eirctl container-first syntax
+- Convert all 3 contexts to eirctl container-first syntax (powershell, infratests, docs)
 - Remove -NoProfile flags from PowerShell contexts (required for eirctl)
-- Update all task paths from /app/ to relative paths
-- Update container image versions to latest stable
+- Verify all task paths use /app/ prefix
+- Update variable naming to simplified convention (company, project, component, location)
 - Update CI/CD pipelines to use eirctl run commands
 - Update GitHub Actions workflows (if present)
 - Update GitLab CI configuration (if present)
@@ -1148,6 +1111,9 @@ git commit -m "Migrate from taskctl to eirctl
 
 Breaking changes:
 - Commands now use: eirctl run <pipeline> (not taskctl <pipeline>)
+- Configuration moved: build/taskctl/ → build/eirctl/
+- Variable naming: name_company → company, name_project → project, etc.
+- Terraform workspace variable: TF_VAR_name_environment → TF_VAR_environment
 - Configuration moved: build/taskctl/ → build/eirctl/
 - Container images updated to latest stable versions
 
@@ -1180,10 +1146,11 @@ Successfully migrated from taskctl to eirctl with full validation.
 
 ### Key Changes
 
-1. **Context modernization**: Converted 4 contexts to container-first syntax
-2. **Path updates**: Changed [N] absolute paths to relative paths
-3. **CI/CD integration**: Updated [N] pipeline invocations
+1. **Context modernization**: Converted 3 contexts to container-first syntax (powershell, infratests, docs)
+2. **Path convention**: Verified all paths use `/app/` prefix
+3. **CI/CD integration**: Updated [N] pipeline invocations to use `eirctl run`
 4. **Critical fix**: Removed `-NoProfile` from PowerShell contexts
+5. **Variable naming**: Updated to use `company`, `project`, `component`, `location` (not `name_*` prefix)
 
 ### Validation Results
 
@@ -1197,10 +1164,9 @@ Successfully migrated from taskctl to eirctl with full validation.
 
 Used the following images (verify versions):
 
-- `docker.io/ensono/eir-infrastructure:1.2.39`
-- `docker.io/ensono/eir-inspec:1.2.39`
-- `docker.io/ensono/eir-asciidoctor:1.2.39`
-- `amidostacks/runner-pwsh:0.4.60-stable`
+- `ensono/eir-infrastructure` (powershell context)
+- `ensono/eir-inspec` (infratests context)
+- `ensono/eir-asciidoctor` (docs context)
 
 ### eirctl Version
 
@@ -1232,9 +1198,10 @@ The git-based approach is cleaner and more maintainable than local backups.
 
 ### Known Considerations
 
-- Container images are from private ACR - consider migrating to public Ensono images in future
+- Container images use `/app` as the workspace mount point
 - PowerShell modules now load via profiles (required for eirctl)
-- Default working directory changed from `/app` to `/eirctl` (mitigated with relative paths)
+- Variable naming uses simplified convention: `company`, `project`, `component`, `location` (not `name_company`, etc.)
+- Terraform workspace variable is `TF_VAR_environment`
 
 ---
 

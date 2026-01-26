@@ -28,20 +28,19 @@ After generating the template, populate the environment variables file using val
 | Variable                         | Source Value                                                           |
 | -------------------------------- | ---------------------------------------------------------------------- |
 | `CLOUD_PLATFORM`                 | `azure`                                                                |
-| `TF_FILE_LOCATION`               | `./deploy/terraform`                                                   |
-| `TF_VAR_name_company`            | `ed` (from `company`)                                                  |
-| `TF_VAR_name_project`            | `stacks` (from `project`)                                              |
-| `TF_VAR_name_component`          | `core` (from `domain`)                                                 |
-| `TF_VAR_name_environment`        | `dev` (or your target environment)                                     |
+| `TF_FILE_LOCATION`               | `/app/deploy/terraform`                                                |
+| `TF_VAR_company`                 | `ed` (from `company`)                                                  |
+| `TF_VAR_project`                 | `stacks` (from `project`)                                              |
+| `TF_VAR_component`               | `core` (from `domain`)                                                 |
+| `TF_VAR_environment`             | `dev` (or your target environment)                                     |
 | `TF_VAR_stage`                   | `dev` (or your target environment)                                     |
-| `TF_VAR_resource_group_location` | `westeurope` (from `region`)                                           |
+| `TF_VAR_location`                | `westeurope` (from `region`)                                           |
 | `TF_VAR_dns_zone`                | `nonprod.stacks.ensono.com` (from `base_domain_nonprod`)               |
 | `TF_VAR_internal_dns_zone`       | `nonprod.stacks.ensono.internal` (from `base_domain_internal_nonprod`) |
 | `TF_VAR_dns_resource_group`      | `stacks-ancillary-resources`                                           |
 | `TF_VAR_create_dns_zone`         | `false`                                                                |
 | `TF_VAR_create_aksvnet`          | `true`                                                                 |
-| `TF_VAR_cluster_version`         | `1.34.1` (from `aks_cluster_version`)                                  |
-| `TF_VAR_cluster_sku_tier`        | `Standard` (from `aks_cluster_sku_tier`)                               |
+| `TF_VAR_cluster_version`         | `1.27.9` (from `aks_cluster_version`)                                  |
 | `TF_VAR_create_acr`              | `false`                                                                |
 | `TF_VAR_acr_resource_group`      | `stacks-ancillary-resources`                                           |
 | `TF_VAR_acr_name`                | `ensonoeuw`                                                            |
@@ -110,19 +109,19 @@ export ARM_SUBSCRIPTION_ID="<your-azure-subscription-id>"
 export ARM_TENANT_ID="<your-azure-tenant-id>"
 
 # Terraform configuration
-export TF_FILE_LOCATION="./deploy/terraform"
+export TF_FILE_LOCATION="/app/deploy/terraform"
 export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
 export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 
 # Naming convention variables
-export TF_VAR_name_company="ed"
-export TF_VAR_name_project="stacks"
-export TF_VAR_name_component="core"
-export TF_VAR_name_environment="dev"
+export TF_VAR_company="ed"
+export TF_VAR_project="stacks"
+export TF_VAR_component="core"
+export TF_VAR_environment="dev"
 export TF_VAR_stage="dev"
 
 # Azure location
-export TF_VAR_resource_group_location="westeurope"
+export TF_VAR_location="westeurope"
 
 # DNS configuration
 export TF_VAR_dns_zone="nonprod.stacks.ensono.com"
@@ -132,8 +131,7 @@ export TF_VAR_create_dns_zone="false"
 
 # AKS configuration
 export TF_VAR_create_aksvnet="true"
-export TF_VAR_cluster_version="1.34.1"
-export TF_VAR_cluster_sku_tier="Standard"
+export TF_VAR_cluster_version="1.27.9"
 export TF_VAR_is_cluster_private="true"
 export TF_VAR_create_user_identity="true"
 
