@@ -53,12 +53,12 @@ variable "dns_zone" {
 }
 
 variable "dns_parent_zone" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "dns_parent_zone_resource_group" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -71,7 +71,7 @@ variable "pfx_password" {
 }
 
 variable "dns_resource_group" {
-  type = string
+  type    = string
   default = ""
 }
 
@@ -119,7 +119,7 @@ variable "deploy_all_environments" {
 }
 
 variable "cluster_version" {
-  type = string
+  type    = string
   default = "1.33.3"
 }
 
@@ -138,7 +138,7 @@ variable "create_acr" {
 }
 
 variable "acr_resource_group" {
-  type = string
+  type    = string
   default = ""
 }
 
