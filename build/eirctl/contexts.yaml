@@ -8,7 +8,7 @@ contexts:
     envfile:
       exclude:
         - sourceversionmessage
-        - posh_azure_subscription
+        - powershell_azure_subscription
 
   infratests:
     container:
