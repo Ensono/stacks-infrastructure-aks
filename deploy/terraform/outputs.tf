@@ -171,9 +171,3 @@ output "create_valid_cert" {
 output "kubernetes_version" {
   value = var.cluster_version
 }
-
-output "encoded_outputs" {
-  description = "Base64 encoded outputs for use in pipelines etc"
-  value       = jsonencode(module.naming.encoded_outputs)
-  sensitive   = true
-}

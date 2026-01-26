@@ -65,7 +65,7 @@ tasks:
     context: powershell
     description: Terraform Outputs
     command:
-      - Invoke-Terraform -Output
+      - Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | Out-File local/output.json
 
   setup:dev:
     context: powershell

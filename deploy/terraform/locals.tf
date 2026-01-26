@@ -34,9 +34,14 @@ locals {
     }
   }
 
-  outputs = { for envname in local.environments : envname => {
+  outputs = { for envname in local.environments : envname => merge(local.resource_outputs[envname], {
+    acr_admin_password                  = module.aks_bootstrap.acr_admin_password
+    acr_admin_username                  = module.aks_bootstrap.acr_admin_username
+    acr_id                              = module.aks_bootstrap.acr_id
+    acr_login_server                    = module.aks_bootstrap.acr_login_server
     acr_registry_name                   = module.aks_bootstrap.acr_registry_name
     acr_resource_group_name             = module.aks_bootstrap.acr_resource_group_name
+    aks_cluster_fqdn                    = module.aks_bootstrap.aks_cluster_fqdn
     aks_cluster_name                    = module.aks_bootstrap.aks_cluster_name
     aks_default_user_identity_client_id = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_client_id : ""
     aks_default_user_identity_id        = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_id : ""
@@ -73,9 +78,23 @@ locals {
     vnet_address_space                  = var.create_aksvnet ? module.aks_bootstrap.vnet_address_space : []
     vnet_name                           = var.create_aksvnet ? module.aks_bootstrap.vnet_name : ""
 
-    }
+    })
   }
 
+  encoded_outputs = tomap({
+    for name in local.environments : name => {
+      for k, v in local.outputs[name] :
+      replace(k, "-", "_") => (
+        // This will be true for lists (arrays)
+        can([for x in v : x]) ||
+        // This will be true for maps/objects
+        can(keys(v)) ?
+
+        jsonencode(v) :
+        tostring(v)
+      )
+    }
+  })
 
   company_short_name = lower(substr(var.company, 0, 3))
 
