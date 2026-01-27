@@ -806,7 +806,7 @@ Test Terraform operations WITHOUT applying:
 # Set required environment variables (adjust for your environment)
 export TF_FILE_LOCATION="/eirctl/deploy/terraform"
 export TF_VAR_environment="test"
-export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=<your_storage>,resource_group_name=<your_rg>"
+export TF_BACKEND_INIT="key=core:infrastructure:aks:dev,container_name=tfstate,storage_account_name=<your_storage>,resource_group_name=<your_rg>"
 
 # Set other required TF_VAR_* variables from build/config/stage_envvars.yml
 # (This is a comprehensive list - consult the file for all required variables)

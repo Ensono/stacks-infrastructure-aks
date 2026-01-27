@@ -31,7 +31,7 @@ After generating the template, populate the environment variables file using val
 | `TF_FILE_LOCATION`            | `/eirctl/deploy/terraform`                                             |
 | `TF_VAR_company`              | `ed` (from `company`)                                                  |
 | `TF_VAR_project`              | `stacks` (from `project`)                                              |
-| `TF_VAR_component`            | `core` (from pipeline variable `domain`, mapped to Terraform variable `component`) |
+| `TF_VAR_component`            | `infra:dev` (from pipeline variable `domain`, mapped to Terraform variable `component`) |
 | `TF_VAR_stage`                | `dev` (or your target environment)                                     |
 | `TF_VAR_location`             | `uksouth` (from `region`)                                              |
 | `TF_VAR_dns_zone`             | `nonprod.stacks.ensono.com` (from `base_domain_nonprod`)               |
@@ -51,7 +51,7 @@ After generating the template, populate the environment variables file using val
 ### Terraform Backend Configuration:
 
 ```bash
-TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
+TF_BACKEND_INIT="key=core:infrastructure:aks:dev,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
 TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 ```
 
@@ -109,7 +109,7 @@ export ARM_TENANT_ID="<your-azure-tenant-id>"
 
 # Terraform configuration
 export TF_FILE_LOCATION="/eirctl/deploy/terraform"
-export TF_BACKEND_INIT="key=infra-aks,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
+export TF_BACKEND_INIT="key=core:infrastructure:aks:dev,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
 export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 
 # Naming convention variables

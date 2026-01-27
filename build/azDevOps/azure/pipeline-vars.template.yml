@@ -47,7 +47,7 @@ variables:
   - name: tf_state_container
     value: {{ .Input.Terraform.Backend.Container }}
   - name: tf_state_key
-    value: core
+    value: "core:infrastructure:aks"
 
   # ------- Network Domain names
   - name: base_domain_nonprod

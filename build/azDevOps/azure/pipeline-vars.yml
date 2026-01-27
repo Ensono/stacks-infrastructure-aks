@@ -13,10 +13,10 @@ variables:
   - name: project
     value: stacks
 
-  # which domain fo the company is this. e.g. core resources, or front end
+  # which domain of the company is this. e.g. core resources, or front end
   # This is not a network domain
   - name: domain
-    value: core
+    value: infra
 
   # the email address to use when creating the SSL certificate
   - name: acme_email
@@ -60,7 +60,7 @@ variables:
   - name: tf_state_container
     value: tfstate
   - name: tf_state_key
-    value: infradev
+    value: "core:infrastructure:aks"
 
   # -------- Network Domain names
   - name: base_domain_nonprod
