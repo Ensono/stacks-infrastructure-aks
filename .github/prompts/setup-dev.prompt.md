@@ -25,29 +25,29 @@ After generating the template, populate the environment variables file using val
 
 ### Values available from pipeline-vars.yml (#file:../../build/azDevOps/azure/pipeline-vars.yml):
 
-| Variable                         | Source Value                                                           |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `CLOUD_PLATFORM`                 | `azure`                                                                |
-| `TF_FILE_LOCATION`               | `/eirctl/deploy/terraform`                                                |
-| `TF_VAR_company`                 | `ed` (from `company`)                                                  |
-| `TF_VAR_project`                 | `stacks` (from `project`)                                              |
-| `TF_VAR_component`               | `core` (from `domain`)                                                 |
-| `TF_VAR_environment`             | `dev` (or your target environment)                                     |
-| `TF_VAR_stage`                   | `dev` (or your target environment)                                     |
-| `TF_VAR_location`                | `westeurope` (from `region`)                                           |
-| `TF_VAR_dns_zone`                | `nonprod.stacks.ensono.com` (from `base_domain_nonprod`)               |
-| `TF_VAR_internal_dns_zone`       | `nonprod.stacks.ensono.internal` (from `base_domain_internal_nonprod`) |
-| `TF_VAR_dns_resource_group`      | `stacks-ancillary-resources`                                           |
-| `TF_VAR_create_dns_zone`         | `false`                                                                |
-| `TF_VAR_create_aksvnet`          | `true`                                                                 |
-| `TF_VAR_cluster_version`         | `1.27.9` (from `aks_cluster_version`)                                  |
-| `TF_VAR_create_acr`              | `false`                                                                |
-| `TF_VAR_acr_resource_group`      | `stacks-ancillary-resources`                                           |
-| `TF_VAR_acr_name`                | `ensonoeuw`                                                            |
-| `TF_VAR_is_cluster_private`      | `true` (from `private_cluster`)                                        |
-| `TF_VAR_acme_email`              | `stacks@ensono.com`                                                    |
-| `TF_VAR_create_user_identity`    | `true`                                                                 |
-| `TF_VAR_pfx_password`            | `Password1` (development only - use a secure password for production)  |
+| Variable                      | Source Value                                                           |
+| ----------------------------- | ---------------------------------------------------------------------- |
+| `CLOUD_PLATFORM`              | `azure`                                                                |
+| `TF_FILE_LOCATION`            | `/eirctl/deploy/terraform`                                             |
+| `TF_VAR_company`              | `ed` (from `company`)                                                  |
+| `TF_VAR_project`              | `stacks` (from `project`)                                              |
+| `TF_VAR_component`            | `core` (from `domain`)                                                 |
+| `TF_VAR_environment`          | `dev` (or your target environment)                                     |
+| `TF_VAR_stage`                | `dev` (or your target environment)                                     |
+| `TF_VAR_location`             | `uksouth` (from `region`)                                              |
+| `TF_VAR_dns_zone`             | `nonprod.stacks.ensono.com` (from `base_domain_nonprod`)               |
+| `TF_VAR_internal_dns_zone`    | `nonprod.stacks.ensono.internal` (from `base_domain_internal_nonprod`) |
+| `TF_VAR_dns_resource_group`   | `stacks-dns-zones`                                                     |
+| `TF_VAR_create_dns_zone`      | `false`                                                                |
+| `TF_VAR_create_aksvnet`       | `true`                                                                 |
+| `TF_VAR_cluster_version`      | `1.34.1` (from `aks_cluster_version`)                                  |
+| `TF_VAR_create_acr`           | `false`                                                                |
+| `TF_VAR_acr_resource_group`   | `stacks-dns-zones`                                                     |
+| `TF_VAR_acr_name`             | `ensonouks`                                                            |
+| `TF_VAR_is_cluster_private`   | `true` (from `private_cluster`)                                        |
+| `TF_VAR_acme_email`           | `stacks@ensono.com`                                                    |
+| `TF_VAR_create_user_identity` | `true`                                                                 |
+| `TF_VAR_pfx_password`         | `Password1` (development only - use a secure password for production)  |
 
 ### Terraform Backend Configuration:
 
@@ -121,23 +121,23 @@ export TF_VAR_environment="dev"
 export TF_VAR_stage="dev"
 
 # Azure location
-export TF_VAR_location="westeurope"
+export TF_VAR_location="uksouth"
 
 # DNS configuration
 export TF_VAR_dns_zone="nonprod.stacks.ensono.com"
 export TF_VAR_internal_dns_zone="nonprod.stacks.ensono.internal"
-export TF_VAR_dns_resource_group="stacks-ancillary-resources"
+export TF_VAR_dns_resource_group="stacks-dns-zones"
 export TF_VAR_create_dns_zone="false"
 
 # AKS configuration
 export TF_VAR_create_aksvnet="true"
-export TF_VAR_cluster_version="1.27.9"
+export TF_VAR_cluster_version="1.34.1"
 export TF_VAR_is_cluster_private="true"
 export TF_VAR_create_user_identity="true"
 
 # Container registry
 export TF_VAR_create_acr="false"
-export TF_VAR_acr_resource_group="stacks-ancillary-resources"
+export TF_VAR_acr_resource_group="stacks-dns-zones"
 export TF_VAR_acr_name="ensonoeuw"
 
 # Certificate configuration

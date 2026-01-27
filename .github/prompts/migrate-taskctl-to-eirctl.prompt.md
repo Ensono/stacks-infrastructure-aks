@@ -291,14 +291,14 @@ The containers mount the workspace at `/app`. All paths should use this absolute
 
 Verify these paths exist in `build/eirctl/tasks.yaml`:
 
-| Path                                         | Purpose                           |
-| -------------------------------------------- | --------------------------------- |
-| `/eirctl/build/scripts/Set-TFVars.ps1`          | Generate tfvars file              |
-| `/eirctl/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs   |
-| `/eirctl/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts                |
-| `/eirctl/deploy/terraform`                      | Terraform templates               |
-| `/eirctl/deploy/tests`                          | InSpec tests                      |
-| `/eirctl/outputs`                               | Build outputs                     |
+| Path                                            | Purpose                         |
+| ----------------------------------------------- | ------------------------------- |
+| `/eirctl/build/scripts/Set-TFVars.ps1`          | Generate tfvars file            |
+| `/eirctl/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs |
+| `/eirctl/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts              |
+| `/eirctl/deploy/terraform`                      | Terraform templates             |
+| `/eirctl/deploy/tests`                          | InSpec tests                    |
+| `/eirctl/outputs`                               | Build outputs                   |
 
 **Environment variable defaults:**
 
@@ -662,11 +662,11 @@ The CI/CD pipeline files should contain environment variable definitions that us
 
 **Verify these paths in pipeline `env:` blocks:**
 
-| Variable              | Expected Value               |
-| --------------------- | ---------------------------- |
-| `TF_FILE_LOCATION`    | `/eirctl/deploy/terraform`      |
-| `INSPEC_FILES`        | `/eirctl/deploy/tests`          |
-| `INSPEC_OUTPUT_PATH`  | `/eirctl/outputs/tests`         |
+| Variable             | Expected Value             |
+| -------------------- | -------------------------- |
+| `TF_FILE_LOCATION`   | `/eirctl/deploy/terraform` |
+| `INSPEC_FILES`       | `/eirctl/deploy/tests`     |
+| `INSPEC_OUTPUT_PATH` | `/eirctl/outputs/tests`    |
 
 **Verify /eirctl/ paths exist:**
 

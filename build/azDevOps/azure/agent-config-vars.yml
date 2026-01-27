@@ -2,7 +2,7 @@ variables:
 
   # Agent configuration
   - name: pool_vm_image
-    value: ubuntu-22.04
+    value: ubuntu-24.04
   - name: EirctlVersion
     value: 0.9.7
 
