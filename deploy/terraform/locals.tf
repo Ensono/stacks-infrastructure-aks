@@ -21,7 +21,7 @@ locals {
 
   # Obtain a list of environments from the variables
   # This is a comma separated list which also has a flag to state if it is for the production subscription or not
-  environments_all = { for env_definition in split(",", var.environments) :
+  environments_all = { for env_definition in split(",", var.environment_definitions) :
     "${split(":", env_definition)[0]}" =>
     {
       is_prod = "${split(":", env_definition)[1]}" == "true" ? true : false

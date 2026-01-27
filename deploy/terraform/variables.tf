@@ -18,8 +18,8 @@ variable "component" {
   type = string
 }
 
-variable "environments" {
-  description = "Comma-separated list of environments with production flag (format: env:is_prod, e.g., dev:false,test:false,prod:true)"
+variable "environment_definitions" {
+  description = "Comma-separated environment configuration definitions with production flag (format: env:is_prod, e.g., dev:false,test:false,prod:true)"
   default     = "dev:false,test:false,prod:true"
 }
 
