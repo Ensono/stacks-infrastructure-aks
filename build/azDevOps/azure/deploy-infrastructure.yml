@@ -177,6 +177,7 @@ stages:
                         TF_VAR_tag_team_owner: $(team_owner)
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
                         TF_VAR_ado_project_name: $(ado_project_name)
+                        TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
 
                     # Upload the Terraform variables file and the plan for debugging
                     - ${{ if eq(parameters.upload, true) }}:
@@ -213,6 +214,7 @@ stages:
                         TF_BACKEND_INIT: "key=core,container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
                         TF_VAR_stage: ${{ stage.environment_shortname }}
+                        TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
 
                     # Perform infrastructure tests
                     - ${{ if eq(parameters.deploy, true) }}:

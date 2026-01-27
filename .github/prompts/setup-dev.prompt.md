@@ -110,13 +110,13 @@ export ARM_TENANT_ID="<your-azure-tenant-id>"
 
 # Terraform configuration
 export TF_FILE_LOCATION="/eirctl/deploy/terraform"
-export TF_BACKEND_INIT="key=core,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
+export TF_BACKEND_INIT="key=infra-aks,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
 export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 
 # Naming convention variables
 export TF_VAR_company="ed"
 export TF_VAR_project="stacks"
-export TF_VAR_component="core"
+export TF_VAR_component="infra-aks"
 export TF_VAR_environment="dev"
 export TF_VAR_stage="dev"
 
