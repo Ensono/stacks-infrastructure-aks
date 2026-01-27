@@ -50,10 +50,6 @@ locals {
   }
 
   outputs = { for envname in local.environments : envname => merge(local.resource_outputs[envname], {
-    acr_admin_password                  = module.aks_bootstrap.acr_admin_password
-    acr_admin_username                  = module.aks_bootstrap.acr_admin_username
-    acr_id                              = module.aks_bootstrap.acr_id
-    acr_login_server                    = module.aks_bootstrap.acr_login_server
     acr_registry_name                   = module.aks_bootstrap.acr_registry_name
     acr_resource_group_name             = module.aks_bootstrap.acr_resource_group_name
     aks_cluster_name                    = module.aks_bootstrap.aks_cluster_name
