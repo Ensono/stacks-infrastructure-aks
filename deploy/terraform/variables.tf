@@ -18,9 +18,11 @@ variable "component" {
   type = string
 }
 
-# variable "environment" {
-#   type = string
-# }
+variable "environment" {
+  type        = string
+  description = "The target environment for Terraform workspace selection (e.g., dev, test, prod)"
+  default     = ""
+}
 
 variable "environments" {
   description = "Comma-separated list of environments with production flag (format: env:is_prod, e.g., dev:false,test:false,prod:true)"

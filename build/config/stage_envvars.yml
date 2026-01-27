@@ -28,6 +28,9 @@ stages:
       - name: TF_VAR_project
         description: Name of the project
       - name: TF_VAR_component
+      - name: TF_VAR_environment
+        description: Target environment for Terraform workspace selection
+        required: false
       - name: TF_VAR_stage
       - name: TF_VAR_attributes
         required: false
