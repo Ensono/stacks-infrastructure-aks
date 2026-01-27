@@ -86,3 +86,35 @@ Now that the environment has been configured the pipelines can be run.
 |===
 
 These pipelines can be run in any order based on the task that needs to be accomplished. In addition to these any of the tasks, as described in <<Pipeline>> can be executed.
+
+=== Azure DevOps PAT Scopes
+
+When enabling Terraform to create Azure DevOps Variable Groups via the `azuredevops` provider, a Personal Access Token (PAT) is required. Use the minimum scopes needed:
+
+* Required
+** Variable Groups: Read & manage (Library)
+** Project and Team: Read (to resolve the project ID)
+
+* Optional (only if explicitly needed)
+** Build: Read (if querying build definitions with Terraform in future)
+
+Security recommendations:
+
+* Scope the PAT to your Azure DevOps organization only
+* Use short expiration and rotate regularly
+* Store the PAT securely (e.g., Azure Key Vault, secure pipeline variable)
+* Do not grant broader scopes such as Code, Work Items, Service Connections unless strictly required
+
+Environment setup for PAT (bash):
+
+[source,bash]
+----
+export TF_VAR_ado_org_service_url="https://dev.azure.com/<organization>"
+export TF_VAR_ado_project_name="<project>"
+export TF_VAR_ado_personal_access_token="<PAT>"
+----
+
+Notes:
+
+* Variable group creation is controlled by `TF_VAR_create_ado_variable_group` (defaults to `true`). If you do not have a PAT, set it to `false` to skip Azure DevOps changes.
+* Azure resource deployment authentication is separate and handled by the AzureRM provider; the PAT is only for Azure DevOps API access.
