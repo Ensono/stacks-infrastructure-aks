@@ -62,6 +62,18 @@ variable "dns_parent_zone_resource_group" {
   default = ""
 }
 
+variable "dns_parent_resource_group" {
+  type        = string
+  description = "Resource group containing the parent DNS zone"
+  default     = ""
+}
+
+variable "dns_create_parent_zone_ns_records" {
+  type        = bool
+  description = "If true, NS records will be created in the parent DNS zone for delegation"
+  default     = false
+}
+
 variable "internal_dns_zone" {
   type = string
 }

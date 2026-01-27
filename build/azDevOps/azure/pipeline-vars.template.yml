@@ -20,7 +20,7 @@ variables:
 
   # the email address to use when creating the SSL certificate
   - name: acme_email
-    value: stacks@ensono.com
+    value: postmaster@{{ .Input.Network.Base.Domain.External }}
 
   # ------- Cluster information
   # version of AKS to deploy
@@ -63,14 +63,14 @@ variables:
   - name: create_dns_zone
     value: true
   - name: dns_resource_group
-    value: stacks-dns-zones
+    value: {{ .Input.Business.Company }}-dns-zones
   ## dns_zone is in the stages variable in the pipeline
   - name: dns_create_parent_zone_ns_records
     value: true
   - name: dns_parent_resource_group
-    value: stacks-dns-zones
+    value: {{ .Input.Business.Company }}-dns-zones
   - name: dns_parent_zone
-    value: stacks.ensono.com
+    value: {{.Input.Network.Base.Domain.External}}
 
   # ------- Kured
   - name: kured_end_time

@@ -43,6 +43,15 @@ stages:
         description: Password for the certificate deployed into Kubernetes
       - name: TF_VAR_dns_resource_group
         description: Resource group that contains the DNS zones to update
+      - name: TF_VAR_dns_parent_zone
+        description: Parent DNS zone name for NS record delegation (e.g., stacks.ensono.com)
+        required: false
+      - name: TF_VAR_dns_parent_resource_group
+        description: Resource group containing the parent DNS zone
+        required: false
+      - name: TF_VAR_dns_create_parent_zone_ns_records
+        description: If true, NS records will be created in the parent DNS zone for delegation
+        required: false
       - name: TF_VAR_create_dns_zone
         description: State if the DNS zone should be created
       - name: TF_VAR_create_aksvnet
