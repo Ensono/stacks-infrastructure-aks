@@ -87,11 +87,12 @@ variables:
 
   # ------- Container registry
   - name: create_acr
-    value: true
+    value: false
+  # Only required when create_acr is false (using existing ACR)
   - name: acr_resource_group
-    value:
+    value: stacks-ancillary-resources
   - name: acr_name
-    value:
+    value: ensonoeuw
 
   # ------- Key Vault
   - name: create_key_vault

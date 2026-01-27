@@ -15,6 +15,16 @@ resource "null_resource" "validate_subscription_tag" {
   }
 }
 
+# Validate ACR configuration when using existing ACR
+resource "null_resource" "validate_acr_config" {
+  lifecycle {
+    precondition {
+      condition     = var.create_acr || (var.acr_resource_group != "" && var.acr_name != "")
+      error_message = "When create_acr is false, both acr_resource_group and acr_name must be provided to use an existing ACR."
+    }
+  }
+}
+
 # Get details about the ADO project, this is required so that Terraform
 # can create the variable group in the correct project and an ID is required for that
 data "azuredevops_project" "project" {

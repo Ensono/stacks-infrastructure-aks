@@ -1,7 +1,7 @@
 contexts:
   powershell:
     container:
-      name: ensono/eir-infrastructure
+      name: ensono/eir-infrastructure:1.2.39
       shell: pwsh
       shell_args:
         - -Command

@@ -31,8 +31,7 @@ After generating the template, populate the environment variables file using val
 | `TF_FILE_LOCATION`            | `/eirctl/deploy/terraform`                                             |
 | `TF_VAR_company`              | `ed` (from `company`)                                                  |
 | `TF_VAR_project`              | `stacks` (from `project`)                                              |
-| `TF_VAR_component`            | `core` (from `domain`)                                                 |
-| `TF_VAR_environment`          | `dev` (or your target environment)                                     |
+| `TF_VAR_component`            | `core` (from pipeline variable `domain`, mapped to Terraform variable `component`) |
 | `TF_VAR_stage`                | `dev` (or your target environment)                                     |
 | `TF_VAR_location`             | `uksouth` (from `region`)                                              |
 | `TF_VAR_dns_zone`             | `nonprod.stacks.ensono.com` (from `base_domain_nonprod`)               |
