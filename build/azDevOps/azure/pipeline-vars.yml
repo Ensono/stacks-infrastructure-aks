@@ -126,4 +126,4 @@ variables:
   - name: ado_org_service_url
     value: https://dev.azure.com/ensonodigitaluk
   - name: ado_project_name
-    value: "Ensono Stacks"
+    value: "Stacks"
