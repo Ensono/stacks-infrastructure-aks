@@ -23,7 +23,7 @@ variable "component" {
 # }
 
 variable "environments" {
-  description = "List of environments that need to be created"
+  description = "Comma-separated list of environments with production flag (format: env:is_prod, e.g., dev:false,test:false,prod:true)"
   default     = "dev:false,test:false,prod:true"
 }
 

@@ -37,7 +37,7 @@ variables:
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
-    value: {}
+    value: "{}"
 
   - name: private_cluster
     value: false
