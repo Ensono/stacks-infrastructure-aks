@@ -213,7 +213,32 @@ stages:
                         TF_FILE_LOCATION: /eirctl/deploy/terraform
                         TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
+                        TF_VAR_location: $(region)
+                        TF_VAR_company: $(company)
+                        TF_VAR_project: $(project)
+                        TF_VAR_component: $(domain)
+                        TF_VAR_acme_email: $(acme_email)
+                        TF_VAR_is_cluster_private: $(private_cluster)
+                        TF_VAR_cluster_version: $(aks_cluster_version)
+                        TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
+                        TF_VAR_aks_node_pools: $(aks_node_pools)
                         TF_VAR_stage: ${{ stage.environment_shortname }}
+                        TF_VAR_create_dns_zone: $(create_dns_zone)
+                        TF_VAR_dns_resource_group: $(dns_resource_group)
+                        TF_VAR_dns_zone: ${{ stage.dns_zone }}
+                        TF_VAR_internal_dns_zone: ${{ stage.domain_internal }}
+                        TF_VAR_dns_create_parent_zone_ns_records: $(dns_create_parent_zone_ns_records)
+                        TF_VAR_dns_parent_resource_group: $(dns_parent_resource_group)
+                        TF_VAR_dns_parent_zone: $(dns_parent_zone)
+                        TF_VAR_create_key_vault: $(create_key_vault)
+                        TF_VAR_create_aksvnet: $(create_aksvnet)
+                        TF_VAR_create_user_identity: $(create_user_identity)
+                        TF_VAR_create_acr: $(create_acr)
+                        TF_VAR_acr_resource_group: $(acr_resource_group)
+                        TF_VAR_acr_name: $(acr_name)
+                        TF_VAR_pfx_password: Password1
+                        TF_VAR_create_valid_cert: $(create_valid_cert)
+                        TF_VAR_tag_team_owner: $(team_owner)
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
                         TF_VAR_ado_project_name: $(ado_project_name)
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
