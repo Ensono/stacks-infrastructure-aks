@@ -75,3 +75,12 @@ stages:
       - name: TF_VAR_acme_email
         description: Email address for Acme certificate registration, must be a valid email
       - name: TF_VAR_create_user_identity
+      - name: TF_VAR_ado_org_service_url
+        description: Azure DevOps organization service URL (e.g., https://dev.azure.com/yourorg)
+        required: false
+      - name: TF_VAR_ado_project_name
+        description: Azure DevOps project name for variable group management
+        required: false
+      - name: TF_VAR_create_ado_variable_group
+        description: Whether to create Azure DevOps variable group (true/false)
+        required: false
