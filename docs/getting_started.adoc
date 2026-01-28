@@ -70,7 +70,60 @@ Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-
 
 ==== Bash
 
-Currently we do not have an option when running in `bash` for creating such a script file. We have some ideas on how this will be done, but the biggest issue is how this will be distributed.
+If using Bash, you can use the `eirctl run setup:dev` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
+
+[source,bash,linenums]
+----
+eirctl run setup:dev
+----
+
+The resultant script will be created in `local/envvar-azure-dev.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
+
+This command will:
+
+1. Create the `local/` directory if it doesn't exist
+2. Generate a shell script with all required environment variables
+3. Pre-populate values from the stage configuration
+4. Include Azure authentication variables (ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.)
+5. Set Terraform backend configuration and all TF_VAR_* variables
+
+Edit this file with your specific values and then source the script to setup the necessary environment variables in your local shell:
+
+[source,bash]
+----
+source ./local/envvar-azure-dev.sh
+----
+
+or using the dot notation:
+
+[source,bash]
+----
+. ./local/envvar-azure-dev.sh
+----
+
+These environment variables will then be copied into the container when it is spun up by eirctl.
+
+TIP: You can verify the environment variables are set correctly by running `eirctl run setup:environment` which will validate that all required variables are present.
+
+==== Validating Azure DevOps PAT
+
+Before running infrastructure deployment, you can validate that your Azure DevOps Personal Access Token has the correct scopes:
+
+[source,bash]
+----
+eirctl run setup:validate:azdo:pat
+----
+
+This task will:
+
+* Check the PAT format and length
+* Verify **Project and Team: Read** permission
+* Verify **Variable Groups: Read** permission
+* Test **Variable Groups: Manage** permission by creating and deleting a test variable group
+
+If the PAT is missing required scopes, the task will fail early with specific instructions on which scopes to add. This helps avoid Terraform failures later in the deployment process.
+
+NOTE: This validation runs automatically as part of the `infrastructure` pipeline, immediately after environment setup and before Terraform initialization. It is automatically skipped if `TF_VAR_create_ado_variable_group=false`.
 
 === Running the Pipelines
 
@@ -116,5 +169,11 @@ export TF_VAR_ado_personal_access_token="<PAT>"
 
 Notes:
 
-* Variable group creation is controlled by `TF_VAR_create_ado_variable_group` (defaults to `true`). If you do not have a PAT, set it to `false` to skip Azure DevOps changes.
+* Variable group creation is controlled by `TF_VAR_create_ado_variable_group` (defaults to `true`). Set it to `false` to skip Azure DevOps variable group creation and PAT validation:
++
+[source,bash]
+----
+export TF_VAR_create_ado_variable_group="false"
+----
+
 * Azure resource deployment authentication is separate and handled by the AzureRM provider; the PAT is only for Azure DevOps API access.

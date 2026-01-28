@@ -80,6 +80,12 @@ tasks:
     command:
       - Confirm-Environment -Path /eirctl/build/config/stage_envvars.yml
 
+  setup:validate:azdo:pat:
+    context: powershell
+    description: Validate Azure DevOps PAT has required scopes for variable group creation
+    command:
+      - /eirctl/build/scripts/Test-AzureDevOpsPAT.ps1
+
   tests:infra:init:
     context: infratests
     description: Initialise the Inspec test profile
