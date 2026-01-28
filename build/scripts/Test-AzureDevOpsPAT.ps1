@@ -8,6 +8,8 @@
 
     Required OAuth scopes for Terraform Azure DevOps provider:
     - vso.project (Project and Team → Read)
+    - vso.work (Work Items → Read)
+    - vso.build (Build → Read)
     - vso.variablegroups_manage (Variable Groups → Read, create, and manage)
 
     Note: Azure DevOps PATs don't expose their scopes via API introspection,
@@ -26,7 +28,17 @@
        - API: GET /_apis/projects/{project}
        - Required by: data.azuredevops_project resource
 
-    2. vso.variablegroups_manage (Variable Groups → Read, create, and manage)
+    2. vso.work (Work Items → Read)
+       - Allows reading work items and process templates
+       - API: GET /_apis/work/processes, GET /_apis/wit/workitemtypes
+       - Required by: data.azuredevops_project (reads process template)
+
+    3. vso.build (Build → Read)
+       - Allows reading build definitions and project resources
+       - API: GET /_apis/build/definitions
+       - Required by: azuredevops_variable_group (reads project resources/permissions)
+
+    4. vso.variablegroups_manage (Variable Groups → Read, create, and manage)
        - Allows creating, reading, updating, and deleting variable groups
        - API: GET/POST/PUT/DELETE /_apis/distributedtask/variablegroups
        - Required by: azuredevops_variable_group resource
@@ -99,7 +111,9 @@ function Test-AzureDevOpsPAT {
         Write-Host "To fix this:"
         Write-Host "  1. Create a PAT in Azure DevOps with these scopes:"
         Write-Host "     • Project and Team → Read"
-        Write-Host "     • Library (Variable Groups) → Read & manage"
+        Write-Host "     • Work Items → Read"
+        Write-Host "     • Build → Read"
+        Write-Host "     • Library (Variable Groups) → Read, create, & manage"
         Write-Host "  2. Set TF_VAR_ado_personal_access_token environment variable"
         Write-Host ""
         exit 1
@@ -192,9 +206,91 @@ function Test-AzureDevOpsPAT {
     }
     Write-Host ""
 
-    # Test 2: Variable Groups: Read
+    # Test 2: Work Items: Read (Process Template)
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    Write-Host "Validation 3: Variable Groups: Read"
+    Write-Host "Validation 3: Work Items: Read"
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    Write-Host "Testing: GET /_apis/work/processes"
+    Write-Host ""
+
+    $processUri = "$orgUrl/_apis/work/processes?api-version=7.1"
+
+    try {
+        $processResponse = Invoke-RestMethod -Uri $processUri -Method Get -Headers $headers -ErrorAction Stop
+        Write-Host "✅ SUCCESS"
+        Write-Host "   Found $($processResponse.count) process template(s)"
+        Write-Host "   Scope verified: Work Items → Read"
+    }
+    catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+
+        if ($statusCode -eq 401 -or $statusCode -eq 403) {
+            Write-Error "❌ FAILED (HTTP $statusCode)"
+            Write-Host ""
+            Write-Host "Missing scope: Work Items → Read"
+            Write-Host ""
+            Write-Host "This scope is required for Terraform to read project process templates."
+            Write-Host ""
+            Write-Host "To fix:"
+            Write-Host "  1. Go to Azure DevOps → User Settings → Personal Access Tokens"
+            Write-Host "  2. Edit your PAT"
+            Write-Host "  3. Add scope: Work Items → Read"
+            Write-Host "  4. Update TF_VAR_ado_personal_access_token with the new PAT"
+            Write-Host ""
+            exit 1
+        }
+        else {
+            Write-Error "❌ FAILED (HTTP $statusCode)"
+            Write-Host "   Error: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    Write-Host ""
+
+    # Test 3: Build: Read (Project Resources)
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    Write-Host "Validation 4: Build: Read"
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    Write-Host "Testing: GET /_apis/build/definitions"
+    Write-Host ""
+
+    $buildUri = "$orgUrl/$projectEncoded/_apis/build/definitions?api-version=7.1"
+
+    try {
+        $buildResponse = Invoke-RestMethod -Uri $buildUri -Method Get -Headers $headers -ErrorAction Stop
+        Write-Host "✅ SUCCESS"
+        Write-Host "   Found $($buildResponse.count) build definition(s)"
+        Write-Host "   Scope verified: Build → Read"
+    }
+    catch {
+        $statusCode = $_.Exception.Response.StatusCode.value__
+
+        if ($statusCode -eq 401 -or $statusCode -eq 403) {
+            Write-Error "❌ FAILED (HTTP $statusCode)"
+            Write-Host ""
+            Write-Host "Missing scope: Build → Read"
+            Write-Host ""
+            Write-Host "This scope is required for Terraform to read project resources/permissions."
+            Write-Host ""
+            Write-Host "To fix:"
+            Write-Host "  1. Go to Azure DevOps → User Settings → Personal Access Tokens"
+            Write-Host "  2. Edit your PAT"
+            Write-Host "  3. Add scope: Build → Read"
+            Write-Host "  4. Update TF_VAR_ado_personal_access_token with the new PAT"
+            Write-Host ""
+            exit 1
+        }
+        else {
+            Write-Error "❌ FAILED (HTTP $statusCode)"
+            Write-Host "   Error: $($_.Exception.Message)"
+            exit 1
+        }
+    }
+    Write-Host ""
+
+    # Test 4: Variable Groups: Read
+    Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    Write-Host "Validation 5: Variable Groups: Read"
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host "Testing: GET /_apis/distributedtask/variablegroups"
     Write-Host ""
@@ -231,9 +327,9 @@ function Test-AzureDevOpsPAT {
     }
     Write-Host ""
 
-    # Test 3: Variable Groups: Manage (Create)
+    # Test 5: Variable Groups: Manage (Create)
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    Write-Host "Validation 4: Variable Groups: Manage"
+    Write-Host "Validation 6: Variable Groups: Manage"
     Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     Write-Host "Testing: POST /_apis/distributedtask/variablegroups"
     Write-Host "Action: Creating a test variable group"
@@ -327,10 +423,13 @@ function Test-AzureDevOpsPAT {
     Write-Host ""
     Write-Host "Your PAT has the required OAuth scopes:"
     Write-Host "  ✅ vso.project (Project and Team → Read)"
+    Write-Host "  ✅ vso.work (Work Items → Read)"
+    Write-Host "  ✅ vso.build (Build → Read)"
     Write-Host "  ✅ vso.variablegroups_manage (Variable Groups → Read, create, and manage)"
     Write-Host ""
     Write-Host "Note: These scopes are required by the Terraform Azure DevOps provider"
-    Write-Host "for reading project metadata and managing variable groups."
+    Write-Host "for reading project metadata, process templates, project resources, and"
+    Write-Host "managing variable groups."
     Write-Host ""
     Write-Host "Terraform should now authenticate successfully."
     Write-Host ""
