@@ -6,12 +6,43 @@
     Tests that the Azure DevOps PAT has the minimum required permissions to create
     variable groups. This helps catch authentication issues early before Terraform runs.
 
-    Required scopes:
-    - Project and Team: Read
-    - Library (Variable Groups): Read & manage
+    Required OAuth scopes for Terraform Azure DevOps provider:
+    - vso.project (Project and Team → Read)
+    - vso.variablegroups_manage (Variable Groups → Read, create, and manage)
+
+    Note: Azure DevOps PATs don't expose their scopes via API introspection,
+    so this script validates permissions by attempting actual API operations.
 
 .EXAMPLE
     Test-AzureDevOpsPAT
+
+.NOTES
+    AZURE DEVOPS PAT SCOPE REQUIREMENTS:
+
+    For Terraform Azure DevOps Provider, the PAT must have these OAuth scopes:
+
+    1. vso.project (Project and Team → Read)
+       - Allows reading project metadata
+       - API: GET /_apis/projects/{project}
+       - Required by: data.azuredevops_project resource
+
+    2. vso.variablegroups_manage (Variable Groups → Read, create, and manage)
+       - Allows creating, reading, updating, and deleting variable groups
+       - API: GET/POST/PUT/DELETE /_apis/distributedtask/variablegroups
+       - Required by: azuredevops_variable_group resource
+
+    SCOPE INTROSPECTION:
+
+    Unlike OAuth 2.0 tokens, Azure DevOps Personal Access Tokens (PATs) do not
+    provide a /me or introspection endpoint to query the token's granted scopes.
+
+    The only way to validate PAT scopes is by attempting API operations and
+    checking for 401/403 responses. This is why the script performs actual
+    read and write operations instead of querying token metadata.
+
+    REFERENCE:
+    - OAuth Scopes: https://learn.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/oauth?view=azure-devops#oauth-scopes
+    - PAT Creation: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate
 #>
 
 [CmdletBinding()]
@@ -294,11 +325,14 @@ function Test-AzureDevOpsPAT {
     Write-Host "✅ ALL VALIDATIONS PASSED"
     Write-Host "=========================================="
     Write-Host ""
-    Write-Host "Your PAT has the minimum required scopes:"
-    Write-Host "  ✅ Project and Team → Read"
-    Write-Host "  ✅ Library (Variable Groups) → Read & manage"
+    Write-Host "Your PAT has the required OAuth scopes:"
+    Write-Host "  ✅ vso.project (Project and Team → Read)"
+    Write-Host "  ✅ vso.variablegroups_manage (Variable Groups → Read, create, and manage)"
     Write-Host ""
-    Write-Host "Terraform can now create variable groups successfully."
+    Write-Host "Note: These scopes are required by the Terraform Azure DevOps provider"
+    Write-Host "for reading project metadata and managing variable groups."
+    Write-Host ""
+    Write-Host "Terraform should now authenticate successfully."
     Write-Host ""
 }
 
