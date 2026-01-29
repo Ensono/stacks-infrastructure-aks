@@ -6,6 +6,6 @@
 data "external" "current_user" {
   program = [
     "pwsh", "-NoProfile", "-Command",
-    "@{ username = if ($env:USERNAME) { $env:USERNAME } elseif ($env:USER) { $env:USER } else { whoami } } | ConvertTo-Json -Compress"
+    "@{ username = if ($env:USERNAME) { $env:USERNAME } elseif ($env:USER) { $env:USER } else { 'unknown' } } | ConvertTo-Json -Compress"
   ]
 }

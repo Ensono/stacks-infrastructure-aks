@@ -11,6 +11,7 @@
     - vso.work (Work Items → Read)
     - vso.build (Build → Read)
     - vso.variablegroups_manage (Variable Groups → Read, create, and manage)
+    - vso.pipelineresources_manage (Pipeline resources → Use and manage)
 
     Note: Azure DevOps PATs don't expose their scopes via API introspection,
     so this script validates permissions by attempting actual API operations.
@@ -42,6 +43,11 @@
        - Allows creating, reading, updating, and deleting variable groups
        - API: GET/POST/PUT/DELETE /_apis/distributedtask/variablegroups
        - Required by: azuredevops_variable_group resource
+
+    5. vso.pipelineresources_manage (Pipeline resources → Use and manage)
+       - Allows managing pipeline resource permissions and authorizations
+       - API: GET/PUT/DELETE /_apis/pipelines/pipelinePermissions
+       - Required by: azuredevops_variable_group (manages access definitions)
 
     SCOPE INTROSPECTION:
 
@@ -114,6 +120,7 @@ function Test-AzureDevOpsPAT {
         Write-Host "     • Work Items → Read"
         Write-Host "     • Build → Read"
         Write-Host "     • Library (Variable Groups) → Read, create, & manage"
+        Write-Host "     • Pipeline resources → Use and manage"
         Write-Host "  2. Set TF_VAR_ado_personal_access_token environment variable"
         Write-Host ""
         exit 1
@@ -426,12 +433,14 @@ function Test-AzureDevOpsPAT {
     Write-Host "  ✅ vso.work (Work Items → Read)"
     Write-Host "  ✅ vso.build (Build → Read)"
     Write-Host "  ✅ vso.variablegroups_manage (Variable Groups → Read, create, and manage)"
+    Write-Host "  ✅ vso.pipelineresources_manage (Pipeline resources → Use and manage)"
     Write-Host ""
     Write-Host "Note: These scopes are required by the Terraform Azure DevOps provider"
-    Write-Host "for reading project metadata, process templates, project resources, and"
-    Write-Host "managing variable groups."
+    Write-Host "for reading project metadata, process templates, project resources,"
+    Write-Host "managing variable groups, and their pipeline resource authorizations."
     Write-Host ""
-    Write-Host "Terraform should now authenticate successfully."
+    Write-Host "Terraform should now authenticate successfully for all operations"
+    Write-Host "including create, read, update, and delete of variable groups."
     Write-Host ""
 }
 
