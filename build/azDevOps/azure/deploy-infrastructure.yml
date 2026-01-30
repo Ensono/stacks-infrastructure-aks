@@ -254,6 +254,7 @@ stages:
                             TF_VAR_stage: ${{ stage.environment_shortname }}
                             TF_VAR_location: $(region)
                             TF_VAR_is_cluster_private: $(private_cluster)
+                            TF_VAR_aks_node_pools: $(aks_node_pools)
 
                     - ${{ if eq(parameters.deploy, true) }}:
                         - task: PublishTestResults@2
