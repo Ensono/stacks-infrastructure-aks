@@ -747,6 +747,9 @@ function auditLog(event) {
     sessionId: event.sessionId
   };
 }
+
+// NOTE: `actorIp` can be personal data. Retention and access must comply with GDPR
+// Article 6 (lawful basis) and Article 5 (purpose limitation and storage limitation).
 ````
 
 ---

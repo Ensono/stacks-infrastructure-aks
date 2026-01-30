@@ -70,7 +70,7 @@ In order to run the pipeline locally a number of environment variables are requi
 
 ==== PowerShell
 
-If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner module that reads the `build/config/stage_envvars.yml` and creates a skeleton PowerShell script which will setup the variables.
+If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner module that reads the `build/config/stage_envvars.yml` and creates a skeleton PowerShell script which will set up the variables.
 
 [source,powershell,linenums]
 ---
@@ -82,7 +82,7 @@ The resultant script will be `local/envvar-azure-stacks-aks.ps1`. The naming con
 .Environment variable script
 image::images/envvar-script.png[width=500]
 
-Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then setup the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
+Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then set up the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
 
 ==== Bash
 
@@ -103,7 +103,7 @@ This command will:
 4. Include Azure authentication variables (ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.)
 5. Set Terraform backend configuration and all TF_VAR_* variables
 
-Edit this file with your specific values and then source the script to setup the necessary environment variables in your local shell:
+Edit this file with your specific values and then source the script to set up the necessary environment variables in your local shell:
 
 [source,bash]
 ----

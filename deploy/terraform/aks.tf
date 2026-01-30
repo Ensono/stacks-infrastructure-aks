@@ -10,7 +10,7 @@ module "aks_bootstrap" {
   tenant_id                         = data.azurerm_client_config.current.tenant_id
   cluster_version                   = var.cluster_version
   cluster_sku_tier                  = var.cluster_sku_tier
-  name_environment                  = local.environments[0]
+  name_environment                  = length(local.environments) > 0 ? local.environments[0] : ""
   name_project                      = var.project
   name_company                      = var.company
   name_component                    = var.component

@@ -2,6 +2,10 @@ tasks:
   build:number:
     context: powershell
     description: Update the build number
+    # Note:
+    # - The legacy `exportAs` field for this task has been intentionally removed.
+    # - The build number is updated directly by `Update-BuildNumber`, so no additional
+    #   environment export from this task is required.
     command:
       - Update-BuildNumber
 
