@@ -16,7 +16,7 @@ control "azure-kubernetes-cluster" do
         its("properties.linuxProfile.adminUsername") { should cmp "ubuntu" }
 
         # Count how many node_pools there are
-        its("properties.agentPoolProfiles.count") { should cmp 2 }
+        its("properties.agentPoolProfiles.count") { should cmp input("node_pool_count") }
 
         # Check the identity that has been assigned
         its("identity.type") { should cmp "SystemAssigned" }

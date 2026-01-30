@@ -112,12 +112,56 @@ tasks:
     command:
       - |
         Import-Module Az.Aks
+        Import-Module Az.KeyVault -ErrorAction SilentlyContinue
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
         Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml
         Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append
         Add-Content -Path /eirctl/inspec_inputs.yml -Value "region: $($env:TF_VAR_location)"
         Add-Content -Path /eirctl/inspec_inputs.yml -Value "kubernetes_private_cluster: $($env:TF_VAR_is_cluster_private)"
         Add-Content -Path /eirctl/inspec_inputs.yml -Value "subscription_id: $($env:ARM_SUBSCRIPTION_ID)"
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "azure_application_id: $($env:ARM_CLIENT_ID)"
+
+        $nodePools = @{}
+        if ($env:TF_VAR_aks_node_pools -and $env:TF_VAR_aks_node_pools.Trim() -ne "" -and $env:TF_VAR_aks_node_pools.Trim() -ne "{}") {
+          $nodePools = $env:TF_VAR_aks_node_pools | ConvertFrom-Json
+        }
+        $additionalPoolCount = 0
+        if ($nodePools -is [System.Collections.IDictionary]) {
+          $additionalPoolCount = $nodePools.Keys.Count
+        }
+        elseif ($nodePools -is [System.Array]) {
+          $additionalPoolCount = $nodePools.Count
+        }
+        else {
+          $additionalPoolCount = $nodePools.PSObject.Properties.Count
+        }
+        $nodePoolCount = 1 + [int]$additionalPoolCount
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "node_pool_count: $nodePoolCount"
+
+        $publicIpSku = "Standard"
+        if ($env:TFOUT_app_gateway_public_ip_name -and $env:TFOUT_app_gateway_resource_group_name) {
+            $publicIp = Get-AzPublicIpAddress -Name $env:TFOUT_app_gateway_public_ip_name -ResourceGroupName $env:TFOUT_app_gateway_resource_group_name -ErrorAction SilentlyContinue
+            if ($publicIp -and $publicIp.Sku -and $publicIp.Sku.Name) {
+                $publicIpSku = $publicIp.Sku.Name
+            }
+        }
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "public_ip_sku: $publicIpSku"
+
+        $keyVaults = @()
+        if ($env:TFOUT_resource_group_name) {
+          $keyVaultsRaw = Get-AzKeyVault -ResourceGroupName $env:TFOUT_resource_group_name -ErrorAction SilentlyContinue
+          foreach ($kv in @($keyVaultsRaw)) {
+            $skuName = $kv.Sku.Name
+            if (-not $skuName) {
+              $skuName = "standard"
+            }
+            $keyVaults += [pscustomobject]@{
+              name = $kv.VaultName
+              sku  = $skuName
+            }
+          }
+        }
+        @{ key_vault = @($keyVaults) } | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append
 
   tests:infra:run:
     context: infratests
@@ -130,6 +174,10 @@ tasks:
       AZURE_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID}
     command:
       - |
+        $env:AZURE_CLIENT_ID = $env:ARM_CLIENT_ID
+        $env:AZURE_CLIENT_SECRET = $env:ARM_CLIENT_SECRET
+        $env:AZURE_TENANT_ID = $env:ARM_TENANT_ID
+        $env:AZURE_SUBSCRIPTION_ID = $env:ARM_SUBSCRIPTION_ID
         Import-Module -Name EnsonoBuild -ErrorAction Stop
         Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml"
 

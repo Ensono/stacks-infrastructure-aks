@@ -26,3 +26,15 @@ inputs:
   - name: k8s_version_threshold
     description: Denotes the number versions that are considered valid
     value: 4
+  - name: node_pool_count
+    description: Expected number of AKS node pools (default pool + additional pools)
+    value: 1
+  - name: public_ip_sku
+    description: Expected SKU for the Application Gateway public IP
+    value: Standard
+  - name: key_vault
+    description: List of key vaults to validate
+    value: []
+  - name: azure_application_id
+    description: Azure application (client) ID used for key vault access policies
+    value: ""
