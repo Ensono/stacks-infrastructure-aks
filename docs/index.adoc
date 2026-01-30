@@ -19,7 +19,15 @@ include::infrastructure.adoc[]
 
 <<<
 
+include::azure-devops-integration.adoc[]
+
+<<<
+
 include::getting_started.adoc[]
+
+<<<
+
+include::advanced-configuration.adoc[]
 
 <<<
 
@@ -32,6 +40,10 @@ include::pipeline.adoc[]
 <<<
 
 include::tests.adoc[]
+
+<<<
+
+include::troubleshooting.adoc[]
 
 <<<
 

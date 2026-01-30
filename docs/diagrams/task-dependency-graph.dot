@@ -1,0 +1,13 @@
+digraph TaskDeps {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  env [label="setup:environment"];
+  pat [label="setup:validate:azdo:pat"];
+  init [label="infra:init"];
+  plan [label="infra:plan"];
+  apply [label="infra:apply"];
+  helm [label="infra:helm:apply"];
+
+  env -> pat -> init -> plan -> apply -> helm;
+}

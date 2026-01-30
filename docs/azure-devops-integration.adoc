@@ -1,0 +1,74 @@
+---
+id: aks_azure_devops_integration
+title: Azure DevOps Integration
+description: Azure DevOps integration details including PAT validation and variable group management.
+weight: 45
+---
+
+:toc:
+
+== Azure DevOps Integration
+
+This guide explains how Azure DevOps (ADO) integrates with the infrastructure pipeline, including PAT validation, variable group creation, and security considerations.
+
+=== PAT Validation Workflow
+
+The ADO Personal Access Token (PAT) is used by Terraform to create and update Variable Groups. The validation task runs early to fail fast when scopes or permissions are missing.
+
+[graphviz]
+----
+include::diagrams/pat-validation-pipeline.dot[]
+----
+
+Steps:
+
+. PAT is provided via `TF_VAR_ado_personal_access_token`.
+. `setup:validate:azdo:pat` checks required scopes.
+. The task verifies read permissions and attempts a create/delete test variable group.
+. The pipeline continues only if validation succeeds.
+
+=== Variable Group Generation
+
+Variable groups are created by Terraform (via the `azuredevops` provider) when `TF_VAR_create_ado_variable_group=true`.
+
+Structure:
+
+* `stacks-<stage>-vars` (default) – contains environment-specific values
+* Standardized keys for Terraform and pipeline integration
+
+=== Required PAT Scopes
+
+Minimum required scopes for this repository:
+
+* Project and Team: Read (`vso.project`)
+* Variable Groups: Read & manage (`vso.variablegroups_manage`)
+
+Optional (only if required by future changes):
+
+* Build: Read (`vso.build`)
+* Pipeline resources: Use and manage (`vso.pipelineresources_manage`)
+
+=== Security Best Practices
+
+IMPORTANT: Never hardcode PATs. Use secure variable groups or a secrets manager.
+
+* Use least-privilege scopes
+* Set short PAT expiration
+* Rotate PATs regularly
+* Store tokens in secret variables or Key Vault
+
+=== Troubleshooting PAT Validation
+
+Common failures:
+
+* Missing scopes
+* Expired token
+* Insufficient permissions in the ADO project
+
+Remediation:
+
+. Confirm scopes against the list above
+. Recreate the PAT with the correct scopes
+. Re-run `eirctl run setup:validate:azdo:pat`
+
+See xref:troubleshooting.adoc[Troubleshooting] for detailed error scenarios.

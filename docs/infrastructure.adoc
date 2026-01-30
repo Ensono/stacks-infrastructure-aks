@@ -9,6 +9,15 @@ weight: 30
 
 All of the infrastructure that is deployed to Azure, is done using Terraform. The templates have been configured so that different options can be deployed depending on requirements.
 
+=== Architecture Overview
+
+The Terraform stack combines Ensono Stacks modules with local modules and data sources. The diagram below shows the module relationships.
+
+[graphviz]
+----
+include::diagrams/module-dependencies.dot[]
+----
+
 The following diagram depicts the resources that are deployed.
 
 .Azure Resources
@@ -43,3 +52,21 @@ As can be seen from the example above, this command has four parts to the pipeli
 . Create environment variables from each of the names of the outputs in the JSON. Prefix these names with `TFOUT`. As the data from Terraform can be nested, the `-key` parameter informs the cmdlet which nested parameter holds the value. Also pass an array of data through the pipeline.
 . Convert the array to a YAML string
 . Write the the YAML string to a file to be used for the infrastructure tests
+
+=== Outputs Reference
+
+Key outputs used across the pipeline include:
+
+* `resource_group_name`
+* `aks_cluster_name`
+* `aks_ingress_public_ip`
+* `app_gateway_public_ip_name`
+* `dns_base_domain`
+
+=== Data Sources and Azure API Dependencies
+
+Data sources are used to fetch resource IDs, DNS zones, and version information. Ensure the service principal has read permissions in the relevant resource groups and subscriptions.
+
+=== Workspace Strategy
+
+Terraform workspaces are aligned with environment names. The workspace is selected or created during `infra:init` using the `TF_VAR_stage` value.

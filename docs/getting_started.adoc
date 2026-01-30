@@ -19,6 +19,22 @@ Please ensure that the following prerequisites are satisfied:
 
 NOTE: eirctl is the officially supported task automation tool for Ensono Stacks projects.
 
+=== Azure DevOps PAT Creation (Step-by-step)
+
+Use an Azure DevOps Personal Access Token (PAT) for variable group creation.
+
+.Steps
+. In Azure DevOps, open User settings → Personal Access Tokens
+. Select New Token
+. Set Organization to your ADO org
+. Set expiration (short lived recommended)
+. Select scopes:
+* Project and Team: Read
+* Variable Groups: Read & manage
+. Create and copy the token
+
+IMPORTANT: Store the PAT in a secure variable group or a secrets manager. Do not commit it.
+
 === Setup
 
 In order to run the pipeline locally a number of environment variables are required. These are used to pass variable values to Terraform. The following table shows what these variables are.
@@ -124,6 +140,52 @@ This task will:
 If the PAT is missing required scopes, the task will fail early with specific instructions on which scopes to add. This helps avoid Terraform failures later in the deployment process.
 
 NOTE: This validation runs automatically as part of the `infrastructure` pipeline, immediately after environment setup and before Terraform initialization. It is automatically skipped if `TF_VAR_create_ado_variable_group=false`.
+
+=== Environment Definitions
+
+Environment definitions use the format `env:is_prod`.
+
+Examples:
+
+* `dev:false`
+* `nonprod:false`
+* `prod:true`
+
+[graphviz]
+----
+include::diagrams/environment-definitions.dot[]
+----
+
+=== Workspace Strategy and State Management
+
+Terraform workspaces map directly to the environment name (for example, `nonprod`, `prod`). Ensure `TF_VAR_stage` matches the workspace name.
+
+Common commands:
+
+[source,bash]
+----
+eirctl run infra:init
+eirctl run infra:plan
+----
+
+=== Variable Precedence
+
+Order of precedence (highest to lowest):
+
+. Shell environment variables (`TF_VAR_*`)
+. Environment script (`local/envvar-azure-<stage>.*`)
+. Defaults in `build/config/stage_envvars.yml`
+
+TIP: Keep `TF_VAR_*` values consistent between local scripts and pipeline variables to avoid drift.
+
+=== Multi-environment Examples
+
+Example definitions:
+
+* `dev:false` deploys to non-production resources and workspaces
+* `prod:true` deploys to production resources and workspaces
+
+When `force` is set in the ADO pipeline, both non-prod and prod can deploy from a single branch. Otherwise the branch gates are enforced.
 
 === Running the Pipelines
 

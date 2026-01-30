@@ -38,6 +38,7 @@ Currently knows how to set the build number for Azure DevOps.
 | `setup:validate:azdo:pat` | Validate that the Azure DevOps Personal Access Token has the minimum required scopes (Project and Team: Read, Variable Groups: Read & manage). Fails fast if scopes are missing. Skipped if `TF_VAR_create_ado_variable_group=false`.
 | `tests:infra:init` | Initialse the Inspec test profile.
 | `tests:infra:vendor` | This will analyse the profile and download the required providers to run the tests
+| `tests:infra:inputs` | Generate the Inspec inputs file from Terraform outputs and Azure version data
 | `tests:infra:run` | Execute infrastructure tests against the deployed Cloud Resources using Inspec
 | `helm:charts` | Deploy enabled charts to the Kubernetes cluster. More information can be found in the <<Helm>> section.
 | `_docs` | Create a PDF file of the documentation.
@@ -45,6 +46,17 @@ Currently knows how to set the build number for Azure DevOps.
 |===
 
 The tasks are defined in `build/eirctl/tasks.yaml`
+
+==== Task Dependency Graph
+
+[graphviz]
+----
+include::diagrams/task-dependency-graph.dot[]
+----
+
+==== Validation Placement
+
+The PAT validation task (`setup:validate:azdo:pat`) runs immediately after `setup:environment` and before any Terraform initialization.
 
 .EDIR Pipelines
 [cols="1,2,2a",options="header",stripes="even"]
@@ -83,6 +95,10 @@ include::diagrams/release.dot[]
 === Azure DevOps
 
 The following diagram shows the stages and the jobs within each stage for Azure DevOps. Most of the time ADO will call upon the pipelines and tasks in EDIR, but where there is a task that needs to be performed that is specific to ADO a native task will be used.
+
+=== Variable Extraction Flow
+
+Terraform outputs are converted to `TFOUT_` variables using `Set-EnvironmentVars`, and these are used by the Helm deployment and InSpec tests.
 
 When the pipeline is invoked there are a number of parameters that can be configured. The following table details what these parameters are.
 

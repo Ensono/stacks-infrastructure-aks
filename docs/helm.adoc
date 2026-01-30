@@ -65,3 +65,23 @@ include::../deploy/helm/values/cluster_setup.yml[]
 ----
 
 As can be seen the output values from Terraform are required. Here there are prefixed with `TFOUT_` and substituted into the file before the chart is deployed.
+
+=== Terraform → Helm Data Flow
+
+[graphviz]
+----
+include::diagrams/terraform-helm-dataflow.dot[]
+----
+
+=== Worked Example
+
+The Helm deployment uses Terraform outputs exposed as environment variables:
+
+[source,bash]
+----
+TFOUT_aks_cluster_name=rg-ens-stacks-uks-nonprod
+TFOUT_resource_group_name=rg-ens-stacks-uks-nonprod
+TFOUT_app_gateway_ip=51.132.17.238
+----
+
+These values are injected into the chart values template during `infra:helm:apply`.

@@ -1,0 +1,65 @@
+---
+id: aks_advanced_configuration
+title: Advanced Configuration
+description: Advanced AKS configuration patterns and optional features.
+weight: 55
+---
+
+:toc:
+
+== Advanced Configuration
+
+This guide covers advanced configuration scenarios for AKS deployments.
+
+=== Node Pool Configuration
+
+Configure additional node pools through the `aks_node_pools` variable. Example:
+
+[source,yaml]
+----
+TF_VAR_aks_node_pools="{\"np1\":{\"vm_size\":\"Standard_D4s_v5\",\"auto_scaling\":true,\"min_nodes\":1,\"max_nodes\":3}}"
+----
+
+=== DNS Parent Zone Delegation
+
+Use `TF_VAR_dns_parent_zone` and `TF_VAR_dns_parent_resource_group` to support a parent DNS zone. Enable `TF_VAR_dns_create_parent_zone_ns_records` to manage delegation records.
+
+=== Certificates and Key Vault
+
+Certificates and TLS assets are managed through Key Vault and Application Gateway outputs:
+
+* `create_key_vault` enables Key Vault provisioning
+* `create_valid_cert` controls certificate creation
+* `certificate_pem` and `issuer_pem` are exported via Terraform outputs
+
+=== Conditional Resource Creation
+
+Several features are optional and controlled by flags:
+
+* `create_ado_variable_group`
+* `create_dns_zone`
+* `create_aksvnet`
+* `create_user_identity`
+* `create_acr`
+* `create_key_vault`
+
+=== Ensono Stacks Module Capabilities
+
+The AKS deployment uses Ensono Stacks modules (v8.0.19). These provide:
+
+* Naming conventions via foundation-azure
+* AKS cluster provisioning and identity setup
+* DNS, Key Vault, and networking integration
+
+Limitations:
+
+* Node pool schema must match the module spec
+* Some outputs are optional based on feature flags
+
+=== Naming Patterns
+
+Resource naming follows `{company}-{project}-{stage}-{component}`. Storage accounts use `{company}{project}{stage}{component}`.
+
+=== Configuration Decision Matrix
+
+include::diagrams/configuration-decisions.adoc[]
