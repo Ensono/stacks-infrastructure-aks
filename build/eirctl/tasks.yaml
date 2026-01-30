@@ -87,16 +87,20 @@ tasks:
       - /eirctl/build/scripts/Test-AzureDevOpsPAT.ps1
 
   tests:infra:init:
-    context: powershell
+    context: infratests
     description: Initialise the Inspec test profile
+    env:
+      CHEF_LICENSE: accept-silent
     command:
-      - Invoke-Inspec -init
+      - Invoke-Inspec -path /eirctl/deploy/tests -init
 
   tests:infra:vendor:
     context: infratests
     description: Ensure all necessary plugins and providers are installed
+    env:
+      CHEF_LICENSE: accept-silent
     command:
-      - Invoke-Inspec -vendor -args "--overwrite"
+      - Invoke-Inspec -path /eirctl/deploy/tests -vendor -arguments "--overwrite"
 
   tests:infra:inputs:
     context: powershell
