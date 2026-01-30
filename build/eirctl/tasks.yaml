@@ -92,7 +92,9 @@ tasks:
     env:
       CHEF_LICENSE: accept-silent
     command:
-      - Invoke-Inspec -path /eirctl/deploy/tests -init
+      - |
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -init
 
   tests:infra:vendor:
     context: infratests
@@ -100,7 +102,9 @@ tasks:
     env:
       CHEF_LICENSE: accept-silent
     command:
-      - Invoke-Inspec -path /eirctl/deploy/tests -vendor -arguments "--overwrite"
+      - |
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -vendor -arguments "--overwrite"
 
   tests:infra:inputs:
     context: powershell
@@ -124,7 +128,9 @@ tasks:
       AZURE_TENANT_ID: ${ARM_TENANT_ID}
       AZURE_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID}
     command:
-      - Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=`$PWD/inspec_inputs.yml"
+      - |
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=`$PWD/inspec_inputs.yml"
 
   infra:state:lock:clear:
     context: powershell
