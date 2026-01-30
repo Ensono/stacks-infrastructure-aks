@@ -263,24 +263,23 @@ stages:
                             testRunTitle: Terraform AKS Tests
                             failTaskOnFailedTests: true
 
-                postDeployment:
-                  # Clear Terraform state lock after deployment (success or failure)
-                  - task: Bash@3
-                    displayName: Clear Terraform State Lock
-                    condition: always()
-                    inputs:
-                      targetType: inline
-                      script: |
-                        eirctl run infra:state:lock:clear
-                    env:
-                      TF_STATE_STORAGE: $(tf_state_storage)
-                      TF_STATE_CONTAINER: $(tf_state_container)
-                      TF_STATE_KEY: $(tf_state_key)
-                      TF_STATE_RG: $(tf_state_rg)
-                      ARM_CLIENT_ID: $(ARM_CLIENT_ID)
-                      ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
-                      ARM_TENANT_ID: $(ARM_TENANT_ID)
-                      ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+                    # Clear Terraform state lock after deployment (success or failure)
+                    - task: Bash@3
+                      displayName: Clear Terraform State Lock
+                      condition: always()
+                      inputs:
+                        targetType: inline
+                        script: |
+                          eirctl run infra:state:lock:clear
+                      env:
+                        TF_STATE_STORAGE: $(tf_state_storage)
+                        TF_STATE_CONTAINER: $(tf_state_container)
+                        TF_STATE_KEY: $(tf_state_key)
+                        TF_STATE_RG: $(tf_state_rg)
+                        ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+                        ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+                        ARM_TENANT_ID: $(ARM_TENANT_ID)
+                        ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
 
           - deployment: ${{ stage.deployment_apps }}
             dependsOn: ${{ stage.deployment_infra }}
