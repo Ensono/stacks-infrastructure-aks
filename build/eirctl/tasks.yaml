@@ -87,7 +87,7 @@ tasks:
       - /eirctl/build/scripts/Test-AzureDevOpsPAT.ps1
 
   tests:infra:init:
-    context: infratests
+    context: powershell
     description: Initialise the Inspec test profile
     command:
       - Invoke-Inspec -init
