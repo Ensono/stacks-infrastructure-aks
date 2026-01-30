@@ -13,9 +13,12 @@ pipelines:
     - task: tests:infra:vendor
       depends_on:
         - tests:infra:init
-    - task: tests:infra:run
+    - task: tests:infra:inputs
       depends_on:
         - tests:infra:vendor
+    - task: tests:infra:run
+      depends_on:
+        - tests:infra:inputs
 
   infrastructure:
     - task: setup:environment

@@ -113,10 +113,11 @@ tasks:
       - |
         Import-Module Az.Aks
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
-        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml
-        Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path ${PWD}/inspec_inputs.yml -Append
-        Add-Content -Path ${PWD}/inspec_inputs.yml -Value "region: ${env:TF_VAR_location}"
-        Add-Content -Path ${PWD}/inspec_inputs.yml -Value "kubernetes_private_cluster: ${env:TF_VAR_is_cluster_private}"
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml
+        Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "region: $($env:TF_VAR_location)"
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "kubernetes_private_cluster: $($env:TF_VAR_is_cluster_private)"
+        Add-Content -Path /eirctl/inspec_inputs.yml -Value "subscription_id: $($env:ARM_SUBSCRIPTION_ID)"
 
   tests:infra:run:
     context: infratests
@@ -130,7 +131,7 @@ tasks:
     command:
       - |
         Import-Module -Name EnsonoBuild -ErrorAction Stop
-        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=`$PWD/inspec_inputs.yml"
+        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml"
 
   infra:state:lock:clear:
     context: powershell
