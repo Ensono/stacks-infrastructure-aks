@@ -117,8 +117,14 @@ tasks:
   tests:infra:run:
     context: infratests
     description: Execute infrastructure tests against deployed Cloud resources
+    env:
+      CHEF_LICENSE: accept-silent
+      AZURE_CLIENT_ID: ${ARM_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${ARM_CLIENT_SECRET}
+      AZURE_TENANT_ID: ${ARM_TENANT_ID}
+      AZURE_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID}
     command:
-      - Invoke-Inspec -execute -arguments "--input-file ${PWD}/inspec_inputs.yml"
+      - Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=`$PWD/inspec_inputs.yml"
 
   infra:helm:apply:
     context: powershell
