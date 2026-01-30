@@ -9,7 +9,10 @@ pipelines:
     - task: lint:terraform:validate
 
   tests:
+    - task: tests:infra:init
     - task: tests:infra:vendor
+      depends_on:
+        - tests:infra:init
     - task: tests:infra:run
       depends_on:
         - tests:infra:vendor
