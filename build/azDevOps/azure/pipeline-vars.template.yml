@@ -24,11 +24,8 @@ variables:
 
   # ------- Cluster information
   # version of AKS to deploy
-  - name: AKS_CLUSTER_VERSION
-    value: 1.34.1
-
   - name: aks_cluster_version
-    value: $(AKS_CLUSTER_VERSION)
+    value: 1.34.1
 
   # Should a valid certificate be obtained, or use a self signed one
   - name: create_valid_cert
