@@ -1,12 +1,20 @@
 {
   "cSpell.words": [
+    "adoc",
     "aksvnet",
     "azuredevops",
     "EDIR",
     "emberstack",
+    "htpasswd",
+    "kured",
     "linenums",
     "pkcs",
+    "rollouts",
     "serviceaccount",
-    "versionless"
+    "TFOUT",
+    "traefik",
+    "velero",
+    "versionless",
+    "vnet"
   ]
 }
