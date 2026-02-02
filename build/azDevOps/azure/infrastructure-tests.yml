@@ -45,6 +45,11 @@ stages:
               INSPEC_FILES: /eirctl/deploy/tests
               INSPEC_ARGS: "--input resource_group_name=$(resource_group_name) storage_account_name=$(storage_account_name) region=$(location)"
               REPORT_FILENAME: inspec_azure_aks.xml
+              TF_FILE_LOCATION: /eirctl/deploy/terraform
+              TF_VAR_stage: nonprod
+              TF_VAR_location: $(region)
+              TF_VAR_is_cluster_private: $(private_cluster)
+              TF_VAR_aks_node_pools: $(aks_node_pools)
 
           - task: PublishTestResults@2
             inputs:

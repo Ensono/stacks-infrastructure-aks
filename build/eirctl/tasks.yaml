@@ -115,6 +115,20 @@ tasks:
     description: Create file to use as the input for the Inspec tests
     command:
       - |
+        # Default TF_FILE_LOCATION to conventional path if not set
+        if ([string]::IsNullOrEmpty($env:TF_FILE_LOCATION)) {
+            $env:TF_FILE_LOCATION = '/eirctl/deploy/terraform'
+            Write-Warning "TF_FILE_LOCATION not set, defaulting to: $($env:TF_FILE_LOCATION)"
+        }
+
+        # Fail-fast validation for required environment variables
+        $requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
+        $missing = $requiredVars | Where-Object { [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($_)) }
+        if ($missing.Count -gt 0) {
+            Write-Error "Missing required environment variables: $($missing -join ', '). Run 'source ./local/envvar-azure-dev.sh' or set these variables before running tests."
+            exit 1
+        }
+
         Import-Module Az.Aks
         Import-Module Az.KeyVault -ErrorAction SilentlyContinue
         Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION

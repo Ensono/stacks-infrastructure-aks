@@ -68,6 +68,19 @@ Checks:
 * Validate `/eirctl/inspec_inputs.yml` contents
 * Confirm Azure credentials are present
 
+=== Terraform Workspace Selection Fails
+
+Symptoms:
+
+* `tests:infra:inputs` fails with "No workspace name specified to create or switch to"
+
+Checks:
+
+* Ensure `TF_VAR_stage` environment variable is set (e.g., `dev`, `nonprod`, `prod`)
+* Run `source ./local/envvar-azure-dev.sh` to load required environment variables
+* Verify `TF_FILE_LOCATION` points to `/eirctl/deploy/terraform` (defaults automatically if not set)
+* Run `eirctl run setup:environment` to validate all required variables are present
+
 === Helm Deployment Errors
 
 Symptoms:
