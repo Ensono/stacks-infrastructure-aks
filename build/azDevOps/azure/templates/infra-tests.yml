@@ -41,6 +41,11 @@ steps:
       INSPEC_ARGS: ${{ parameters.INSPEC_ARGS }}
       INSPEC_OUTPUT_PATH: ${{ parameters.INSPEC_OUTPUT_PATH }}
       REPORT_FILENAME: ${{ parameters.REPORT_FILENAME }}
+      TF_FILE_LOCATION: ${{ parameters.TF_FILE_LOCATION }}
+      TF_VAR_stage: ${{ parameters.TF_VAR_stage }}
+      TF_VAR_location: ${{ parameters.TF_VAR_location }}
+      TF_VAR_is_cluster_private: ${{ parameters.TF_VAR_is_cluster_private }}
+      TF_VAR_aks_node_pools: ${{ parameters.TF_VAR_aks_node_pools }}
 
       # Ensure that the env vars are set for access
       # The following are the env vars that Inspec requires for authentication with Azure
