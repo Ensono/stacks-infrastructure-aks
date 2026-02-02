@@ -418,7 +418,7 @@ GitHub Copilot MUST validate all code suggestions against:
 - **NIST SP 800-53** - Security and Privacy Controls
 - **NIST Cybersecurity Framework (CSF)**
 - **FIPS 140-2/140-3** - Cryptographic Module Standards
-- **PCI DSS v4.0** - Payment Card Industry Data Security Standard
+- **PCI DSS (currently v4.0, fully in effect since March 31, 2025)** - Payment Card Industry Data Security Standard
 - **CIS Controls** - Center for Internet Security Controls
 - **Cyber Essentials (UK)** - UK Government Cybersecurity Scheme
 - **OWASP Top 10** - Web Application Security Risks

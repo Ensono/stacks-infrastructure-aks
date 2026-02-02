@@ -41,7 +41,7 @@ tasks:
     description: Create Terraform variables file
     command:
       # NOTE: /eirctl is the container mount root for eirctl contexts.
-      - /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - $ErrorActionPreference = 'Stop'; /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
       - dir ${env:TF_FILE_LOCATION}
 
   infra:plan:
@@ -118,10 +118,10 @@ tasks:
     description: Create file to use as the input for the Inspec tests
     command:
       - |
-        # Default TF_FILE_LOCATION to conventional path if not set
+        # Require TF_FILE_LOCATION to be pre-set for consistency with other tasks
         if ([string]::IsNullOrEmpty($env:TF_FILE_LOCATION)) {
-            $env:TF_FILE_LOCATION = '/eirctl/deploy/terraform'
-            Write-Warning "TF_FILE_LOCATION not set, defaulting to: $($env:TF_FILE_LOCATION)"
+            Write-Error "TF_FILE_LOCATION is not set. Please set TF_FILE_LOCATION (for example to '/eirctl/deploy/terraform') before running this task, or configure it in the environment setup step."
+            exit 1
         }
 
         # Fail-fast validation for required environment variables
