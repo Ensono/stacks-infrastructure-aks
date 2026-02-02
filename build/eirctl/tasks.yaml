@@ -203,7 +203,18 @@ tasks:
     context: powershell
     description: Clear Terraform state lock from Azure Storage backend
     command:
-      - /eirctl/build/scripts/Clear-TerraformStateLock.ps1 `
+      - |
+        # Authenticate with Azure using service principal
+        if ($env:ARM_CLIENT_ID -and $env:ARM_CLIENT_SECRET -and $env:ARM_TENANT_ID -and $env:ARM_SUBSCRIPTION_ID) {
+            $securePassword = ConvertTo-SecureString $env:ARM_CLIENT_SECRET -AsPlainText -Force
+            $credential = New-Object System.Management.Automation.PSCredential($env:ARM_CLIENT_ID, $securePassword)
+            Connect-AzAccount -ServicePrincipal -Credential $credential -Tenant $env:ARM_TENANT_ID -Subscription $env:ARM_SUBSCRIPTION_ID | Out-Null
+            Write-Host "Authenticated with Azure"
+        } else {
+            Write-Warning "Azure credentials not found. Assuming already authenticated."
+        }
+
+        /eirctl/build/scripts/Clear-TerraformStateLock.ps1 `
           -StorageAccountName $env:TF_STATE_STORAGE `
           -ContainerName $env:TF_STATE_CONTAINER `
           -StateKey $env:TF_STATE_KEY `
