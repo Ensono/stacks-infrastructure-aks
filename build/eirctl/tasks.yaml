@@ -6,6 +6,8 @@ tasks:
     # - The legacy `exportAs` field for this task has been intentionally removed.
     # - The build number is updated directly by `Update-BuildNumber`, so no additional
     #   environment export from this task is required.
+    # - Unlike taskctl, eirctl does not use per-task `exportAs` metadata; task outputs are
+    #   handled by the task script or dedicated output tasks, so no explicit export is needed.
     command:
       - Update-BuildNumber
 
@@ -38,6 +40,7 @@ tasks:
     context: powershell
     description: Create Terraform variables file
     command:
+      # NOTE: /eirctl is the container mount root for eirctl contexts.
       - /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
       - dir ${env:TF_FILE_LOCATION}
 

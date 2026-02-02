@@ -156,7 +156,7 @@ function Test-AzureDevOpsPAT {
     Write-Host "Testing: GET /_apis/projects/{project}"
     Write-Host ""
 
-    $projectEncoded = [System.Web.HttpUtility]::UrlEncode($project)
+    $projectEncoded = [Uri]::EscapeDataString($project)
     $projectUri = "$orgUrl/_apis/projects/$projectEncoded`?api-version=7.1"
 
     try {

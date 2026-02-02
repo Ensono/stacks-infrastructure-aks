@@ -24,8 +24,11 @@ variables:
 
   # ------- Cluster information
   # version of AKS to deploy
-  - name: aks_cluster_version
+  - name: AKS_CLUSTER_VERSION
     value: 1.34.1
+
+  - name: aks_cluster_version
+    value: $(AKS_CLUSTER_VERSION)
 
   ## The Cluster Control Plane SKU Tier. One of: Free, Standard, or Premium
   - name: aks_cluster_sku_tier

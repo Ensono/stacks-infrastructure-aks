@@ -17,7 +17,7 @@ locals {
   )
 
   # Check if Azure DevOps PAT is provided (avoid using sensitive value in for_each directly)
-  has_ado_pat = try(length(var.ado_personal_access_token) > 0, false)
+  has_ado_pat = nonsensitive(var.ado_personal_access_token) != ""
 
   # Obtain a list of environments from the variables
   # This is a comma separated list which also has a flag to state if it is for the production subscription or not

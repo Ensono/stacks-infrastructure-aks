@@ -127,7 +127,10 @@ variable "deploy_all_environments" {
 }
 
 variable "cluster_version" {
-  type    = string
+  description = "Default AKS Kubernetes version. Pinned to a known stable version at the time of writing; review regularly against supported AKS versions."
+  type        = string
+  # NOTE: Ensure this default remains a supported AKS version before deploying to new environments.
+  # See: https://learn.microsoft.com/azure/aks/supported-kubernetes-versions
   default = "1.34.1"
 }
 

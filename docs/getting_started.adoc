@@ -30,6 +30,8 @@ Use an Azure DevOps Personal Access Token (PAT) for variable group creation.
 . Set expiration (short lived recommended)
 . Select scopes:
 * Project and Team: Read
+* Work Items: Read
+* Build: Read
 * Variable Groups: Read & manage
 . Create and copy the token
 
@@ -134,6 +136,8 @@ This task will:
 
 * Check the PAT format and length
 * Verify **Project and Team: Read** permission
+* Verify **Work Items: Read** permission
+* Verify **Build: Read** permission
 * Verify **Variable Groups: Read** permission
 * Test **Variable Groups: Manage** permission by creating and deleting a test variable group
 
