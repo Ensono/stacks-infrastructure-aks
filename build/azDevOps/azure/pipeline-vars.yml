@@ -64,13 +64,13 @@ variables:
 
   # -------- Network Domain names
   - name: base_domain_nonprod
-    value: dev.stacks.ensono.com
+    value: nonprod.stacks.ensono.com
   - name: base_domain_internal_nonprod
-    value: dev.stacks.ensono.internal
+    value: nonprod.stacks.ensono.internal
   - name: base_domain_prod
-    value: dev.stacks.ensono.com
+    value: prod.stacks.ensono.com
   - name: base_domain_internal_prod
-    value: dev.stacks.ensono.internal
+    value: prod.stacks.ensono.internal
 
   # ------- DNS configuration
   - name: create_dns_zone
