@@ -17,7 +17,7 @@ Run the setup:dev task to generate the environment variables shell script:
 eirctl run setup:dev
 ```
 
-This command creates or updates the file at `./local/envvar-azure-stacks-aks.sh` with all required environment variables.
+This command creates or updates the file at `./.eirctl/envvar-azure-stacks-aks.sh` with all required environment variables.
 
 ## 2. POPULATE – Fill in known values from the repository
 
@@ -95,7 +95,7 @@ az ad sp create-for-rbac --name "stacks-aks-dev" --role contributor \
 
 ## 4. UPDATE – Apply the populated values
 
-Update the `./local/envvar-azure-stacks-aks.sh` file with all known values, leaving placeholders for credentials:
+Update the `./.eirctl/envvar-azure-stacks-aks.sh` file with all known values, leaving placeholders for credentials:
 
 ```bash
 # The Cloud platform for which these variables are being set
@@ -151,7 +151,7 @@ After updating the file, remind the user to:
 1. **Source the environment file** before running infrastructure commands:
 
    ```bash
-   source ./local/envvar-azure-stacks-aks.sh
+   source ./.eirctl/envvar-azure-stacks-aks.sh
    ```
 
 2. **Verify the environment** using the setup:environment task:
@@ -160,15 +160,14 @@ After updating the file, remind the user to:
    eirctl run setup:environment
    ```
 
-3. **Never commit credentials** - ensure `./local/` is in `.gitignore`
-
+3. **Never commit credentials** - ensure `./.eirctl/` is in `.gitignore`
 ## 6. NEXT STEPS – Run the initial workflow
 
 After verification, run the standard local flow (requires Azure creds to be set):
 
 ```bash
 # ensure env is loaded in the current shell
-source ./local/envvar-azure-stacks-aks.sh
+source ./.eirctl/envvar-azure-stacks-aks.sh
 
 # sanity-check required variables
 eirctl run setup:environment

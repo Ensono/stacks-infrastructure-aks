@@ -4,6 +4,7 @@
 tfplan
 
 local
+.eirctl
 
 envfile*
 

@@ -31,7 +31,7 @@ eirctl run tests                   # InSpec compliance testing
 eirctl run docs                    # Generate documentation
 
 # Environment setup (PowerShell)
-. ./local/envvar-azure-<stage>.ps1  # Load required TF_VAR_* environment variables
+. ./.eirctl/envvar-azure-<stage>.ps1  # Load required TF_VAR_* environment variables
 ```
 
 ## Development Patterns & Conventions

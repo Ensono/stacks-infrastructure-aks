@@ -77,7 +77,7 @@ Symptoms:
 Checks:
 
 * Ensure `TF_VAR_stage` environment variable is set (e.g., `dev`, `nonprod`, `prod`)
-* Run `source ./local/envvar-azure-dev.sh` to load required environment variables
+* Run `source ./.eirctl/envvar-azure-dev.sh` to load required environment variables
 * Verify `TF_FILE_LOCATION` points to `/eirctl/deploy/terraform` (defaults automatically if not set)
 * Run `eirctl run setup:environment` to validate all required variables are present
 

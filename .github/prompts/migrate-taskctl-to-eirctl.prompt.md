@@ -322,7 +322,7 @@ command:
 ```yaml
 # Command should use /eirctl/ prefix:
 command:
-  - New-Item -ItemType Directory -Path "local" -Force | Out-Null; New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/local -Cloud azure -Stage dev
+  - New-Item -ItemType Directory -Path ".eirctl" -Force | Out-Null; New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/.eirctl -Cloud azure -Stage dev
 ```
 
 **Task: `infra:helm:apply`**

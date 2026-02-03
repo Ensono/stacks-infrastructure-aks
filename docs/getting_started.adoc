@@ -79,12 +79,12 @@ If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner mo
 New-EnvConfig -Path .\build\config\stage_envvars.yml -scriptPath local -Cloud Azure -Stage stacks-aks
 ---
 
-The resultant script will be `local/envvar-azure-stacks-aks.ps1`. The naming convention is `envvar-<CLOUD>-<STAGE>.ps1`.
+The resultant script will be `./.eirctl/envvar-azure-stacks-aks.ps1`. The naming convention is `envvar-<CLOUD>-<STAGE>.ps1`.
 
 .Environment variable script
 image::images/envvar-script.png[width=500]
 
-Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then set up the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
+Edit this file as needed and then run the script `. ./.eirctl/envvar-azure-stacks-aks.ps1`. This will then set up the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
 
 ==== Bash
 
@@ -95,11 +95,11 @@ If using Bash, you can use the `eirctl run setup:dev` command to automatically g
 eirctl run setup:dev
 ----
 
-The resultant script will be created in `local/envvar-azure-dev.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
+The resultant script will be created in `./.eirctl/envvar-azure-dev.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
 
 This command will:
 
-1. Create the `local/` directory if it doesn't exist
+1. Create the `./.eirctl/` directory if it doesn't exist
 2. Generate a shell script with all required environment variables
 3. Pre-populate values from the stage configuration
 4. Include Azure authentication variables (ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.)
@@ -109,14 +109,14 @@ Edit this file with your specific values and then source the script to set up th
 
 [source,bash]
 ----
-source ./local/envvar-azure-dev.sh
+source ./.eirctl/envvar-azure-dev.sh
 ----
 
 or using the dot notation:
 
 [source,bash]
 ----
-. ./local/envvar-azure-dev.sh
+. ./.eirctl/envvar-azure-dev.sh
 ----
 
 These environment variables will then be copied into the container when it is spun up by eirctl.
@@ -177,7 +177,7 @@ eirctl run infra:plan
 Order of precedence (highest to lowest):
 
 . Shell environment variables (`TF_VAR_*`)
-. Environment script (`local/envvar-azure-<stage>.*`)
+. Environment script (`.eirctl/envvar-azure-<stage>.*`)
 . Defaults in `build/config/stage_envvars.yml`
 
 TIP: Keep `TF_VAR_*` values consistent between local scripts and pipeline variables to avoid drift.
