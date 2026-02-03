@@ -35,7 +35,6 @@ repos:
       - id: check-merge-conflict
       - id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: ^(deploy/helm/(charts|values)/|deploy/tests/vendor/)
       - id: detect-private-key
         exclude: ^deploy/terraform/certs/
 
