@@ -96,7 +96,6 @@ Examine the following in detail:
 2. **Tasks** (in [build/taskctl/tasks.yaml](../../build/taskctl/tasks.yaml)):
 
 - Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, \_docs, \_release)
-- List all script paths (e.g., `/eirctl/build/scripts/Set-TFVars.ps1`)
 - Identify Terraform file location references (`/eirctl/deploy/terraform`)
 - Note environment variable dependencies
 
@@ -293,7 +292,6 @@ Verify these paths exist in `build/eirctl/tasks.yaml`:
 
 | Path                                            | Purpose                         |
 | ----------------------------------------------- | ------------------------------- |
-| `/eirctl/build/scripts/Set-TFVars.ps1`          | Generate tfvars file            |
 | `/eirctl/build/scripts/Set-EnvironmentVars.ps1` | Set environment from TF outputs |
 | `/eirctl/build/scripts/Deploy-HelmCharts.ps1`   | Deploy Helm charts              |
 | `/eirctl/deploy/terraform`                      | Terraform templates             |
@@ -314,7 +312,7 @@ Review and verify these tasks in `build/eirctl/tasks.yaml` use correct paths:
 ```yaml
 # Command should use /eirctl/ prefix:
 command:
-  - /eirctl/build/scripts/Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+  - -TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
 ```
 
 **Task: `setup:dev`**

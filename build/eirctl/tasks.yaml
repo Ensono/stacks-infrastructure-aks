@@ -40,7 +40,7 @@ tasks:
     context: powershell
     description: Create Terraform variables file
     command:
-      - $ErrorActionPreference = 'Stop'; Set-TFVars.ps1 | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - $ErrorActionPreference = 'Stop'; Get-TFVars | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
       - dir ${env:TF_FILE_LOCATION}
 
   infra:plan:

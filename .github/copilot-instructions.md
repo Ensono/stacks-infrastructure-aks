@@ -44,7 +44,7 @@ eirctl run docs                    # Generate documentation
 
 ### Environment Variables Pattern
 
-- **All Terraform vars prefixed with `TF_VAR_`** - automatically converted to terraform.tfvars by `build/scripts/Set-TFVars.ps1`
+- **All Terraform vars prefixed with `TF_VAR_`** - automatically converted to terraform.tfvars by `Get-TFVars.ps1`
 - **Required vars**: See `docs/getting_started.adoc` table - includes company, project, stage, location, DNS zones, etc.
 - **Environment files**: `build/config/stage_envvars.yml` defines per-stage variable templates
 
