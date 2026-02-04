@@ -43,6 +43,6 @@ repos:
     rev: v0.39.0
     hooks:
       - id: markdownlint
-        args: [--fix, --disable, MD013]
+        args: [--fix, --config, .markdownlint.json]
         exclude: ^(docs/|deploy/tests/vendor/)
         files: \.md$

@@ -53,6 +53,11 @@ variables:
   # Furthermore **IT IS VERY IMPORTANT** that you change the name of a workspace for each deployment stage
   # there are some best practices around this if you are going for feature based environments
   # avoid running anything past dev that is not on master
+  #
+  # NOTE: tf_state_key was intentionally changed from "core" to "core:infrastructure:aks"
+  # for better organization and separation of infrastructure components. If migrating from
+  # the legacy "core" key, you must manually move the state file in Azure Storage or use
+  # `terraform state mv` to migrate resources to the new key.
   - name: tf_state_rg
     value: stacks-terraform-state
   - name: tf_state_storage
@@ -73,6 +78,10 @@ variables:
     value: prod.stacks.ensono.internal
 
   # ------- DNS configuration
+  # Note: create_dns_zone and dns_parent_zone_resource_group values are intentional
+  # per @russellseymour's refactoring. The nonprod and prod DNS zones are created
+  # by the Ancillary repo, so we create child zones here but do NOT create parent
+  # NS records (dns_create_parent_zone_ns_records: false) since those already exist.
   - name: create_dns_zone
     value: true
   - name: dns_resource_group

@@ -45,7 +45,7 @@ Several features are optional and controlled by flags:
 
 === Ensono Stacks Module Capabilities
 
-The AKS deployment uses Ensono Stacks modules (v8.0.19). These provide:
+The AKS deployment uses Ensono Stacks modules from the link:https://github.com/Ensono/stacks-terraform[stacks-terraform repository]. Module versions are specified in [deploy/terraform/aks.tf](../deploy/terraform/aks.tf) and [deploy/terraform/ssl_app_gateway.tf](../deploy/terraform/ssl_app_gateway.tf). These provide:
 
 * Naming conventions via foundation-azure
 * AKS cluster provisioning and identity setup
