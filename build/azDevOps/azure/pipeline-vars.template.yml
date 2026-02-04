@@ -66,7 +66,7 @@ variables:
     value: "{{ .Input.Business.Company }}-dns-zones"
   ## dns_zone is in the stages variable in the pipeline
   - name: dns_create_parent_zone_ns_records
-    value: true
+    value: false
   - name: dns_parent_resource_group
     value: "{{ .Input.Business.Company }}-dns-zones"
   - name: dns_parent_zone

@@ -3,7 +3,7 @@
 | Scenario | Required Variables
 | Basic cluster | `create_aksvnet=true`, `create_dns_zone=true`, `create_key_vault=false`
 | Multi node pool | `aks_node_pools` map with pool definitions
-| DNS delegation | `dns_parent_zone`, `dns_parent_resource_group`, `dns_create_parent_zone_ns_records=true`
+| DNS delegation | `dns_parent_zone`, `dns_parent_resource_group`, `dns_create_parent_zone_ns_records=false`
 | Public IP standard | `public_ip_sku=Standard` (default)
 | Certificate management | `create_key_vault=true`, `create_valid_cert=true`, `acme_email`
 |===
