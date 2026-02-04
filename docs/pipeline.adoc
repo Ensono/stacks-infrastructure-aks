@@ -11,8 +11,6 @@ There are two pipelines at work within the repository. The one that is run by th
 
 NOTE: The Independent Runner is the main pipeline that is executed, whether it is by a CI/CD platform or on a local machine. The CI/CD pipelines are shims that call the Independent Runner which ensures that the pipeline is executed the same way each time.
 
-
-
 === Independent Runner
 
 The EDIR has a number of pipelines that run a number of tasks.

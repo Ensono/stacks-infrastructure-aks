@@ -88,14 +88,14 @@ Edit this file as needed and then run the script `. ./.eirctl/envvar-azure-stack
 
 ==== Bash
 
-If using Bash, you can use the `eirctl run setup:dev` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
+If using Bash, you can use the `eirctl run setup:environment` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
 
 [source,bash,linenums]
 ----
-eirctl run setup:dev
+eirctl run setup:environment
 ----
 
-The resultant script will be created in `./.eirctl/envvar-azure-dev.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
+The resultant script will be created in `./.eirctl/envvar-azure-stacks-aks.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
 
 This command will:
 
@@ -109,14 +109,14 @@ Edit this file with your specific values and then source the script to set up th
 
 [source,bash]
 ----
-source ./.eirctl/envvar-azure-dev.sh
+source ./.eirctl/envvar-azure-stacks-aks.sh
 ----
 
 or using the dot notation:
 
 [source,bash]
 ----
-. ./.eirctl/envvar-azure-dev.sh
+. ./.eirctl/envvar-azure-stacks-aks.sh
 ----
 
 These environment variables will then be copied into the container when it is spun up by eirctl.
