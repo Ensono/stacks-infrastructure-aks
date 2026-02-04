@@ -12,7 +12,7 @@ contexts:
 
   infratests:
     container:
-      name: ensonostackseuweirdfmu.azurecr.io/ensono/eir-inspec:1.2.39
+      name: ensono/eir-inspec:1.2.39
       shell: pwsh
       shell_args:
         - -Command
