@@ -78,15 +78,10 @@ variables:
     value: prod.stacks.ensono.internal
 
   # ------- DNS configuration
-  # Note: create_dns_zone and dns_parent_zone_resource_group values are intentional
-  # per @russellseymour's refactoring. The nonprod and prod DNS zones are created
-  # by the Ancillary repo, so we create child zones here but do NOT create parent
-  # NS records (dns_create_parent_zone_ns_records: false) since those already exist.
   - name: create_dns_zone
-    value: true
+    value: false
   - name: dns_resource_group
     value: stacks-dns-zones
-  ## dns_zone is in the stages variable in the pipeline
   - name: dns_create_parent_zone_ns_records
     value: false
   - name: dns_parent_resource_group
