@@ -40,12 +40,15 @@ Structure:
 
 Minimum required scopes for this repository:
 
-* Project and Team: Read (`vso.project`)
-* Variable Groups: Read & manage (`vso.variablegroups_manage`)
+The Terraform `azuredevops` provider requires the following scopes to create and manage variable groups:
+
+* Project and Team: Read (`vso.project`) – required to read project metadata
+* Work Items: Read (`vso.work`) – required to read process templates
+* Build: Read (`vso.build`) – required to read project resources and permissions
+* Variable Groups: Read & manage (`vso.variablegroups_manage`) – required to create and manage variable groups
 
 Optional (only if required by future changes):
 
-* Build: Read (`vso.build`)
 * Pipeline resources: Use and manage (`vso.pipelineresources_manage`)
 
 === Security Best Practices
