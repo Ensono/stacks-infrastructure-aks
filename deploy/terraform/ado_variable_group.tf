@@ -4,7 +4,7 @@
 
 resource "azuredevops_variable_group" "vg" {
 
-  for_each = var.create_ado_variable_group && local.has_ado_pat ? toset(local.environments) : []
+  for_each = var.create_ado_variable_group && local.has_ado_pat ? toset(local.environments) : toset([])
 
   project_id = data.azuredevops_project.project[0].id
 

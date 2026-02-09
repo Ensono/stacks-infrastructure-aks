@@ -211,11 +211,13 @@ variable "tag_team_owner" {
 variable "ado_org_service_url" {
   description = "The URL of the Azure DevOps organization service"
   type        = string
+  default     = ""
 }
 
 variable "ado_project_name" {
   description = "The name of the Azure DevOps project"
   type        = string
+  default     = ""
 }
 
 variable "ado_personal_access_token" {

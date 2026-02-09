@@ -81,7 +81,7 @@ The Helm deployment uses Terraform outputs exposed as environment variables:
 ----
 TFOUT_aks_cluster_name=rg-ens-stacks-uks-nonprod
 TFOUT_resource_group_name=rg-ens-stacks-uks-nonprod
-TFOUT_app_gateway_ip=51.132.17.238
+TFOUT_app_gateway_ip=198.51.100.10
 ----
 
 These values are injected into the chart values template during `infra:helm:apply`.

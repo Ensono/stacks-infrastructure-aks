@@ -65,7 +65,7 @@ if ($env:TFOUT_app_gateway_public_ip_name -and $env:TFOUT_app_gateway_resource_g
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "public_ip_sku: $publicIpSku"
 
 $keyVaults = @()
-if ($env:TFOUT_resource_group_name) {
+if ($env:TFOUT_resource_group_name -and (Get-Command Get-AzKeyVault -ErrorAction SilentlyContinue)) {
   $keyVaultsRaw = Get-AzKeyVault -ResourceGroupName $env:TFOUT_resource_group_name -ErrorAction SilentlyContinue
   foreach ($kv in @($keyVaultsRaw)) {
     $skuName = $kv.Sku.Name

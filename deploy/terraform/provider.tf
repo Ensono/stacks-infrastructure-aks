@@ -16,7 +16,7 @@ terraform {
 
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = ">=0.1.0"
+      version = "~> 0.1"
     }
   }
 }
@@ -34,6 +34,6 @@ provider "azurerm" {
 }
 
 provider "azuredevops" {
-  org_service_url       = var.ado_org_service_url
+  org_service_url       = var.ado_org_service_url != "" ? var.ado_org_service_url : "https://dev.azure.com"
   personal_access_token = var.ado_personal_access_token != "" ? var.ado_personal_access_token : null
 }

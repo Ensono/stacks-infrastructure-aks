@@ -34,7 +34,7 @@ Currently knows how to set the build number for Azure DevOps.
 | `setup:dev` | Create a shell script which will configure the environment variables based on the `build/config/stage_envvars.yaml`
 | `setup:environment` | Ensure that the environment is configured correctly. This can be used to ensure that all the necessary environment variables have been set.
 | `setup:validate:azdo:pat` | Validate that the Azure DevOps Personal Access Token has the minimum required scopes (Project and Team: Read, Variable Groups: Read & manage). Fails fast if scopes are missing. Skipped if `TF_VAR_create_ado_variable_group=false`.
-| `tests:infra:init` | Initialse the Inspec test profile.
+| `tests:infra:init` | Initialise the Inspec test profile.
 | `tests:infra:vendor` | This will analyse the profile and download the required providers to run the tests
 | `tests:infra:inputs` | Generate the Inspec inputs file from Terraform outputs and Azure version data
 | `tests:infra:run` | Execute infrastructure tests against the deployed Cloud Resources using Inspec
