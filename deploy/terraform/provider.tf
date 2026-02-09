@@ -16,7 +16,7 @@ terraform {
 
     azuredevops = {
       source  = "microsoft/azuredevops"
-      version = "~> 0.1"
+      version = ">= 1.0"
     }
   }
 }
