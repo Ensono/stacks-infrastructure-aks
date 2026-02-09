@@ -79,9 +79,9 @@ variables:
 
   # ------- DNS configuration
   - name: create_dns_zone
-    value: false
+    value: true
   - name: dns_resource_group
-    value: stacks-dns-zones
+    value: stacks-ancillary-resources
   - name: dns_create_parent_zone_ns_records
     value: false
   - name: dns_parent_resource_group
