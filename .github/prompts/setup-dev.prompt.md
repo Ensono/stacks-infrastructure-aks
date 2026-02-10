@@ -5,6 +5,8 @@ description: Run eirctl setup:dev and populate the environment variables file wi
 model: Auto (copilot)
 ---
 
+## Overview
+
 You are an experienced DevOps/Platform engineer helping to configure the local development environment for this Stacks AKS infrastructure project.
 
 Follow this EXACT workflow:
@@ -23,7 +25,7 @@ This command creates or updates the file at `./.eirctl/envvar-azure-stacks-aks.s
 
 After generating the template, populate the environment variables file using values from the repository configuration files:
 
-### Values available from pipeline-vars.yml (#file:../../build/azDevOps/azure/pipeline-vars.yml):
+### Values available from pipeline-vars.yml (#file:../../build/azDevOps/azure/pipeline-vars.yml)
 
 | Variable                      | Source Value                                                                            |
 | ----------------------------- | --------------------------------------------------------------------------------------- |
@@ -48,7 +50,7 @@ After generating the template, populate the environment variables file using val
 | `TF_VAR_create_user_identity` | `true`                                                                                  |
 | `TF_VAR_pfx_password`         | `Password1` (development only - use a secure password for production)                   |
 
-### Terraform Backend Configuration:
+### Terraform Backend Configuration
 
 ```bash
 TF_BACKEND_INIT="key=core:infrastructure:aks:dev,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
@@ -113,10 +115,9 @@ export TF_BACKEND_INIT="key=core:infrastructure:aks:dev,container_name=tfstate,s
 export TF_BACKEND_PLAN='-input=false,-out="deploy.tfplan"'
 
 # Naming convention variables
-export TF_VAR_company="ed"
+export TF_VAR_company="ensono"
 export TF_VAR_project="stacks"
 export TF_VAR_component="infra-aks"
-export TF_VAR_environment="dev"
 export TF_VAR_stage="dev"
 
 # Azure location
@@ -161,6 +162,7 @@ After updating the file, remind the user to:
    ```
 
 3. **Never commit credentials** - ensure `./.eirctl/` is in `.gitignore`
+
 ## 6. NEXT STEPS – Run the initial workflow
 
 After verification, run the standard local flow (requires Azure creds to be set):
@@ -183,4 +185,6 @@ eirctl run infra:helm:apply
 
 ## Summary
 
-After completing this prompt, inform the user which values were populated automatically and which require manual input, presenting the credential variables prominently in the chat so they can easily see what still needs to be configured.
+After completing this prompt, inform the user which values were populated automatically and which
+require manual input, presenting the credential variables prominently in the chat so they can easily
+see what still needs to be configured.

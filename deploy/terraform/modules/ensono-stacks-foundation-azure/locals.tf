@@ -21,7 +21,7 @@ locals {
   # Guard jsondecode with try() to handle null values gracefully
   outputs = try(jsondecode(var.outputs), {})
 
-  # Iterate around the envrionments and the outputs and encode as required, e.g. quotes around strings
+  # Iterate around the environments and the outputs and encode as required, e.g. quotes around strings
   # and encode anything else
   #encoded_outputs = {
   #  for name in var.environments : name => {

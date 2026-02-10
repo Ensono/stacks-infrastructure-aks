@@ -120,7 +120,7 @@ The Helm deployment uses Terraform outputs exposed as environment variables:
 
 [source,bash]
 ----
-TFOUT_aks_cluster_name=rg-ens-stacks-uks-nonprod
+TFOUT_aks_cluster_name=aks-ens-stacks-uks-nonprod
 TFOUT_resource_group_name=rg-ens-stacks-uks-nonprod
 TFOUT_app_gateway_ip=198.51.100.10
 ----

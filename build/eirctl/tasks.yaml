@@ -48,9 +48,11 @@ tasks:
     description: Plan Terraform
     command:
       - |
-        $planArgs = @("-input=false", "-out=`"deploy.tfplan`"")
-        if (![string]::IsNullOrWhiteSpace($env:TF_BACKEND_PLAN)) {
-          $planArgs += $env:TF_BACKEND_PLAN -split '\s+'
+        # Use TF_BACKEND_PLAN as the single source of truth if set, otherwise use defaults
+        if ([string]::IsNullOrWhiteSpace($env:TF_BACKEND_PLAN)) {
+          $planArgs = @("-input=false", "-out=`"deploy.tfplan`"")
+        } else {
+          $planArgs = $env:TF_BACKEND_PLAN -split '\s+'
         }
         Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments ($planArgs -join ",")
 
