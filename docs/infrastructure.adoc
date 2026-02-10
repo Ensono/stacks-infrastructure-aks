@@ -70,3 +70,52 @@ Data sources are used to fetch resource IDs, DNS zones, and version information.
 === Workspace Strategy
 
 Terraform workspaces are aligned with environment names. The workspace is selected or created during `infra:init` using the `TF_VAR_stage` value.
+
+=== AKS Deployment Details
+
+The AKS cluster deployment process follows these key steps:
+
+**Cluster Provisioning**:
+
+. Resource group creation in specified Azure region
+. Virtual network and subnets configured for AKS
+. Network Security Groups (NSGs) with Azure Policy enforcement
+. AKS cluster creation with specified Kubernetes version
+. Node pools configured with auto-scaling rules
+. Managed identity binding for Azure RBAC
+
+**Networking Configuration**:
+
+. Public or private API server endpoint (configurable)
+. Application Gateway for ingress traffic management
+. Azure Load Balancer for service networking
+. DNS integration with public and private zones
+. Network Policy enforcement (Calico/Azure CNI)
+
+**Security Context**:
+
+. Pod security policies enforced at cluster level
+. Network policies restrict traffic between pods
+. Azure RBAC controls access to cluster resources
+. Service principals with minimal required permissions
+. Managed identities for workload authentication
+
+=== Application Gateway SSL Configuration
+
+SSL/TLS termination is handled by Application Gateway with the following architecture:
+
+**Certificate Management**:
+
+. Certificates stored in Azure Key Vault
+. TLS policies configured for Application Gateway
+. Supported protocols: TLS 1.2, TLS 1.3
+. Cipher suites configured per security standards
+. Certificate rotation managed via certificate provider
+
+**Configuration Flow**:
+
+. Terraform creates Application Gateway with HTTPS listener
+. Certificate is retrieved from Key Vault during deployment
+. Helm values template injects gateway IP into ingress configuration
+. External DNS synchronizes ingress hostnames to DNS zones
+. Traffic flows: Client → Application Gateway (SSL termination) → Ingress Controller → Services

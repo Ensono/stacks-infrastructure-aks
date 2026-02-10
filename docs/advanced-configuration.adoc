@@ -60,6 +60,97 @@ Limitations:
 
 Resource naming follows `{company}-{project}-{stage}-{component}`. Storage accounts use `{company}{project}{stage}{component}`.
 
+=== Multi-Region Deployment
+
+Deploy AKS clusters across multiple Azure regions for high availability and disaster recovery:
+
+**Prerequisites**:
+
+* Separate Azure subscriptions or resource groups per region (recommended)
+* Shared DNS zone for cross-region service discovery
+* Azure Front Door or Traffic Manager for global load balancing
+* Replicated container registries (ACR replicas)
+
+**Deployment Strategy**:
+
+1. **Create region-specific eirctl contexts**:
+
+   Create separate environment files for each region:
+
+   [source,bash]
+   ----
+   .eirctl/envvar-azure-uks.sh     # UK South region
+   .eirctl/envvar-azure-eus.sh     # East US region
+   .eirctl/envvar-azure-weu.sh     # West Europe region
+   ----
+
+2. **Configure region-specific variables**:
+
+   [source,bash]
+   ----
+   # Region 1: UK South
+   export TF_VAR_location=uksouth
+   export TF_VAR_stage=prod-uks
+   export TF_VAR_dns_zone=prod-uks.example.com
+   export TF_BACKEND_INIT="...,key=terraform-uks.tfstate,..."
+
+   # Region 2: East US
+   export TF_VAR_location=eastus
+   export TF_VAR_stage=prod-eus
+   export TF_VAR_dns_zone=prod-eus.example.com
+   export TF_BACKEND_INIT="...,key=terraform-eus.tfstate,..."
+   ----
+
+3. **Deploy incrementally**:
+
+   [source,bash]
+   ----
+   source .eirctl/envvar-azure-uks.sh
+   eirctl run infrastructure  # Deploy Region 1
+
+   source .eirctl/envvar-azure-eus.sh
+   eirctl run infrastructure  # Deploy Region 2
+   ----
+
+4. **Configure global routing**:
+
+   Use Azure Front Door to route traffic across regions:
+
+   [source,bash]
+   ----
+   TF_VAR_enable_front_door=true
+   TF_VAR_front_door_backend_pools=[
+     {name: "uks", fqdn: "aks-uks.example.com", weight: 50},
+     {name: "eus", fqdn: "aks-eus.example.com", weight: 50}
+   ]
+   ----
+
+5. **Replicate container images**:
+
+   Enable ACR replication:
+
+   [source,bash]
+   ----
+   TF_VAR_acr_replica_locations=["uksouth", "eastus", "westeurope"]
+   ----
+
+**Monitoring Multi-Region Deployments**:
+
+Configure centralized monitoring across regions:
+
+* Single Log Analytics workspace with multi-region ingestion
+* Application Insights for cross-region application monitoring
+* Azure Monitor alerts for region-specific metrics
+* Traffic Manager health probes for failover detection
+
+**Best Practices**:
+
+* Use separate Terraform workspaces per region to prevent state conflicts
+* Store Terraform state in geo-redundant storage accounts
+* Test failover procedures regularly
+* Document region-specific DNS and IP allocation
+* Monitor cross-region latency and cost implications
+
 === Configuration Decision Matrix
 
 include::diagrams/configuration-decisions.adoc[]

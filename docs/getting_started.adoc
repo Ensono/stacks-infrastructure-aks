@@ -88,11 +88,11 @@ Edit this file as needed and then run the script `. ./.eirctl/envvar-azure-stack
 
 ==== Bash
 
-If using Bash, you can use the `eirctl run setup:environment` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
+If using Bash, you can use the `eirctl run setup:dev` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
 
 [source,bash,linenums]
 ----
-eirctl run setup:environment
+eirctl run setup:dev
 ----
 
 The resultant script will be created in `./.eirctl/envvar-azure-stacks-aks.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
@@ -144,6 +144,65 @@ This task will:
 If the PAT is missing required scopes, the task will fail early with specific instructions on which scopes to add. This helps avoid Terraform failures later in the deployment process.
 
 NOTE: This validation runs automatically as part of the `infrastructure` pipeline, immediately after environment setup and before Terraform initialization. It is automatically skipped if `TF_VAR_create_ado_variable_group=false`.
+
+==== Network Security Group (NSG) Flow Logs
+
+NSG Flow Logs provide visibility into network traffic within the cluster:
+
+**Enablement**:
+
+Set `TF_VAR_enable_nsg_flow_logs=true` to:
+
+* Log accepted and denied traffic
+* Send logs to Azure Storage or Log Analytics
+* Enable threat detection and analysis
+
+**Configuration**:
+
+[source,bash]
+----
+export TF_VAR_enable_nsg_flow_logs=true
+export TF_VAR_nsg_flow_logs_retention_days=30
+----
+
+This helps troubleshoot connectivity issues and monitor for unauthorized access patterns.
+
+==== Environment Variable System
+
+The environment variable system is fundamental to the deployment pipeline. It serves multiple purposes:
+
+**Purpose**:
+
+* Separates configuration from code (12-factor methodology)
+* Enables multi-environment deployments from single codebase
+* Supports local development and CI/CD pipeline execution
+* Allows secure secret handling via variable groups
+
+**Variable Categories**:
+
+Backend Variables (Terraform state management):
+
+* `TF_BACKEND_INIT` – Storage account and container details
+* `TF_BACKEND_PLAN` – Optional plan-specific backend args
+
+Infrastructure Variables (Resource configuration):
+
+* `TF_VAR_company`, `TF_VAR_project`, `TF_VAR_stage`, `TF_VAR_location`
+* `TF_VAR_cluster_version`, `TF_VAR_aks_node_pools`
+* `TF_VAR_create_*` flags for optional features
+
+Authentication Variables:
+
+* `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`
+* `TF_VAR_ado_personal_access_token` (for Variable Groups)
+
+**Variable Loading**:
+
+Local development or Azure DevOps pipeline sources variables from:
+
+* `./.eirctl/envvar-<cloud>-<stage>.<sh|ps1>` (generated scripts)
+* `build/config/stage_envvars.yml` (configuration template)
+* Azure DevOps variable groups (pipeline execution)
 
 === Environment Definitions
 

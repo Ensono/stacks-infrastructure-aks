@@ -42,10 +42,11 @@ locals {
   #
   # ["test", "uat"]
   #
-  #
+  # Use computed locals (local.is_prod_subscription, local.deploy_all_envs) instead of variables
+  # to ensure subscription tag values actually influence which environments are deployed
   environments = flatten([for name, detail in local.environments_all : [
     name
-  ] if detail.is_prod == var.is_prod_subscription || var.deploy_all_environments])
+  ] if detail.is_prod == local.is_prod_subscription || local.deploy_all_envs])
 
   resource_outputs = { for envname in local.environments : envname => {
     resource_group_name = module.aks_bootstrap.resource_group_name

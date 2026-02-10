@@ -172,7 +172,7 @@ stages:
                         TF_VAR_create_acr: $(create_acr)
                         TF_VAR_acr_resource_group: $(acr_resource_group)
                         TF_VAR_acr_name: $(acr_name)
-                        TF_VAR_pfx_password: Password1
+                        TF_VAR_pfx_password: $(pfx_password)
                         TF_VAR_create_valid_cert: $(create_valid_cert)
                         TF_VAR_tag_team_owner: $(team_owner)
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
@@ -238,7 +238,7 @@ stages:
                         TF_VAR_create_acr: $(create_acr)
                         TF_VAR_acr_resource_group: $(acr_resource_group)
                         TF_VAR_acr_name: $(acr_name)
-                        TF_VAR_pfx_password: Password1
+                        TF_VAR_pfx_password: $(pfx_password)
                         TF_VAR_create_valid_cert: $(create_valid_cert)
                         TF_VAR_tag_team_owner: $(team_owner)
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
@@ -260,11 +260,13 @@ stages:
 
                     - ${{ if eq(parameters.deploy, true) }}:
                         - task: PublishTestResults@2
+                          displayName: Publish InSpec Test Results
                           inputs:
                             testResultsFormat: JUnit
                             testResultsFiles: outputs/tests/inspec_azure_aks.xml
                             testRunTitle: Terraform AKS Tests
                             failTaskOnFailedTests: true
+                          continueOnError: false
 
                     # Clear Terraform state lock after deployment (success or failure)
                     - task: Bash@3

@@ -16,7 +16,7 @@ module "aks_bootstrap" {
   name_component                    = var.component
   create_dns_zone                   = var.create_dns_zone
   dns_parent_zone                   = var.dns_parent_zone
-  dns_parent_resource_group         = coalesce(var.dns_parent_resource_group, var.dns_parent_zone_resource_group)
+  dns_parent_resource_group         = var.dns_parent_resource_group != "" ? var.dns_parent_resource_group : var.dns_parent_zone_resource_group
   dns_create_parent_zone_ns_records = var.dns_create_parent_zone_ns_records
   dns_resource_group                = var.dns_resource_group
   dns_zone                          = var.dns_zone

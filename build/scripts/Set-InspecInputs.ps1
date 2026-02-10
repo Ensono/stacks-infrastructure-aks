@@ -24,12 +24,15 @@ if ([string]::IsNullOrEmpty($env:TF_FILE_LOCATION)) {
 $requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
 $missing = $requiredVars | Where-Object { [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($_)) }
 if ($missing.Count -gt 0) {
-    Write-Error "Missing required environment variables: $($missing -join ', '). Run 'source ./.eirctl/envvar-azure-dev.sh' or set these variables before running tests."
+    Write-Error "Missing required environment variables: $($missing -join ', '). Run the appropriate environment setup script (for example './.eirctl/envvar-azure-<stage>.sh' or './.eirctl/envvar-azure-<stage>.ps1'), or set these variables before running tests."
     exit 1
 }
 
 Import-Module Az.Aks
 Import-Module Az.KeyVault -ErrorAction SilentlyContinue
+if (-not (Get-Command Get-AzKeyVault -ErrorAction SilentlyContinue)) {
+    Write-Warning "Az.KeyVault module not available. Skipping key vault operations."
+}
 Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
 Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml
 Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append

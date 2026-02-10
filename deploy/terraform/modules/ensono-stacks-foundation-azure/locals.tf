@@ -18,7 +18,8 @@ locals {
 
   # Define the outputs for this module
   # outputs = merge(jsondecode(var.outputs), { "module_path" : path.module })
-  outputs = jsondecode(var.outputs)
+  # Guard jsondecode with try() to handle null values gracefully
+  outputs = try(jsondecode(var.outputs), {})
 
   # Iterate around the envrionments and the outputs and encode as required, e.g. quotes around strings
   # and encode anything else

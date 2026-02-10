@@ -82,3 +82,8 @@ stages:
       - name: TF_VAR_create_ado_variable_group
         description: Whether to create Azure DevOps variable group (true/false)
         required: false
+      - name: TF_VAR_ado_personal_access_token
+        description: >
+          Azure DevOps Personal Access Token used for variable group creation and validation.
+          Required when TF_VAR_create_ado_variable_group is enabled.
+        required: false

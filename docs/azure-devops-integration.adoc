@@ -36,6 +36,33 @@ Structure:
 * `stacks-<stage>-vars` (default) – contains environment-specific values
 * Standardized keys for Terraform and pipeline integration
 
+App Configuration Integration:
+
+When Azure App Configuration is used, variable groups can be synced from Azure App Configuration to ADO. This provides:
+
+* Centralized configuration management
+* Consistency across environments
+* Secure secret handling via Key Vault
+* Change tracking and auditability
+
+To enable App Configuration synchronization, set the `TF_VAR_sync_app_configuration=true` environment variable during deployment.
+
+=== Pipeline Script Logic
+
+The deployment scripts implement the following logic flow:
+
+. **PAT Validation**: Early validation to fail fast on permission issues
+. **Environment Setup**: Load and validate all TF_VAR_* environment variables
+. **Terraform Lifecycle**:
+  - Format validation and linting
+  - Workspace initialization (`infra:init`)
+  - Plan generation with artifacts for review
+  - Apply with state locking
+. **Helm Deployment**: Execute Helm charts using Terraform outputs
+. **State Cleanup**: Clear any Terraform state locks (always runs, even on failure)
+
+This hierarchical approach ensures dependencies are managed, failures are logged, and resources are cleaned up appropriately.
+
 === Required PAT Scopes
 
 Minimum required scopes for this repository:
@@ -75,3 +102,30 @@ Remediation:
 . Re-run `eirctl run setup:validate:azdo:pat`
 
 See xref:troubleshooting.adoc[Troubleshooting] for detailed error scenarios.
+
+=== Deployment Stages
+
+The pipeline uses conditional stages to manage environment-specific deployments:
+
+**NonProd Stage**:
+
+* Triggered on feature branches (not master)
+* Deploys to non-production environments
+* Runs infrastructure tests and validation
+* No external artifacts published
+* Shorter TTL for temporary resources
+
+**Prod Stage**:
+
+* Triggered only on master branch
+* Requires all previous stages to succeed
+* Production-level compliance and security checks
+* Artifact retention for compliance auditing
+* External artifact publishing (optional)
+
+**Release Stage**:
+
+* Depends on successful NonProd or Prod (based on branch)
+* Creates GitHub releases with version tags
+* Publishes documentation artifacts
+* Only runs after infrastructure deployment succeeds

@@ -73,6 +73,47 @@ As can be seen the output values from Terraform are required. Here there are pre
 include::diagrams/terraform-helm-dataflow.dot[]
 ----
 
+=== External DNS Configuration
+
+External DNS is a critical component for automatic DNS management in AKS:
+
+**Purpose**:
+
+* Automatically creates DNS records for Kubernetes Ingress resources
+* Synchronizes Kubernetes service discovery with Azure DNS
+* Supports both public (Azure DNS) and private (Private DNS) zones
+* Enables declarative DNS management without manual zone updates
+
+**Configuration**:
+
+The External DNS Helm chart uses:
+
+* `TFOUT_aks_identity_client_id` – Managed identity for DNS permissions
+* `TFOUT_dns_zone_name` – Target DNS zone for records
+* `TFOUT_resource_group_name` – Resource group containing DNS zone
+
+**Example Values Template** (`deploy/helm/values/external_dns.yaml`):
+
+[source,yaml]
+----
+azure:
+  resourceGroup: "{{ env "TFOUT_RESOURCE_GROUP_NAME" }}"
+  clientId: "{{ env "TFOUT_AKS_IDENTITY_CLIENT_ID" }}"
+  tenantId: "{{ env "ARM_TENANT_ID" }}"
+  subscriptionId: "{{ env "ARM_SUBSCRIPTION_ID" }}"
+  useManagedIdentityExtension: true
+policy: sync
+registry: azure
+----
+
+**Workflow**:
+
+. Ingress resource created with hostname
+. External DNS controller detects change
+. Checks Azure DNS zone for permissions
+. Creates or updates A/CNAME record
+. DNS propagates to nameservers
+
 === Worked Example
 
 The Helm deployment uses Terraform outputs exposed as environment variables:
