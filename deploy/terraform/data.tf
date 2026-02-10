@@ -25,6 +25,16 @@ resource "null_resource" "validate_acr_config" {
   }
 }
 
+# Validate subscription environment tag to fail fast if misconfigured
+resource "terraform_data" "subscription_tag_validation" {
+  lifecycle {
+    precondition {
+      condition     = contains(["prod", "override", ""], local.subscription_environment_tag)
+      error_message = "Invalid 'environment' subscription tag value '${local.subscription_environment_tag}'. Allowed values are: prod, override, or empty."
+    }
+  }
+}
+
 # Get details about the ADO project, this is required so that Terraform
 # can create the variable group in the correct project and an ID is required for that
 data "azuredevops_project" "project" {

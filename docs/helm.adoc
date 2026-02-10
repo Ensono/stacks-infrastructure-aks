@@ -97,8 +97,8 @@ The External DNS Helm chart uses:
 [source,yaml]
 ----
 azure:
-  resourceGroup: "{{ env "TFOUT_RESOURCE_GROUP_NAME" }}"
-  clientId: "{{ env "TFOUT_AKS_IDENTITY_CLIENT_ID" }}"
+  resourceGroup: "{{ env "TFOUT_resource_group_name" }}"
+  clientId: "{{ env "TFOUT_aks_identity_client_id" }}"
   tenantId: "{{ env "ARM_TENANT_ID" }}"
   subscriptionId: "{{ env "ARM_SUBSCRIPTION_ID" }}"
   useManagedIdentityExtension: true
