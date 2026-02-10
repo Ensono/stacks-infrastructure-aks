@@ -5,7 +5,11 @@ description: Safely migrate the repository from taskctl to eirctl with full vali
 model: Auto (copilot)
 ---
 
-You are an experienced DevOps/Platform engineer specializing in build automation and CI/CD systems. Your goal for THIS RUN is to safely migrate this repository from taskctl to eirctl (the officially supported evolution of taskctl for Ensono Stacks projects).
+# MIGRATE TO EIRCTL – SAFE, STEP-BY-STEP TRANSITION
+
+You are an experienced DevOps/Platform engineer specializing in build automation and CI/CD systems. Your
+goal for THIS RUN is to safely migrate this repository from taskctl to eirctl (the officially supported
+evolution of taskctl for Ensono Stacks projects).
 
 **CRITICAL**: This is infrastructure automation - prioritize safety over speed. Every change must be validated before proceeding to the next phase.
 
@@ -19,7 +23,7 @@ Before making ANY changes, thoroughly understand the current setup:
 
 Fetch and review the official migration guide:
 
-- Primary source: https://github.com/Ensono/eirctl/tree/docs/migration/docs
+- Primary source: <https://github.com/Ensono/eirctl/tree/docs/migration/docs>
 - Look for: migration guides, breaking changes, syntax conversion examples
 - Verify you can access and understand the documentation
 
@@ -94,10 +98,12 @@ Examine the following in detail:
    - Check for `-NoProfile` flags in PowerShell contexts (CRITICAL: must be removed)
 
 2. **Tasks** (in [build/taskctl/tasks.yaml](../../build/taskctl/tasks.yaml)):
-
-- Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml, lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply, infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init, tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, \_docs, \_release)
-- Identify Terraform file location references (`/eirctl/deploy/terraform`)
-- Note environment variable dependencies
+   - Count tasks: Expect >1; use current tasks as examples (e.g., build:number, lint:yaml,
+     lint:terraform:format, lint:terraform:validate, infra:init, infra:vars, infra:plan, infra:apply,
+     infra:destroy:plan, infra:destroy:apply, infra:output, setup:dev, setup:environment, tests:infra:init,
+     tests:infra:vendor, tests:infra:inputs, tests:infra:run, infra:helm:apply, \_docs, \_release)
+   - Identify Terraform file location references (`/eirctl/deploy/terraform`)
+   - Note environment variable dependencies
 
 3. **Pipelines** (in [taskctl.yaml](../../taskctl.yaml)):
    - Count pipelines: Expect 6 (lint, tests, infrastructure, infrastructure_destroy, docs, release)
@@ -135,7 +141,7 @@ eirctl uses a container-first approach with significantly cleaner syntax. This p
 | ----------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
 | `executable.bin: docker` + verbose args         | `container.name: <image>`                                     | Auto-handles docker run, mounts, working dir                          |
 | Working dir: `/app`                             | Working dir: `/eirctl`                                        | Default mount point changed                                           |
-| `executable.args: [pwsh, -NoProfile, -Command]` | `container.shell: pwsh`<br>`container.shell_args: [-Command]` | **Remove `-NoProfile`** - eirctl requires profiles for module loading |
+| `executable.args: [pwsh, -NoProfile, -Command]` | `container.shell: pwsh``container.shell_args: [-Command]` | **Remove `-NoProfile`** - eirctl requires profiles for module loading |
 | Manual volume mounts in args                    | Automatic                                                     | eirctl auto-mounts workspace at `/eirctl`                             |
 | Manual `--env-file` in args                     | `envfile:` config                                             | Simplified, supports in-file variable references                      |
 
@@ -351,7 +357,9 @@ command: |
 
 **Task: `infra:apply` (CRITICAL PATH FIX)**
 
-The `Invoke-Terraform -Apply` command with `-Path` sets the working directory to `TF_FILE_LOCATION`. If you also include `TF_FILE_LOCATION` in the plan file path, it creates a double-nested path that doesn't exist.
+The `Invoke-Terraform -Apply` command with `-Path` sets the working directory to `TF_FILE_LOCATION`. If
+you also include `TF_FILE_LOCATION` in the plan file path, it creates a double-nested path that doesn't
+exist.
 
 ```yaml
 # WRONG - causes "no such file or directory" error:
@@ -427,7 +435,7 @@ echo "Latest eirctl: $EIRCTL_VERSION"
 # Use the versions identified in the discovery phase
 ```
 
-Expected format for eirctl: `v0.x.x` (e.g., `v0.9.7`)
+Expected format for eirctl: `v0.x.x` (e.g., `v0.9.8`)
 
 ### 4.1b Update Container Image Versions
 
