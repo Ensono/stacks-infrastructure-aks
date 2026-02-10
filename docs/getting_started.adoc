@@ -50,7 +50,7 @@ In order to run the pipeline locally a number of environment variables are requi
 | `TF_VAR_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
 | `TF_VAR_project` | Name of the project | [green]#icon:check[]#
 | `TF_VAR_component` | Name of the infrastructure component being deployed (e.g., 'infra', 'core') | [green]#icon:check[]#
-| `TF_VAR_stage` |  | [green]#icon:check[]#
+| `TF_VAR_stage` | Deployment stage / target environment (e.g., dev, nonprod, prod) | [green]#icon:check[]#
 | `TF_VAR_attributes` |  | [red]#icon:times[]#
 | `TF_VAR_tags` |  | [red]#icon:times[]#
 | `TF_VAR_location` | Location that the cluster should be deployed to | [green]#icon:check[]#

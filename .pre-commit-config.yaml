@@ -17,7 +17,8 @@ repos:
     hooks:
       - id: terraform_fmt
         args:
-          - --diff --args=-recursive
+          - --args=-diff
+          - --args=-recursive
       - id: terraform_validate
         args:
           - --hook-config=--retry-once-with-cleanup=true

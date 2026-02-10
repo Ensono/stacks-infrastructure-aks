@@ -9,14 +9,6 @@ DESCRIPTION
   default     = false
 }
 
-variable "avm_region_version" {
-  description = <<DESCRIPTION
-Set the version of the Azure Verified Module to use.
-DESCRIPTION
-  type        = string
-  default     = "0.5.0"
-}
-
 variable "region_recommend_filter" {
   description = <<DESCRIPTION
 State if the module should only return regions as recommended by the Azure locations API
