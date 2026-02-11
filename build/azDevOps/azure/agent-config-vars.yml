@@ -1,5 +1,4 @@
 variables:
-
   # Agent configuration
   - name: pool_vm_image
     value: ubuntu-24.04
