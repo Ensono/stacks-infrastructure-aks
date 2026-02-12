@@ -72,34 +72,34 @@ output "aks_ingress_public_ip" {
 
 output "certificate_pem" {
   description = "PEM key of certificate, can be used internally"
-  value       = module.ssl_app_gateway.certificate_pem
+  value       = module.ssl_app_gateway[0].certificate_pem
   sensitive   = true
 }
 
 output "issuer_pem" {
   description = "PEM key of certificate, can be used internally together certificate to create a full cert"
-  value       = module.ssl_app_gateway.issuer_pem
+  value       = module.ssl_app_gateway[0].issuer_pem
   sensitive   = true
 }
 
 output "app_gateway_resource_group_name" {
   description = "Resource group of the Application Gateway"
-  value       = module.ssl_app_gateway.app_gateway_resource_group_name
+  value       = module.ssl_app_gateway[0].app_gateway_resource_group_name
 }
 
 output "app_gateway_name" {
   description = "Name of the Application Gateway"
-  value       = module.ssl_app_gateway.app_gateway_name
+  value       = module.ssl_app_gateway[0].app_gateway_name
 }
 
 output "app_gateway_ip" {
   description = "Application Gateway public IP. Should be used with DNS provider at a top level. Can have multiple subs pointing to it - e.g. app.sub.domain.com, app-uat.sub.domain.com. App Gateway will perform SSL termination for all "
-  value       = module.ssl_app_gateway.app_gateway_ip
+  value       = module.ssl_app_gateway[0].app_gateway_ip
 }
 
 output "app_gateway_public_ip_name" {
   description = "The Public IP associated to the Application Gateway"
-  value       = module.ssl_app_gateway.app_gateway_ip_name
+  value       = module.ssl_app_gateway[0].app_gateway_ip_name
 }
 
 output "dns_resource_group_name" {
