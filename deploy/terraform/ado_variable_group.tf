@@ -19,5 +19,4 @@ resource "azuredevops_variable_group" "vg" {
       value = variable.value
     }
   }
-
 }
