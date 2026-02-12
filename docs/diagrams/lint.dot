@@ -4,7 +4,7 @@ digraph G {
 
   start [shape=oval, label="Start"];
   end [shape=oval, label="End"];
-  
+
   subgraph "steps" {
       yaml [shape=box, label="Yaml Lint"]
       tf_format [shape=box, label="Terraform Format"]

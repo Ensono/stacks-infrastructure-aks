@@ -13,6 +13,11 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
+
+    azuredevops = {
+      source  = "microsoft/azuredevops"
+      version = "~> 1.0"
+    }
   }
 }
 
@@ -26,4 +31,9 @@ provider "azurerm" {
       prevent_deletion_if_contains_resources = false
     }
   }
+}
+
+provider "azuredevops" {
+  org_service_url       = var.ado_org_service_url != "" ? var.ado_org_service_url : ""
+  personal_access_token = var.ado_personal_access_token != "" ? var.ado_personal_access_token : ""
 }

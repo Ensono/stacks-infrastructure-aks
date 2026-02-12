@@ -15,9 +15,27 @@ Please ensure that the following prerequisites are satisfied:
 
 * Docker Engine
 ** This can be Docker, Rancher Desktop or Podman
-* Taskctl (https://github.com/russellseymour/taskctl/releases)
+* eirctl (from https://github.com/Ensono/eirctl)
 
-NOTE: Taskctl has been forked to add some new functionality to the tool that this repository uses.
+NOTE: eirctl is the officially supported task automation tool for Ensono Stacks projects.
+
+=== Azure DevOps PAT Creation (Step-by-step)
+
+Use an Azure DevOps Personal Access Token (PAT) for variable group creation.
+
+.Steps
+. In Azure DevOps, open User settings → Personal Access Tokens
+. Select New Token
+. Set Organization to your ADO org
+. Set expiration (short lived recommended)
+. Select scopes:
+* Project and Team: Read
+* Work Items: Read
+* Build: Read
+* Variable Groups: Read & manage
+. Create and copy the token
+
+IMPORTANT: Store the PAT in a secure variable group or a secrets manager. Do not commit it.
 
 === Setup
 
@@ -29,14 +47,13 @@ In order to run the pipeline locally a number of environment variables are requi
 | `TF_FILE_LOCATION` | Path to the Terraform template files | [green]#icon:check[]#
 | `TF_BACKEND_INIT` | Arguments that should be passed to Terraform during the init process | [green]#icon:check[]#
 | `TF_BACKEND_PLAN` | Arguments that should be passed to Terraform during the plan process | [red]#icon:times[]#
-| `TF_VAR_name_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
-| `TF_VAR_name_project` | Name of the project | [green]#icon:check[]#
-| `TF_VAR_name_component` |  | [green]#icon:check[]#
-| `TF_VAR_name_environment` |  | [green]#icon:check[]#
-| `TF_VAR_stage` |  | [green]#icon:check[]#
+| `TF_VAR_company` | Name of the company that the cluster is being built for | [green]#icon:check[]#
+| `TF_VAR_project` | Name of the project | [green]#icon:check[]#
+| `TF_VAR_component` | Name of the infrastructure component being deployed (e.g., 'infra', 'core') | [green]#icon:check[]#
+| `TF_VAR_stage` | Deployment stage / target environment (e.g., dev, nonprod, prod) | [green]#icon:check[]#
 | `TF_VAR_attributes` |  | [red]#icon:times[]#
 | `TF_VAR_tags` |  | [red]#icon:times[]#
-| `TF_VAR_resource_group_location` | Location that the cluster should be deployed to | [green]#icon:check[]#
+| `TF_VAR_location` | Location that the cluster should be deployed to | [green]#icon:check[]#
 | `TF_VAR_dns_zone` | Public DNS zone that should be used for URLs | [green]#icon:check[]#
 | `TF_VAR_internal_dns_zone` | Private DNS zone for internal services | [green]#icon:check[]#
 | `TF_VAR_pfx_password` | Password for the certificate deployed into Kubernetes | [green]#icon:check[]#
@@ -55,23 +72,183 @@ In order to run the pipeline locally a number of environment variables are requi
 
 ==== PowerShell
 
-If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner module that reads the `build/config/stage_envvars.yml` and creates a skeleton PowerShell script which will setup the variables.
+If using PowerShell there is a cmdlet in the Ensono Stacks Independent Runner module that reads the `build/config/stage_envvars.yml` and creates a skeleton PowerShell script which will set up the variables.
 
 [source,powershell,linenums]
 ---
 New-EnvConfig -Path .\build\config\stage_envvars.yml -scriptPath local -Cloud Azure -Stage stacks-aks
 ---
 
-The resultant script will be `local/envvar-azure-stacks-aks.ps1`. The naming convention is `envvar-<CLOUD>-<STAGE>.ps1`.
+The resultant script will be `./.eirctl/envvar-azure-stacks-aks.ps1`. The naming convention is `envvar-<CLOUD>-<STAGE>.ps1`.
 
 .Environment variable script
 image::images/envvar-script.png[width=500]
 
-Edit this file as needed and then run the script `. ./local/envvar-azure-stacks-aks.ps1`. This will then setup the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by Taskctl.
+Edit this file as needed and then run the script `. ./.eirctl/envvar-azure-stacks-aks.ps1`. This will then set up the necessary environment variables in your local shell. These will then be copied into the container when it is spun up by eirctl.
 
 ==== Bash
 
-Currently we do not have an option when running in `bash` for creating such a script file. We have some ideas on how this will be done, but the biggest issue is how this will be distributed.
+If using Bash, you can use the `eirctl run setup:dev` command to automatically generate an environment variable script from the `build/config/stage_envvars.yml` configuration file.
+
+[source,bash,linenums]
+----
+eirctl run setup:dev
+----
+
+The resultant script will be created in `./.eirctl/envvar-azure-stacks-aks.sh`. The naming convention is `envvar-<CLOUD>-<STAGE>.sh`.
+
+This command will:
+
+1. Create the `./.eirctl/` directory if it doesn't exist
+2. Generate a shell script with all required environment variables
+3. Pre-populate values from the stage configuration
+4. Include Azure authentication variables (ARM_CLIENT_ID, ARM_CLIENT_SECRET, etc.)
+5. Set Terraform backend configuration and all TF_VAR_* variables
+
+Edit this file with your specific values and then source the script to set up the necessary environment variables in your local shell:
+
+[source,bash]
+----
+source ./.eirctl/envvar-azure-stacks-aks.sh
+----
+
+or using the dot notation:
+
+[source,bash]
+----
+. ./.eirctl/envvar-azure-stacks-aks.sh
+----
+
+These environment variables will then be copied into the container when it is spun up by eirctl.
+
+TIP: You can verify the environment variables are set correctly by running `eirctl run setup:environment` which will validate that all required variables are present.
+
+==== Validating Azure DevOps PAT
+
+Before running infrastructure deployment, you can validate that your Azure DevOps Personal Access Token has the correct scopes:
+
+[source,bash]
+----
+eirctl run setup:validate:azdo:pat
+----
+
+This task will:
+
+* Check the PAT format and length
+* Verify **Project and Team: Read** permission
+* Verify **Work Items: Read** permission
+* Verify **Build: Read** permission
+* Verify **Variable Groups: Read** permission
+* Test **Variable Groups: Manage** permission by creating and deleting a test variable group
+
+If the PAT is missing required scopes, the task will fail early with specific instructions on which scopes to add. This helps avoid Terraform failures later in the deployment process.
+
+NOTE: This validation runs automatically as part of the `infrastructure` pipeline, immediately after environment setup and before Terraform initialization. It is automatically skipped if `TF_VAR_create_ado_variable_group=false`.
+
+==== Network Security Group (NSG) Flow Logs
+
+NSG Flow Logs provide visibility into network traffic within the cluster:
+
+**Enablement**:
+
+Set `TF_VAR_enable_nsg_flow_logs=true` to:
+
+* Log accepted and denied traffic
+* Send logs to Azure Storage or Log Analytics
+* Enable threat detection and analysis
+
+**Configuration**:
+
+[source,bash]
+----
+export TF_VAR_enable_nsg_flow_logs=true
+export TF_VAR_nsg_flow_logs_retention_days=30
+----
+
+This helps troubleshoot connectivity issues and monitor for unauthorized access patterns.
+
+==== Environment Variable System
+
+The environment variable system is fundamental to the deployment pipeline. It serves multiple purposes:
+
+**Purpose**:
+
+* Separates configuration from code (12-factor methodology)
+* Enables multi-environment deployments from single codebase
+* Supports local development and CI/CD pipeline execution
+* Allows secure secret handling via variable groups
+
+**Variable Categories**:
+
+Backend Variables (Terraform state management):
+
+* `TF_BACKEND_INIT` – Storage account and container details
+* `TF_BACKEND_PLAN` – Optional plan-specific backend args
+
+Infrastructure Variables (Resource configuration):
+
+* `TF_VAR_company`, `TF_VAR_project`, `TF_VAR_stage`, `TF_VAR_location`
+* `TF_VAR_cluster_version`, `TF_VAR_aks_node_pools`
+* `TF_VAR_create_*` flags for optional features
+
+Authentication Variables:
+
+* `ARM_CLIENT_ID`, `ARM_CLIENT_SECRET`, `ARM_TENANT_ID`, `ARM_SUBSCRIPTION_ID`
+* `TF_VAR_ado_personal_access_token` (for Variable Groups)
+
+**Variable Loading**:
+
+Local development or Azure DevOps pipeline sources variables from:
+
+* `./.eirctl/envvar-<cloud>-<stage>.<sh|ps1>` (generated scripts)
+* `build/config/stage_envvars.yml` (configuration template)
+* Azure DevOps variable groups (pipeline execution)
+
+=== Environment Definitions
+
+Environment definitions use the format `env:is_prod`.
+
+Examples:
+
+* `dev:false`
+* `nonprod:false`
+* `prod:true`
+
+[graphviz]
+----
+include::diagrams/environment-definitions.dot[]
+----
+
+=== Workspace Strategy and State Management
+
+Terraform workspaces map directly to the environment name (for example, `nonprod`, `prod`). Ensure `TF_VAR_stage` matches the workspace name.
+
+Common commands:
+
+[source,bash]
+----
+eirctl run infra:init
+eirctl run infra:plan
+----
+
+=== Variable Precedence
+
+Order of precedence (highest to lowest):
+
+. Shell environment variables (`TF_VAR_*`)
+. Environment script (`.eirctl/envvar-azure-<stage>.*`)
+. Defaults in `build/config/stage_envvars.yml`
+
+TIP: Keep `TF_VAR_*` values consistent between local scripts and pipeline variables to avoid drift.
+
+=== Multi-environment Examples
+
+Example definitions:
+
+* `dev:false` deploys to non-production resources and workspaces
+* `prod:true` deploys to production resources and workspaces
+
+When `force` is set in the ADO pipeline, both non-prod and prod can deploy from a single branch. Otherwise the branch gates are enforced.
 
 === Running the Pipelines
 
@@ -80,10 +257,48 @@ Now that the environment has been configured the pipelines can be run.
 [cols="1,4",options=header,stripes=even]
 |===
 | # | Command
-| 1 | `taskctl lint`
-| 2 | `taskctl infrastructure`
-| 3 | `taskctl tests`
-| 4 | `taskctl docs`
+| 1 | `eirctl run lint`
+| 2 | `eirctl run infrastructure`
+| 3 | `eirctl run tests`
+| 4 | `eirctl run docs`
 |===
 
 These pipelines can be run in any order based on the task that needs to be accomplished. In addition to these any of the tasks, as described in <<Pipeline>> can be executed.
+
+=== Azure DevOps PAT Scopes
+
+When enabling Terraform to create Azure DevOps Variable Groups via the `azuredevops` provider, a Personal Access Token (PAT) is required. Use the minimum scopes needed:
+
+* Required
+** Variable Groups: Read & manage (Library)
+** Project and Team: Read (to resolve the project ID)
+
+* Optional (only if explicitly needed)
+** Build: Read (if querying build definitions with Terraform in future)
+
+Security recommendations:
+
+* Scope the PAT to your Azure DevOps organization only
+* Use short expiration and rotate regularly
+* Store the PAT securely (e.g., Azure Key Vault, secure pipeline variable)
+* Do not grant broader scopes such as Code, Work Items, Service Connections unless strictly required
+
+Environment setup for PAT (bash):
+
+[source,bash]
+----
+export TF_VAR_ado_org_service_url="https://dev.azure.com/<organization>"
+export TF_VAR_ado_project_name="<project>"
+export TF_VAR_ado_personal_access_token="<PAT>"
+----
+
+Notes:
+
+* Variable group creation is controlled by `TF_VAR_create_ado_variable_group` (defaults to `true`). Set it to `false` to skip Azure DevOps variable group creation and PAT validation:
++
+[source,bash]
+----
+export TF_VAR_create_ado_variable_group="false"
+----
+
+* Azure resource deployment authentication is separate and handled by the AzureRM provider; the PAT is only for Azure DevOps API access.

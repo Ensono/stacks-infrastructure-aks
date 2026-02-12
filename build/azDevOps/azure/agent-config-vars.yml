@@ -1,10 +1,9 @@
 variables:
-
   # Agent configuration
   - name: pool_vm_image
-    value: ubuntu-22.04
-  - name: TaskctlVersion
-    value: 1.5.0
+    value: ubuntu-24.04
+  - name: EirctlVersion
+    value: 0.9.8
 
   # Set the name of the cloud platform
   - name: CLOUD_PLATFORM

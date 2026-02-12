@@ -23,18 +23,18 @@ stages:
       - name: TF_BACKEND_PLAN
         description: Arguments that should be passed to Terraform during the plan process
         required: false
-      - name: TF_VAR_name_company
+      - name: TF_VAR_company
         description: Name of the company that the cluster is being built for
-      - name: TF_VAR_name_project
+      - name: TF_VAR_project
         description: Name of the project
-      - name: TF_VAR_name_component
-      - name: TF_VAR_name_environment
+      - name: TF_VAR_component
       - name: TF_VAR_stage
+        description: Target environment for Terraform workspace selection
       - name: TF_VAR_attributes
         required: false
       - name: TF_VAR_tags
         required: false
-      - name: TF_VAR_resource_group_location
+      - name: TF_VAR_location
         description: Location that the cluster should be deployed to
       - name: TF_VAR_dns_zone
         description: Public DNS zone that should be used for URLs
@@ -44,6 +44,15 @@ stages:
         description: Password for the certificate deployed into Kubernetes
       - name: TF_VAR_dns_resource_group
         description: Resource group that contains the DNS zones to update
+      - name: TF_VAR_dns_parent_zone
+        description: Parent DNS zone name for NS record delegation (e.g., stacks.ensono.com)
+        required: false
+      - name: TF_VAR_dns_parent_resource_group
+        description: Resource group containing the parent DNS zone
+        required: false
+      - name: TF_VAR_dns_create_parent_zone_ns_records
+        description: If true, NS records will be created in the parent DNS zone for delegation
+        required: false
       - name: TF_VAR_create_dns_zone
         description: State if the DNS zone should be created
       - name: TF_VAR_create_aksvnet
@@ -64,3 +73,17 @@ stages:
       - name: TF_VAR_acme_email
         description: Email address for Acme certificate registration, must be a valid email
       - name: TF_VAR_create_user_identity
+      - name: TF_VAR_ado_org_service_url
+        description: Azure DevOps organization service URL (e.g., https://dev.azure.com/yourorg)
+        required: false
+      - name: TF_VAR_ado_project_name
+        description: Azure DevOps project name for variable group management
+        required: false
+      - name: TF_VAR_create_ado_variable_group
+        description: Whether to create Azure DevOps variable group (true/false)
+        required: false
+      - name: TF_VAR_ado_personal_access_token
+        description: >
+          Azure DevOps Personal Access Token used for variable group creation and validation.
+          Required when TF_VAR_create_ado_variable_group is enabled.
+        required: false

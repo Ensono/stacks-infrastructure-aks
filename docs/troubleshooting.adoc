@@ -1,0 +1,94 @@
+---
+id: aks_troubleshooting
+title: Troubleshooting
+description: Common issues and remediation steps for AKS infrastructure pipeline.
+weight: 80
+---
+
+:toc:
+
+== Troubleshooting
+
+=== PAT Validation Failures
+
+Symptoms:
+
+* `setup:validate:azdo:pat` fails
+* Variable group creation fails
+
+Checks:
+
+* Verify scopes: `vso.project`, `vso.variablegroups_manage`
+* Confirm PAT is not expired
+
+=== Terraform Init/Plan Issues
+
+Symptoms:
+
+* Backend init fails
+* Plan cannot be created
+
+Checks:
+
+* Validate `TF_BACKEND_INIT` string
+* Confirm storage account and container permissions
+* Ensure workspace name matches `TF_VAR_stage`
+
+=== Variable Group Creation Errors
+
+Symptoms:
+
+* `azuredevops` provider fails
+
+Checks:
+
+* PAT scope includes Variable Groups Manage
+* `TF_VAR_create_ado_variable_group=true`
+
+=== DNS Propagation Problems
+
+Symptoms:
+
+* DNS records not updated
+
+Checks:
+
+* Validate `TF_VAR_dns_resource_group` and zone names
+* Confirm NS delegation if using parent zones
+
+=== InSpec Test Failures
+
+Symptoms:
+
+* `tests:infra:run` fails
+
+Checks:
+
+* Ensure `tests:infra:inputs` runs before `tests:infra:run`
+* Validate `/eirctl/inspec_inputs.yml` contents
+* Confirm Azure credentials are present
+
+=== Terraform Workspace Selection Fails
+
+Symptoms:
+
+* `tests:infra:inputs` fails with "No workspace name specified to create or switch to"
+
+Checks:
+
+* Ensure `TF_VAR_stage` environment variable is set (e.g., `dev`, `nonprod`, `prod`)
+* Run `source ./.eirctl/envvar-azure-dev.sh` to load required environment variables
+* Verify `TF_FILE_LOCATION` points to `/eirctl/deploy/terraform` (defaults automatically if not set)
+* Run `eirctl run setup:environment` to validate all required variables are present
+
+=== Helm Deployment Errors
+
+Symptoms:
+
+* `infra:helm:apply` fails
+
+Checks:
+
+* Validate TFOUT_ variables are present
+* Confirm chart values template paths
+* Verify cluster credentials and network access

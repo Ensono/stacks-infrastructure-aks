@@ -1,0 +1,16 @@
+digraph EnvDefinitions {
+  rankdir=TB;
+  node [shape=box, style=rounded];
+
+  start [label="Environment Definition\nformat: env:is_prod"];
+  dev [label="dev:false"];
+  prod [label="prod:true"];
+  workspace [label="Terraform Workspace\n= env name"];
+  config [label="Environment-specific config\nvars + DNS zones"];
+
+  start -> dev;
+  start -> prod;
+  dev -> workspace;
+  prod -> workspace;
+  workspace -> config;
+}

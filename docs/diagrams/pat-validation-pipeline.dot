@@ -1,0 +1,16 @@
+digraph PATValidation {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  pat [label="PAT Provided"];
+  validate [label="Validate Scopes\n(setup:validate:azdo:pat)"];
+  create [label="Create Test Variable Group"];
+  success [label="Proceed with Pipeline"];
+  fail [label="Fail Fast\n(scope/permission error)"];
+
+  pat -> validate;
+  validate -> create [label="scopes ok"];
+  create -> success;
+  validate -> fail [label="scopes missing"];
+  create -> fail [label="create/delete fails"];
+}

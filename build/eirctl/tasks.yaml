@@ -1,0 +1,212 @@
+tasks:
+  build:number:
+    context: powershell
+    description: Update the build number
+    # Note:
+    # - The legacy `exportAs` field for this task has been intentionally removed.
+    # - The build number is updated directly by `Update-BuildNumber`, so no additional
+    #   environment export from this task is required.
+    # - Unlike taskctl, eirctl does not use per-task `exportAs` metadata; task outputs are
+    #   handled by the task script or dedicated output tasks, so no explicit export is needed.
+    command:
+      - Update-BuildNumber
+
+  lint:yaml:
+    context: powershell
+    description: Perform YAML linting
+    command:
+      - Invoke-YamlLint
+
+  lint:terraform:format:
+    context: powershell
+    description: Perform Terraform format check
+    command:
+      - Invoke-Terraform -Format -Path $env:TF_FILE_LOCATION
+
+  lint:terraform:validate:
+    context: powershell
+    description: Perform Terraform validation
+    command:
+      - Invoke-Terraform -Validate -Path $env:TF_FILE_LOCATION
+
+  infra:init:
+    context: powershell
+    description: Initialise Terraform for chosen templates
+    command:
+      - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
+      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
+
+  infra:vars:
+    context: powershell
+    description: Create Terraform variables file
+    command:
+      - $ErrorActionPreference = 'Stop'; Get-TFVars | Out-File -Path "${env:TF_FILE_LOCATION}/terraform.tfvars"
+      - dir ${env:TF_FILE_LOCATION}
+
+  infra:plan:
+    context: powershell
+    description: Plan Terraform
+    command:
+      - |
+        # Use TF_BACKEND_PLAN as the single source of truth if set, otherwise use defaults
+        if ([string]::IsNullOrWhiteSpace($env:TF_BACKEND_PLAN)) {
+          $planArgs = @("-input=false", "-out=`"deploy.tfplan`"")
+        } else {
+          # Ensure -out=deploy.tfplan is always present to maintain consistency with apply task
+          $planArgs = $env:TF_BACKEND_PLAN -split '\s+'
+          if ($planArgs -notcontains '-out' -and ($planArgs -join ' ') -notmatch '-out=') {
+            $planArgs += @("-out=`"deploy.tfplan`"")
+          }
+        }
+        Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments ($planArgs -join ",")
+
+  infra:apply:
+    context: powershell
+    description: Apply Terraform
+    command:
+      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/deploy.tfplan"
+
+  infra:destroy:plan:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command:
+      - Invoke-Terraform -Plan -Path $env:TF_FILE_LOCATION -Arguments "-destroy","-input=false","-out=`"destroy.tfplan`"" -debug
+
+  infra:destroy:apply:
+    context: powershell
+    description: Destroy Environment.ShortName
+    command:
+      - Invoke-Terraform -Apply -Path "${env:TF_FILE_LOCATION}/destroy.tfplan" -Arguments "-destroy" -debug
+
+  infra:output:
+    context: powershell
+    description: Terraform Outputs
+    command:
+      - |
+        # Ensure .eirctl directory exists before writing output file
+        if (-not (Test-Path ".eirctl")) {
+          New-Item -ItemType Directory -Path ".eirctl" -Force | Out-Null
+        }
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | Out-File ".eirctl/output.json"
+
+  setup:dev:
+    context: powershell
+    description: Create a shell script to configure the environment variables
+    command:
+      - New-Item -Type directory /eirctl/.eirctl -ErrorAction SilentlyContinue
+      - |
+        # Use TF_VAR_stage for stage name if available, otherwise default to dev
+        $stage = if (-not [string]::IsNullOrWhiteSpace($env:TF_VAR_stage)) { $env:TF_VAR_stage } else { "dev" }
+        New-EnvConfig -Path /eirctl/build/config/stage_envvars.yml -ScriptPath /eirctl/.eirctl -Cloud azure -Stage $stage
+
+  setup:environment:
+    context: powershell
+    description: Ensure that the environment is configured correctly
+    command:
+      - Confirm-Environment -Path /eirctl/build/config/stage_envvars.yml
+
+  setup:validate:azdo:pat:
+    context: powershell
+    description: Validate Azure DevOps PAT has required scopes for variable group creation
+    command:
+      - /eirctl/build/scripts/Test-AzureDevOpsPAT.ps1
+
+  tests:infra:init:
+    context: infratests
+    description: Initialise the Inspec test profile
+    env:
+      CHEF_LICENSE: accept-silent
+    command:
+      - |
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -init
+
+  tests:infra:vendor:
+    context: infratests
+    description: Ensure all necessary plugins and providers are installed
+    env:
+      CHEF_LICENSE: accept-silent
+    command:
+      - |
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -vendor -arguments "--overwrite"
+
+  tests:infra:inputs:
+    context: powershell
+    description: Create file to use as the input for the Inspec tests
+    command:
+      - /eirctl/build/scripts/Set-InspecInputs.ps1
+
+  tests:infra:run:
+    context: infratests
+    description: Execute infrastructure tests against deployed Cloud resources
+    env:
+      CHEF_LICENSE: accept-silent
+      AZURE_CLIENT_ID: ${ARM_CLIENT_ID}
+      AZURE_CLIENT_SECRET: ${ARM_CLIENT_SECRET}
+      AZURE_TENANT_ID: ${ARM_TENANT_ID}
+      AZURE_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID}
+    command:
+      - |
+        $env:AZURE_CLIENT_ID = $env:ARM_CLIENT_ID
+        $env:AZURE_CLIENT_SECRET = $env:ARM_CLIENT_SECRET
+        $env:AZURE_TENANT_ID = $env:ARM_TENANT_ID
+        $env:AZURE_SUBSCRIPTION_ID = $env:ARM_SUBSCRIPTION_ID
+        Import-Module -Name EnsonoBuild -ErrorAction Stop
+        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml"
+
+  infra:state:lock:clear:
+    context: powershell
+    description: Clear Terraform state lock from Azure Storage backend
+    command:
+      - |
+        # Authenticate with Azure using service principal
+        if ($env:ARM_CLIENT_ID -and $env:ARM_CLIENT_SECRET -and $env:ARM_TENANT_ID -and $env:ARM_SUBSCRIPTION_ID) {
+            $securePassword = ConvertTo-SecureString $env:ARM_CLIENT_SECRET -AsPlainText -Force
+            $credential = New-Object System.Management.Automation.PSCredential($env:ARM_CLIENT_ID, $securePassword)
+            Connect-AzAccount -ServicePrincipal -Credential $credential -Tenant $env:ARM_TENANT_ID -Subscription $env:ARM_SUBSCRIPTION_ID | Out-Null
+            Write-Host "Authenticated with Azure"
+        } else {
+            Write-Warning "Azure credentials not found. Assuming already authenticated."
+        }
+
+        /eirctl/build/scripts/Clear-TerraformStateLock.ps1 `
+          -StorageAccountName $env:TF_STATE_STORAGE `
+          -ContainerName $env:TF_STATE_CONTAINER `
+          -StateKey $env:TF_STATE_KEY `
+          -ResourceGroupName $env:TF_STATE_RG
+
+  infra:helm:apply:
+    context: powershell
+    description: Deploy Helm charts to the cluster as defined by configuration file
+    command:
+      - |
+        $ErrorActionPreference = "Stop"
+
+        Import-Module Az.Aks
+
+        Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value"
+
+        /eirctl/build/scripts/Deploy-HelmCharts.ps1 `
+          -Path /eirctl/deploy/helm/k8s_apps.yaml `
+          -ResourceGroup ${env:TFOUT_resource_group_name} `
+          -Clustername ${env:TFOUT_aks_cluster_name} `
+          -Provider ${env:CLOUD_PLATFORM}
+
+  _docs:
+    description: Build Docs for AKS
+    context: docs
+    command: |
+      /eirctl/build/scripts/New-Glossary.ps1 -docpath /eirctl/docs -path /eirctl/tmp/glossary.adoc
+      Build-Documentation -Config /eirctl/docs.json -BasePath /eirctl -Verbose
+
+  _release:
+    context: powershell
+    command:
+      - Publish-GitHubRelease `
+          -version $env:BUILD_BUILDNUMBER `
+          -commitId $env:COMMIT_ID `
+          -apikey $env:GITHUB_TOKEN `
+          -artifactsDir $env:ARTIFACTS_DIR `
+          -Owner $env:OWNER `
+          -repository $env:REPOSITORY

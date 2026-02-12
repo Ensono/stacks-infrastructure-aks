@@ -1,0 +1,18 @@
+digraph ModuleDependencies {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  main [label="main.tf"];
+  naming [label="ensono-stacks-foundation-azure\n(naming)"];
+  aks [label="aks.tf\n(ensono-stacks module)"];
+  local [label="azurerm-aks-local"];
+  data [label="data sources"];
+  outputs [label="outputs.tf"];
+
+  main -> naming;
+  main -> aks;
+  aks -> local;
+  aks -> data;
+  local -> outputs;
+  data -> outputs;
+}

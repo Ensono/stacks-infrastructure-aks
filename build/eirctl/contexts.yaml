@@ -1,0 +1,31 @@
+contexts:
+  powershell:
+    container:
+      name: ensono/eir-infrastructure:1.2.39
+      shell: pwsh
+      shell_args:
+        - -Command
+    envfile:
+      exclude:
+        - sourceversionmessage
+        - powershell_azure_subscription
+
+  infratests:
+    container:
+      name: ensono/eir-inspec:1.2.39
+      shell: pwsh
+      shell_args:
+        - -Command
+    envfile:
+      exclude:
+        - sourceversionmessage
+
+  docs:
+    container:
+      name: ensono/eir-asciidoctor:1.2.39
+      shell: pwsh
+      shell_args:
+        - -Command
+    envfile:
+      exclude:
+        - sourceversionmessage

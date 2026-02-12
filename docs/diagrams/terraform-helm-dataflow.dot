@@ -1,0 +1,12 @@
+digraph TfHelmFlow {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+
+  tfapply [label="Terraform apply"];
+  outputs [label="Terraform outputs"];
+  setenv [label="Set-EnvironmentVars\nTFOUT_*"];
+  values [label="Helm values template"];
+  helm [label="Helm deploy"];
+
+  tfapply -> outputs -> setenv -> values -> helm;
+}

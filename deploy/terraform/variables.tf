@@ -6,20 +6,21 @@
 # NAMING
 ############################################
 
-variable "name_company" {
+variable "company" {
   type = string
 }
 
-variable "name_project" {
+variable "project" {
   type = string
 }
 
-variable "name_component" {
+variable "component" {
   type = string
 }
 
-variable "name_environment" {
-  type = string
+variable "environment_definitions" {
+  description = "Comma-separated environment configuration definitions with production flag (format: env:is_prod, e.g., dev:false,test:false,prod:true)"
+  default     = "dev:false,test:false,prod:true"
 }
 
 variable "stage" {
@@ -39,12 +40,34 @@ variable "tags" {
 # AZURE INFORMATION
 ############################################
 
-variable "resource_group_location" {
+variable "location" {
   type = string
 }
 
 variable "dns_zone" {
   type = string
+}
+
+variable "dns_parent_zone" {
+  type    = string
+  default = ""
+}
+
+variable "dns_parent_zone_resource_group" {
+  type    = string
+  default = ""
+}
+
+variable "dns_parent_resource_group" {
+  type        = string
+  description = "Resource group containing the parent DNS zone"
+  default     = ""
+}
+
+variable "dns_create_parent_zone_ns_records" {
+  type        = bool
+  description = "If true, NS records will be created in the parent DNS zone for delegation"
+  default     = false
 }
 
 variable "internal_dns_zone" {
@@ -56,7 +79,8 @@ variable "pfx_password" {
 }
 
 variable "dns_resource_group" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "aks_node_pools" {
@@ -81,12 +105,33 @@ variable "create_aksvnet" {
   type = bool
 }
 
+variable "vnet_name_resource_group" {
+  type    = string
+  default = ""
+}
+
 variable "create_user_identity" {
   type = bool
 }
 
+variable "is_prod_subscription" {
+  type        = bool
+  default     = false
+  description = "Flag to state if the subscription being deployed to is the production subscription or not. This so that the environments are created properly."
+}
+
+variable "deploy_all_environments" {
+  type        = bool
+  default     = false
+  description = "If true, all environments will be deployed regardless of subscription type, e.g. nonprod or prod"
+}
+
 variable "cluster_version" {
-  type = string
+  description = "Default AKS Kubernetes version. Pinned to a known stable version at the time of writing; review regularly against supported AKS versions."
+  type        = string
+  # NOTE: Ensure this default remains a supported AKS version before deploying to new environments.
+  # See: https://learn.microsoft.com/azure/aks/supported-kubernetes-versions
+  default = "1.34.1"
 }
 
 variable "cluster_sku_tier" {
@@ -104,7 +149,8 @@ variable "create_acr" {
 }
 
 variable "acr_resource_group" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "acr_name" {
@@ -156,4 +202,44 @@ variable "vnet_cidr" {
 
 variable "tag_team_owner" {
   default = ""
+}
+
+#######################################################
+# Azure DevOps Settings
+#######################################################
+
+variable "ado_org_service_url" {
+  description = "The URL of the Azure DevOps organization service"
+  type        = string
+  default     = ""
+}
+
+variable "ado_project_name" {
+  description = "The name of the Azure DevOps project"
+  type        = string
+  default     = ""
+}
+
+variable "ado_personal_access_token" {
+  description = "The personal access token for Azure DevOps authentication"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "create_ado_variable_group" {
+  description = "Flag to indicate if a variable group should be created in Azure DevOps"
+  type        = bool
+  default     = true
+}
+
+
+#######################################################
+# Local development settings
+#######################################################
+
+variable "create_env_files" {
+  description = "Flag to indicate if environment files should be created for local development"
+  type        = bool
+  default     = false
 }

@@ -1,6 +1,6 @@
 import:
-  - ./build/taskctl/contexts.yaml
-  - ./build/taskctl/tasks.yaml
+  - ./build/eirctl/contexts.yaml
+  - ./build/eirctl/tasks.yaml
 
 pipelines:
   lint:
@@ -9,16 +9,28 @@ pipelines:
     - task: lint:terraform:validate
 
   tests:
+    - task: setup:environment
+    - task: tests:infra:init
+      depends_on:
+        - setup:environment
     - task: tests:infra:vendor
-    - task: tests:infra:run
+      depends_on:
+        - tests:infra:init
+    - task: tests:infra:inputs
       depends_on:
         - tests:infra:vendor
+    - task: tests:infra:run
+      depends_on:
+        - tests:infra:inputs
 
   infrastructure:
     - task: setup:environment
-    - task: infra:init
+    - task: setup:validate:azdo:pat
       depends_on:
         - setup:environment
+    - task: infra:init
+      depends_on:
+        - setup:validate:azdo:pat
     - task: infra:plan
       depends_on:
         - infra:init

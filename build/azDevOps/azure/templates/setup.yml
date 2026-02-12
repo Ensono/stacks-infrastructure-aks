@@ -1,15 +1,27 @@
 parameters:
-  TaskctlVersion: 1.5.0
+  EirctlVersion: 0.9.8
 
 steps:
   # Checkout self repo
   - checkout: self
 
-  # Install Taskfile so that the tests can be run
+  # Install eirctl task automation tool
   - task: Bash@3
-    displayName: "Install: Taskctl"
+    displayName: "Install: eirctl"
     inputs:
       targetType: inline
       script: |
-        wget https://github.com/russellseymour/taskctl/releases/download/v${{ parameters.TaskctlVersion }}/taskctl_${{ parameters.TaskctlVersion }}_linux_amd64.tar.gz -O /tmp/taskctl.tar.gz
-        tar zxf /tmp/taskctl.tar.gz -C /usr/local/bin taskctl
+        set -euo pipefail
+        EIRCTL_URL="https://github.com/Ensono/eirctl/releases/download/${{ parameters.EirctlVersion }}/eirctl-linux-amd64"
+        EIRCTL_PATH="/usr/local/bin/eirctl"
+        echo "Downloading eirctl ${{ parameters.EirctlVersion }} from ${EIRCTL_URL}..."
+        if ! sudo wget --timeout=30 --tries=3 -q "${EIRCTL_URL}" -O "${EIRCTL_PATH}"; then
+          echo "##[error]Failed to download eirctl from ${EIRCTL_URL}"
+          exit 1
+        fi
+        sudo chmod +x "${EIRCTL_PATH}"
+        if ! eirctl --version; then
+          echo "##[error]eirctl installation verification failed"
+          exit 1
+        fi
+        echo "eirctl installed successfully"
