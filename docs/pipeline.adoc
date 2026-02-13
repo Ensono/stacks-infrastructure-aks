@@ -108,7 +108,6 @@ When the pipeline is invoked there are a number of parameters that can be config
 | Destroy Environment | `destroy` | `false` | Destroy the environment. When used with the `deploy` parameter this rebuilds the environment by tearing it down and redeploying it.
 | Upload Generated Files | `upload` | `false` | The pipeline generates files for Terraform to use. This option will upload these file as build artifacts so they can be checked for issues. Useful for debugging.
 | Force Deploy | `force` | `false` | This option allows environments to be built when not on the correct branch. This means that the non-prod environment can be deployed from the main build.
-| Upgrade Providers | `upgrade_providers` | `false` | Runs `terraform init -upgrade` to update provider versions to match constraints in provider.tf. Use when upgrading major provider versions (e.g., AzureRM 3.x → 4.x).
 | Stages | `stages` | | Parameterized array defining deployment stages with environment-specific configuration (DNS zones, resource naming, security policies).
 
 Each stage includes `environment_shortname` (maps to `TF_VAR_stage`), `is_prod_subscription` (controls security posture), and deployment conditions.
