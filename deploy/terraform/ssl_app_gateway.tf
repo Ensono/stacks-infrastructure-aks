@@ -1,6 +1,5 @@
 module "ssl_app_gateway" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=v8.0.19"
-
+  source                       = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-app-gateway?ref=v8.0.19"
   count                        = var.create_ssl_gateway ? 1 : 0
   resource_namer               = module.naming.names[var.project].application_gateway.name
   resource_group_name          = module.aks_bootstrap.resource_group_name

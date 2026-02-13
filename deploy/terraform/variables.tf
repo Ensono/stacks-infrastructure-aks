@@ -149,8 +149,9 @@ variable "create_acr" {
 }
 
 variable "create_ssl_gateway" {
-  type    = bool
-  default = true
+  description = "Controls creation of the Application Gateway used for external ingress and SSL termination. When true, App Gateway and related outputs/resources are created and SSL terminates at the gateway. When false, these resources are skipped and ingress/SSL termination must be handled elsewhere (for example, by an in-cluster ingress controller or another upstream gateway)."
+  type        = bool
+  default     = true
 }
 
 variable "acr_resource_group" {
