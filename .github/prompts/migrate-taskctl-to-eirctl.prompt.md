@@ -435,7 +435,7 @@ echo "Latest eirctl: $EIRCTL_VERSION"
 # Use the versions identified in the discovery phase
 ```
 
-Expected format for eirctl: `v0.x.x` (e.g., `v0.9.8`)
+Expected format for eirctl: `v0.x.x` (e.g., `v0.9.9`)
 
 ### 4.1b Update Container Image Versions
 
