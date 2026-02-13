@@ -219,6 +219,8 @@ Examples:
 include::diagrams/environment-definitions.dot[]
 ----
 
+NOTE: In Azure DevOps pipelines, environment configuration is controlled by the `stages` parameter object, which maps `environment_shortname` to `TF_VAR_stage` and controls deployment behavior via `is_prod_subscription`. See xref:azure-devops-integration.adoc#_stage_configuration_structure[Stage Configuration] for detailed pipeline configuration options.
+
 === Workspace Strategy and State Management
 
 Terraform workspaces map directly to the environment name (for example, `nonprod`, `prod`). Ensure `TF_VAR_stage` matches the workspace name.

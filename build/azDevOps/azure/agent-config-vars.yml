@@ -3,7 +3,7 @@ variables:
   - name: pool_vm_image
     value: ubuntu-24.04
   - name: EirctlVersion
-    value: 0.9.8
+    value: 0.9.9
 
   # Set the name of the cloud platform
   - name: CLOUD_PLATFORM

@@ -73,6 +73,12 @@ stages:
       - name: TF_VAR_acme_email
         description: Email address for Acme certificate registration, must be a valid email
       - name: TF_VAR_create_user_identity
+      - name: TF_VAR_create_ssl_gateway
+        description: Flag to control creation of the Application Gateway for external ingress and SSL termination. When false, App Gateway resources are skipped (true/false)
+        required: false
+      - name: TF_VAR_is_prod_subscription
+        description: Flag to indicate if deploying to the production subscription (true/false)
+        required: false
       - name: TF_VAR_ado_org_service_url
         description: Azure DevOps organization service URL (e.g., https://dev.azure.com/yourorg)
         required: false
