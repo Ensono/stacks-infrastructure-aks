@@ -34,10 +34,16 @@ tasks:
     description: Initialise Terraform for chosen templates
     command:
       - |
-        # Add -upgrade flag if TF_BACKEND_UPGRADE is set to true
-        $upgradeFlag = if ($env:TF_BACKEND_UPGRADE -eq "true") { "-upgrade" } else { "" }
-        $initArgs = if ($upgradeFlag) { "$upgradeFlag,$env:TF_BACKEND_INIT" } else { $env:TF_BACKEND_INIT }
-        Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $initArgs -debug
+        # Invoke-Terraform -Init wraps ALL arguments as -backend-config values.
+        # The -upgrade flag is a top-level terraform init flag, NOT a backend config,
+        # so we must use -Custom to construct the full command when upgrading.
+        if ($env:TF_BACKEND_UPGRADE -eq "true") {
+            $backendArgs = ($env:TF_BACKEND_INIT -split ',') | ForEach-Object { "-backend-config='$_'" }
+            $initCmd = "init -upgrade " + ($backendArgs -join " ")
+            Invoke-Terraform -Custom -Path $env:TF_FILE_LOCATION -Arguments $initCmd -debug
+        } else {
+            Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
+        }
       - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
 
   infra:vars:
