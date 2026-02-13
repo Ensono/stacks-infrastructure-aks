@@ -43,10 +43,6 @@ parameters:
     displayName: Create a pre-release from feature branch
     type: boolean
     default: false
-  - name: upgrade_providers
-    displayName: Upgrade Terraform providers
-    type: boolean
-    default: false
 
   - name: stages
     type: object
@@ -203,8 +199,6 @@ stages:
                           env:
                             TF_FILE_LOCATION: /eirctl/deploy/terraform
                             TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            ${{ if eq(parameters.upgrade_providers, true) }}:
-                              TF_CLI_ARGS_init: "-upgrade"
                             TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_stage: ${{ stage.environment_shortname }}
                             TF_VAR_is_prod_subscription: ${{ stage.is_prod_subscription }}
@@ -224,8 +218,6 @@ stages:
                       env:
                         TF_FILE_LOCATION: /eirctl/deploy/terraform
                         TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        ${{ if eq(parameters.upgrade_providers, true) }}:
-                          TF_CLI_ARGS_init: "-upgrade"
                         TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
                         TF_VAR_location: $(region)
                         TF_VAR_company: $(company)
@@ -325,8 +317,6 @@ stages:
                         TF_FILE_LOCATION: /eirctl/deploy/terraform
                         TF_VAR_stage: ${{ stage.environment_shortname }}
                         TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        ${{ if eq(parameters.upgrade_providers, true) }}:
-                          TF_CLI_ARGS_init: "-upgrade"
 
   - stage: Release
     dependsOn:
