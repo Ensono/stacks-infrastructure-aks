@@ -105,12 +105,88 @@ See xref:troubleshooting.adoc[Troubleshooting] for detailed error scenarios.
 
 === Deployment Stages
 
-The pipeline uses conditional stages to manage environment-specific deployments:
+The pipeline uses conditional stages to manage environment-specific deployments. Stages are defined as a parameter object in the pipeline YAML, allowing for flexible multi-environment deployments.
+
+==== Stage Configuration Structure
+
+Stages are defined using the `stages` parameter in `deploy-infrastructure.yml`:
+
+[source,yaml]
+----
+parameters:
+  - name: stages
+    type: object
+    default:
+      - stage: NonProd
+        dependsOn: Build
+        condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
+        environment_shortname: nonprod
+        dns_zone: $(base_domain_nonprod)
+        domain_internal: $(base_domain_internal_nonprod)
+        deployment_infra: InfraNonProd
+        deployment_apps: K8sNonProd
+        is_prod_subscription: false
+      - stage: Prod
+        dependsOn: Build
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+        environment_shortname: prod
+        dns_zone: $(base_domain_prod)
+        domain_internal: $(base_domain_internal_prod)
+        deployment_infra: InfraProd
+        deployment_apps: K8sProd
+        is_prod_subscription: true
+----
+
+==== Stage Configuration Fields
+
+[cols="2,1,4",options="header",stripes=even]
+|===
+| Field | Type | Description
+
+| `stage`
+| string
+| Azure DevOps stage name (displayed in pipeline UI)
+
+| `dependsOn`
+| string
+| Stage dependency - typically `Build` for deployment stages
+
+| `condition`
+| expression
+| Azure DevOps condition expression determining when the stage runs (e.g., branch-based routing)
+
+| `environment_shortname`
+| string
+| Maps to `TF_VAR_stage` - determines Terraform workspace, resource naming suffix, and environment configuration. Common values: `dev`, `nonprod`, `prod`
+
+| `dns_zone`
+| string
+| Public DNS zone for external-facing ingress endpoints (e.g., `example.nonprod.com`)
+
+| `domain_internal`
+| string
+| Private DNS zone for internal cluster services (e.g., `internal.nonprod.local`)
+
+| `deployment_infra`
+| string
+| Azure DevOps deployment job name for infrastructure provisioning
+
+| `deployment_apps`
+| string
+| Azure DevOps deployment job name for Helm chart deployments
+
+| `is_prod_subscription`
+| boolean
+| Flags production environment for enhanced security controls, compliance checks, and audit logging. Set `true` only for production subscriptions.
+|===
+
+==== Default Stage Definitions
 
 **NonProd Stage**:
 
 * Triggered on feature branches (not master)
-* Deploys to non-production environments
+* `environment_shortname: nonprod` - creates resources with `-nonprod` suffix
+* `is_prod_subscription: false` - relaxed security policies for development
 * Runs infrastructure tests and validation
 * No external artifacts published
 * Shorter TTL for temporary resources
@@ -118,6 +194,8 @@ The pipeline uses conditional stages to manage environment-specific deployments:
 **Prod Stage**:
 
 * Triggered only on master branch
+* `environment_shortname: prod` - creates resources with `-prod` suffix
+* `is_prod_subscription: true` - enforces production-grade security and compliance
 * Requires all previous stages to succeed
 * Production-level compliance and security checks
 * Artifact retention for compliance auditing
@@ -129,3 +207,65 @@ The pipeline uses conditional stages to manage environment-specific deployments:
 * Creates GitHub releases with version tags
 * Publishes documentation artifacts
 * Only runs after infrastructure deployment succeeds
+
+==== Customizing Stages
+
+To add custom stages (e.g., QA, Staging), modify the `stages` parameter in your pipeline:
+
+[source,yaml]
+----
+parameters:
+  - name: stages
+    type: object
+    default:
+      - stage: Dev
+        dependsOn: Build
+        condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/feature/')
+        environment_shortname: dev
+        dns_zone: $(base_domain_dev)
+        domain_internal: $(base_domain_internal_dev)
+        deployment_infra: InfraDev
+        deployment_apps: K8sDev
+        is_prod_subscription: false
+      - stage: QA
+        dependsOn: Build
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/qa')
+        environment_shortname: qa
+        dns_zone: $(base_domain_qa)
+        domain_internal: $(base_domain_internal_qa)
+        deployment_infra: InfraQA
+        deployment_apps: K8sQA
+        is_prod_subscription: false
+      - stage: Prod
+        dependsOn: Build
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+        environment_shortname: prod
+        dns_zone: $(base_domain_prod)
+        domain_internal: $(base_domain_internal_prod)
+        deployment_infra: InfraProd
+        deployment_apps: K8sProd
+        is_prod_subscription: true
+----
+
+IMPORTANT: Ensure corresponding DNS zone variables (e.g., `base_domain_dev`, `base_domain_qa`) are defined in `pipeline-vars.yml` and Azure DevOps variable groups.
+
+==== Stage-to-Environment Mapping
+
+The `environment_shortname` field controls:
+
+* **Terraform Workspace**: Workspace name matches `environment_shortname` (e.g., `nonprod`, `prod`)
+* **Resource Naming**: All resources include the stage in their name pattern: `{company}-{project}-{stage}-{component}`
+* **Configuration Selection**: Environment-specific values from `build/config/stage_envvars.yml`
+* **State File Isolation**: Separate Terraform state per environment
+
+==== is_prod_subscription Flag
+
+The `is_prod_subscription` boolean enables production-specific behaviors:
+
+* Enhanced Azure Policy enforcement
+* Stricter RBAC and network security rules
+* Enabled audit logging and retention policies
+* Production SKU selection (e.g., Standard vs Premium tiers)
+* Change approval gates and deployment windows
+
+Set `is_prod_subscription: true` only for production environments to maintain security posture and compliance requirements.

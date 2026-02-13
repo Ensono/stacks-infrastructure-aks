@@ -108,11 +108,12 @@ When the pipeline is invoked there are a number of parameters that can be config
 | Destroy Environment | `destroy` | `false` | Destroy the environment. When used with the `deploy` parameter this rebuilds the environment by tearing it down and redeploying it.
 | Upload Generated Files | `upload` | `false` | The pipeline generates files for Terraform to use. This option will upload these file as build artifacts so they can be checked for issues. Useful for debugging.
 | Force Deploy | `force` | `false` | This option allows environments to be built when not on the correct branch. This means that the non-prod environment can be deployed from the main build.
-| Stages | `stages` | | To reduce unnecessary duplication in the ADO pipeline the stages are a parameterised array.
+| Upgrade Providers | `upgrade_providers` | `false` | Runs `terraform init -upgrade` to update provider versions to match constraints in provider.tf. Use when upgrading major provider versions (e.g., AzureRM 3.x → 4.x).
+| Stages | `stages` | | Parameterized array defining deployment stages with environment-specific configuration (DNS zones, resource naming, security policies).
 
-This allows the stage to be iterated over for each of the necessary environments and pass in the required changes when necessary.
+Each stage includes `environment_shortname` (maps to `TF_VAR_stage`), `is_prod_subscription` (controls security posture), and deployment conditions.
 
-It is not expected that this parameter will be modified often, rather used for the iteration of the stages.
+See xref:azure-devops-integration.adoc#_stage_configuration_structure[Stage Configuration] for customization options.
 |===
 
 These values can be set, either when running the pipeline from the ADO portal or on the command line.
