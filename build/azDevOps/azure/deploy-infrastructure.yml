@@ -202,10 +202,9 @@ stages:
                               eirctl run infrastructure_destroy
                           env:
                             TF_FILE_LOCATION: /eirctl/deploy/terraform
+                            TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                             ${{ if eq(parameters.upgrade_providers, true) }}:
-                              TF_BACKEND_INIT: "-upgrade,key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                            ${{ else }}:
-                              TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                              TF_BACKEND_UPGRADE: "true"
                             TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_stage: ${{ stage.environment_shortname }}
                             TF_VAR_is_prod_subscription: ${{ stage.is_prod_subscription }}
@@ -224,10 +223,9 @@ stages:
                             eirctl run infra:plan
                       env:
                         TF_FILE_LOCATION: /eirctl/deploy/terraform
+                        TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         ${{ if eq(parameters.upgrade_providers, true) }}:
-                          TF_BACKEND_INIT: "-upgrade,key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        ${{ else }}:
-                          TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                          TF_BACKEND_UPGRADE: "true"
                         TF_BACKEND_PLAN: '-input=false,-out="deploy.tfplan"'
                         TF_VAR_location: $(region)
                         TF_VAR_company: $(company)
@@ -326,10 +324,9 @@ stages:
                       env:
                         TF_FILE_LOCATION: /eirctl/deploy/terraform
                         TF_VAR_stage: ${{ stage.environment_shortname }}
+                        TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                         ${{ if eq(parameters.upgrade_providers, true) }}:
-                          TF_BACKEND_INIT: "-upgrade,key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
-                        ${{ else }}:
-                          TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
+                          TF_BACKEND_UPGRADE: "true"
 
   - stage: Release
     dependsOn:

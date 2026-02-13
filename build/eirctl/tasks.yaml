@@ -33,7 +33,11 @@ tasks:
     context: powershell
     description: Initialise Terraform for chosen templates
     command:
-      - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
+      - |
+        # Add -upgrade flag if TF_BACKEND_UPGRADE is set to true
+        $upgradeFlag = if ($env:TF_BACKEND_UPGRADE -eq "true") { "-upgrade" } else { "" }
+        $initArgs = if ($upgradeFlag) { "$upgradeFlag,$env:TF_BACKEND_INIT" } else { $env:TF_BACKEND_INIT }
+        Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $initArgs -debug
       - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
 
   infra:vars:
