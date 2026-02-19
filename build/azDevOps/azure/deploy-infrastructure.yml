@@ -182,7 +182,7 @@ stages:
                         # Note: Using AZDO_PERSONAL_ACCESS_TOKEN pipeline variable for Terraform
                         # For enhanced security, consider migrating to $(System.AccessToken) or Azure Key Vault
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
-                        TF_VAR_is_prod_subscription: ${{ stage.is_prod_subscription }}
+                        TF_VAR_is_prod_subscription: ${{ eq(stage.is_prod_subscription, true) && 'true' || 'false' }}
 
                     # Upload the Terraform variables file and the plan for debugging
                     - ${{ if eq(parameters.upload, true) }}:
@@ -201,7 +201,7 @@ stages:
                             TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                             TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_stage: ${{ stage.environment_shortname }}
-                            TF_VAR_is_prod_subscription: ${{ stage.is_prod_subscription }}
+                            TF_VAR_is_prod_subscription: ${{ eq(stage.is_prod_subscription, true) && 'true' || 'false' }}
 
                     # Create the resources for the Kubernetes cluster
                     - task: Bash@3
@@ -248,7 +248,7 @@ stages:
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
                         TF_VAR_ado_project_name: $(ado_project_name)
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
-                        TF_VAR_is_prod_subscription: ${{ stage.is_prod_subscription }}
+                        TF_VAR_is_prod_subscription: ${{ eq(stage.is_prod_subscription, true) && 'true' || 'false' }}
 
                     # Perform infrastructure tests
                     - ${{ if eq(parameters.deploy, true) }}:
