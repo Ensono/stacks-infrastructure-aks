@@ -324,7 +324,7 @@ stages:
     dependsOn:
       - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
           - NonProd
-      - ${{ else }}:
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
           - Prod
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
