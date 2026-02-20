@@ -64,7 +64,7 @@ provider "registry.terraform.io/chilicat/pkcs12" {
 
 provider "registry.terraform.io/hashicorp/azurerm" {
   version     = "4.61.0"
-  constraints = ">= 4.0.0, ~> 4.59"
+  constraints = ">= 4.0.0, ~> 4.61"
   hashes = [
     "h1:n0vta9qQda3XHIg0jB9BGQ1PyJmSj3ade9hNvg7sLM8=",
     "zh:314ce5459fd4a93aada8e99a2e2528d7df60f7145da0843d182a1d48f0c98a72",

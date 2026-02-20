@@ -11,7 +11,7 @@ terraform {
 
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.59"
+      version = "~> 4.61"
     }
 
     azuredevops = {
