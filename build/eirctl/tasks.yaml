@@ -36,6 +36,13 @@ tasks:
       - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
       - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
 
+  infra:init:upgrade:
+    context: powershell
+    description: Initialise Terraform and upgrade modules/providers to the latest allowed versions
+    command:
+      - $env:TF_CLI_ARGS_init = "-upgrade"; Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
+      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
+
   infra:vars:
     context: powershell
     description: Create Terraform variables file
