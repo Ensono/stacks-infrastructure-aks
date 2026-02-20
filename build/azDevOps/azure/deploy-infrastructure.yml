@@ -322,11 +322,13 @@ stages:
 
   - stage: Release
     dependsOn:
-      - ${{ if ne(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - NonProd
-      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
-          - Prod
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
+      - NonProd
+      - Prod
+    condition: >-
+      and(
+        or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)),
+        or(eq(dependencies.NonProd.result, 'Succeeded'), eq(dependencies.Prod.result, 'Succeeded'))
+      )
     variables:
       # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
       - name: version_number
