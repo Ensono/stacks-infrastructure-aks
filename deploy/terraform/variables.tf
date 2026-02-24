@@ -94,6 +94,24 @@ variable "aks_node_pools" {
   default     = {}
 }
 
+variable "aks_default_node_pool_autoscaling" {
+  type        = bool
+  description = "Enable auto-scaling for the default AKS node pool. When false, node count must be fixed to a single value. Note: Due to AzureRM v4.x requirements, autoscaling is recommended unless you need fixed node counts."
+  default     = true
+}
+
+variable "aks_default_node_pool_min_count" {
+  type        = number
+  description = "Minimum node count for default node pool when autoscaling is enabled"
+  default     = 1
+}
+
+variable "aks_default_node_pool_max_count" {
+  type        = number
+  description = "Maximum node count for default node pool when autoscaling is enabled"
+  default     = 3
+}
+
 # ###########################
 # # CONDITIONALS
 # ##########################

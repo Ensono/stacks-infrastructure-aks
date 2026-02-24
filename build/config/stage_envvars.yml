@@ -59,6 +59,15 @@ stages:
         description: State if the virtual network for AKS should be created
       - name: TF_VAR_cluster_version
         description: Version of Kubernetes to deploy
+      - name: TF_VAR_aks_default_node_pool_autoscaling
+        description: Enable auto-scaling for the default AKS node pool (true/false, default: true for AzureRM v4.x compatibility)
+        required: false
+      - name: TF_VAR_aks_default_node_pool_min_count
+        description: Minimum node count for default node pool when autoscaling is enabled (default: 1)
+        required: false
+      - name: TF_VAR_aks_default_node_pool_max_count
+        description: Maximum node count for default node pool when autoscaling is enabled (default: 3)
+        required: false
       - name: TF_VAR_create_acr
         description: State if a container registry should be created
       - name: TF_VAR_acr_resource_group
