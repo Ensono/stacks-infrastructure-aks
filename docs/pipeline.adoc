@@ -104,7 +104,7 @@ When the pipeline is invoked there are a number of parameters that can be config
 [cols="1,1,1,4a",options="header",stripes=even]
 |===
 | Parameter | ID | Default | Description
-| Deploy Enviornment | `deploy` | `true` | Deploy the environment
+| Deploy Environment | `deploy` | `true` | Deploy the environment
 | Destroy Environment | `destroy` | `false` | Destroy the environment. When used with the `deploy` parameter this rebuilds the environment by tearing it down and redeploying it.
 | Upload Generated Files | `upload` | `false` | The pipeline generates files for Terraform to use. This option will upload these file as build artifacts so they can be checked for issues. Useful for debugging.
 | Force Deploy | `force` | `false` | This option allows environments to be built when not on the correct branch. This means that the non-prod environment can be deployed from the main build.

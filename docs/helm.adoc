@@ -35,7 +35,7 @@ Applications can be enabled as required and other ones added as needed.
 include::../deploy/helm/k8s_apps.yaml[]
 ----
 
-This file is read by the `Deploy-Helm` cmdlet in the Independent Runner PowerShell module. The cmdlet cna handle installing from a remote chart repository or from a local one contained on the file system.
+This file is read by the `Deploy-Helm` cmdlet in the Independent Runner PowerShell module. The cmdlet can handle installing from a remote chart repository or from a local one contained on the file system.
 
 The following table describes the parameters that can be set.
 
