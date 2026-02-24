@@ -5,9 +5,12 @@ description: Review and address all unresolved comments on a GitHub Pull Request
 model: Auto (copilot)
 ---
 
+# Address PR Comments Agent
+
 ## Purpose
 
-This prompt guides an AI agent to review and address all **unresolved** comments on a GitHub Pull Request, implement the requested changes, and commit the fixes.
+This prompt guides an AI agent to review and address all **unresolved** comments on a GitHub Pull Request,
+implement the requested changes, and commit the fixes.
 
 ## Prerequisites
 
@@ -37,6 +40,7 @@ The user may provide:
    - If PR number provided in `$ARGUMENTS`, use it directly
    - If PR URL provided, extract the PR number
    - If no argument, detect PR from current branch:
+
      ```bash
      gh pr view --json number --jq '.number'
      ```
@@ -47,6 +51,7 @@ The user may provide:
    - If branches don't match, STOP and ask user to switch branches first
 
 3. **Fetch PR metadata**:
+
    ```bash
    gh pr view <number> --json title,body,state,reviewDecision,reviews,comments
    ```
@@ -187,6 +192,7 @@ For each comment requiring code changes:
    ```
 
 3. **Push changes**:
+
    ```bash
    git push origin HEAD
    ```
@@ -254,7 +260,7 @@ This workflow MUST adhere to:
 
 ## Example Usage
 
-```
+```text
 User: Address comments on PR 26
 Agent:
 1. Fetching PR #26 details...
