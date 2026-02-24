@@ -186,7 +186,7 @@ parameters:
 
 * Triggered on feature branches (not master)
 * `environment_shortname: nonprod` - creates resources with `-nonprod` suffix
-* `is_prod_subscription: false` - relaxed security policies for development
+* `is_prod_subscription: false` - marks subscription as non-production for environment selection and tagging
 * Runs infrastructure tests and validation
 * No external artifacts published
 * Shorter TTL for temporary resources
@@ -195,9 +195,9 @@ parameters:
 
 * Triggered only on master branch
 * `environment_shortname: prod` - creates resources with `-prod` suffix
-* `is_prod_subscription: true` - enforces production-grade security and compliance
+* `is_prod_subscription: true` - marks subscription as production for environment selection and tagging
 * Requires all previous stages to succeed
-* Production-level compliance and security checks
+* Production-level compliance and security checks (via separate Azure Policy assignments and role definitions)
 * Artifact retention for compliance auditing
 * External artifact publishing (optional)
 

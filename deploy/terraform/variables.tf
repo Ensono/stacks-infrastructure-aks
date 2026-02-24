@@ -102,14 +102,24 @@ variable "aks_default_node_pool_autoscaling" {
 
 variable "aks_default_node_pool_min_count" {
   type        = number
-  description = "Minimum node count for default node pool when autoscaling is enabled"
+  description = "Minimum node count for default node pool when autoscaling is enabled. Must be at least 1 and less than or equal to aks_default_node_pool_max_count when autoscaling is enabled."
   default     = 1
+
+  validation {
+    condition     = var.aks_default_node_pool_min_count >= 1
+    error_message = "aks_default_node_pool_min_count must be at least 1."
+  }
 }
 
 variable "aks_default_node_pool_max_count" {
   type        = number
-  description = "Maximum node count for default node pool when autoscaling is enabled"
+  description = "Maximum node count for default node pool when autoscaling is enabled. Must be at least 1 and greater than or equal to aks_default_node_pool_min_count when autoscaling is enabled."
   default     = 3
+
+  validation {
+    condition     = var.aks_default_node_pool_max_count >= 1
+    error_message = "aks_default_node_pool_max_count must be at least 1."
+  }
 }
 
 # ###########################

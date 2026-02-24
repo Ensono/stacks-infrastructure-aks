@@ -108,8 +108,9 @@ Resolution:
 This is a known limitation of the Ensono Stacks AKS module (v8.0.24 and below). To work around:
 
 1. **For autoscaling changes only**: The infrastructure as code is configured to set `min_nodes` and `max_nodes` to `null` when autoscaling is disabled, which complies with AzureRM provider v4.x requirements. If the error persists:
-   - Taint the node pool to force replacement: `terraform taint 'module.aks_bootstrap.azurerm_kubernetes_cluster.default[0]'`
-   - Re-apply the Terraform configuration in a non-production environment first to validate
+   - Taint the node pool to force replacement using the standard `eirctl`/`Invoke-Terraform` workflow (do not call `terraform` directly)
+   - Add a dedicated `Invoke-Terraform` command in the eirctl container context: `Invoke-Terraform -TaintTarget 'module.aks_bootstrap.azurerm_kubernetes_cluster.default[0]'` (see `build/eirctl/tasks.yaml` for task definitions)
+   - Re-run the appropriate `eirctl` infrastructure task (plan/apply) in a non-production environment first to validate
 
 2. **For vm_size or disk changes**:
    - Upgrade to a newer module version (when available) that supports `temporary_name_for_rotation`
