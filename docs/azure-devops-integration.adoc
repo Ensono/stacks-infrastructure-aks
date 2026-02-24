@@ -262,10 +262,12 @@ The `environment_shortname` field controls:
 
 The `is_prod_subscription` boolean enables production-specific behaviors:
 
-* Enhanced Azure Policy enforcement
-* Stricter RBAC and network security rules
-* Enabled audit logging and retention policies
-* Production SKU selection (e.g., Standard vs Premium tiers)
-* Change approval gates and deployment windows
+The `is_prod_subscription` boolean is passed from the Azure DevOps stage into Terraform and is used to control how environments are selected and tagged.
 
-Set `is_prod_subscription: true` only for production environments to maintain security posture and compliance requirements.
+In the current implementation:
+
+* Terraform uses `is_prod_subscription` to determine which environments from `environment_definitions` are deployed for a given run (for example, selecting production-only environments when `true`).
+* It can be used to drive subscription-level metadata or tagging that distinguishes production from non-production subscriptions.
+* While production controls like Azure Policy enforcement, stricter RBAC, audit logging, and SKU selection are important, they are separate concerns and must be configured independently (via Azure Policy assignments, role definitions, or pipeline protection rules).
+
+Set `is_prod_subscription: true` only for production subscriptions so that Terraform applies the correct environment selection and subscription tagging behavior.

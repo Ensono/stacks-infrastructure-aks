@@ -102,6 +102,11 @@ output "app_gateway_public_ip_name" {
   value       = var.create_ssl_gateway ? module.ssl_app_gateway[0].app_gateway_ip_name : ""
 }
 
+output "create_ssl_gateway" {
+  description = "Whether the Application Gateway (SSL termination) is enabled"
+  value       = var.create_ssl_gateway
+}
+
 output "dns_resource_group_name" {
   description = "Resource group name for the DNS zones"
   value       = module.aks_bootstrap.dns_resource_group_name

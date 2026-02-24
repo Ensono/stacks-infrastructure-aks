@@ -38,3 +38,6 @@ inputs:
   - name: azure_application_id
     description: Azure application (client) ID used for key vault access policies
     value: ""
+  - name: create_ssl_gateway
+    description: Whether the Application Gateway for SSL termination is enabled
+    value: true
