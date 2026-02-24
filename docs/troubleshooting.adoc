@@ -92,3 +92,29 @@ Checks:
 * Validate TFOUT_ variables are present
 * Confirm chart values template paths
 * Verify cluster credentials and network access
+
+=== Default Node Pool Update Failures
+
+Symptoms:
+
+* Terraform plan/apply fails with: `temporary_name_for_rotation` must be specified when updating default_node_pool properties
+
+Cause:
+
+Azure provider requires `temporary_name_for_rotation` when modifying certain default node pool properties (vm_size, os_disk_size_gb, enable_auto_scaling, etc.). This enables zero-downtime node rotation.
+
+Resolution:
+
+This is a known limitation of the Ensono Stacks AKS module (v8.0.24 and below). To work around:
+
+1. **For autoscaling changes only**: The infrastructure as code is configured to set `min_nodes` and `max_nodes` to `null` when autoscaling is disabled, which complies with AzureRM provider v4.x requirements. If the error persists:
+   - Taint the node pool to force replacement: `terraform taint 'module.aks_bootstrap.azurerm_kubernetes_cluster.default[0]'`
+   - Re-apply the Terraform configuration in a non-production environment first to validate
+
+2. **For vm_size or disk changes**:
+   - Upgrade to a newer module version (when available) that supports `temporary_name_for_rotation`
+   - Or manually manage the node pool update in Azure portal with a temporary node pool
+
+3. **Prevention**:
+   - Avoid frequent changes to default node pool properties
+   - Use additional node pools for varying instance types instead of modifying the default pool
