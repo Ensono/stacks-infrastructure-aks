@@ -40,14 +40,14 @@ module "aks_bootstrap" {
   key_vault_name          = substr(var.key_vault_name, 0, 24)
   create_key_vault        = var.create_key_vault
   aks_node_pools          = var.aks_node_pools
-  
+
   # Default node pool auto-scaling configuration for AzureRM v4.x compatibility
   # When auto_scaling_enabled = false, max_count/min_count must be null
   # So we enable autoscaling when not explicitly disabled, using min/max values
   auto_scaling_enabled = var.aks_default_node_pool_autoscaling
-  min_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_min_count : 1
-  max_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_max_count : 1
+  min_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_min_count : null
+  max_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_max_count : null
   vm_size              = "Standard_D2s_v3"
-  
-  resource_group_tags     = local.tags
+
+  resource_group_tags = local.tags
 }

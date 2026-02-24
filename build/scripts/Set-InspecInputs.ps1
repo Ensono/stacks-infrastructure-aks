@@ -40,7 +40,6 @@ Add-Content -Path /eirctl/inspec_inputs.yml -Value "region: $($env:TF_VAR_locati
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "kubernetes_private_cluster: $($env:TF_VAR_is_cluster_private)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "subscription_id: $($env:ARM_SUBSCRIPTION_ID)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "azure_application_id: $($env:ARM_CLIENT_ID)"
-Add-Content -Path /eirctl/inspec_inputs.yml -Value "create_ssl_gateway: $(if([System.Convert]::ToBoolean($env:TFOUT_create_ssl_gateway)) { 'true' } else { 'false' })"
 
 $nodePools = @{}
 if ($env:TF_VAR_aks_node_pools -and $env:TF_VAR_aks_node_pools.Trim() -ne "" -and $env:TF_VAR_aks_node_pools.Trim() -ne "{}") {
