@@ -6,7 +6,7 @@ terraform {
   required_providers {
     acme = {
       source  = "vancluever/acme"
-      version = "~> 2.0"
+      version = "~> 2.45"
     }
 
     azurerm = {
