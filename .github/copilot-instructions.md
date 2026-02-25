@@ -2,10 +2,12 @@
 
 ## Project Overview
 
-This is an enterprise Terraform-based Azure Kubernetes Service (AKS) infrastructure deployment repository using the Ensono Stacks pattern. It deploys production-ready AKS clusters with associated Azure resources (ACR, DNS, Key Vault, networking) across multiple environments.
+This is an enterprise Terraform-based Azure Kubernetes Service (AKS) infrastructure deployment repository using the Ensono Stacks pattern. It deploys
+production-ready AKS clusters with associated Azure resources (ACR, DNS, Key Vault, networking) across multiple environments.
 
 > [!IMPORTANT]
-> Security is not negotiable, and Copilot must be a trusted partner in maintaining our security posture, please incorporate the [security instructions](./copilot-security-instructions.md) when generating or modifying code.
+> Security is not negotiable, and Copilot must be a trusted partner in maintaining our security posture, please incorporate the
+> [security instructions](./copilot-security-instructions.md) when generating or modifying code.
 
 ## Architecture & Key Components
 
@@ -80,3 +82,4 @@ eirctl run docs                    # Generate documentation
 ## What to Avoid
 
 - Directly calling tools, i.e. `terraform` - always use `eirctl` tasks i.e. `Invoke-Terraform` for consistency.
+- Adding an unnecessary v version prefix to eirctl (e.g., `v0.9.10`) - the expected format is `0.x.x` without the 'v' prefix.
