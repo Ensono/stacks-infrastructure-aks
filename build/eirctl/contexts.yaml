@@ -1,7 +1,7 @@
 contexts:
   powershell:
     container:
-      name: ensono/eir-infrastructure:1.2.39
+      name: ensono/eir-infrastructure:1.2.45
       shell: pwsh
       shell_args:
         - -Command
@@ -12,7 +12,7 @@ contexts:
 
   infratests:
     container:
-      name: ensono/eir-inspec:1.2.39
+      name: ensono/eir-inspec:1.2.45
       shell: pwsh
       shell_args:
         - -Command
@@ -22,7 +22,7 @@ contexts:
 
   docs:
     container:
-      name: ensono/eir-asciidoctor:1.2.39
+      name: ensono/eir-asciidoctor:1.2.45
       shell: pwsh
       shell_args:
         - -Command
