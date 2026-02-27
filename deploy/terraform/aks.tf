@@ -42,12 +42,14 @@ module "aks_bootstrap" {
   aks_node_pools          = var.aks_node_pools
 
   # Default node pool auto-scaling configuration for AzureRM v4.x compatibility
-  # When auto_scaling_enabled = false, max_count/min_count must be null
-  # So we enable autoscaling when not explicitly disabled, using min/max values
-  auto_scaling_enabled = var.aks_default_node_pool_autoscaling
-  min_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_min_count : null
-  max_nodes            = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_max_count : null
-  vm_size              = "Standard_D2s_v3"
+  # When auto_scaling_enabled = false, max_count/min_count must be null and node_count must be set
+  # When auto_scaling_enabled = true, node_count must be null and min/max values must be set
+  auto_scaling_enabled        = var.aks_default_node_pool_autoscaling
+  min_nodes                   = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_min_count : null
+  max_nodes                   = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_max_count : null
+  node_count                  = var.aks_default_node_pool_autoscaling ? null : var.aks_default_node_pool_count
+  vm_size                     = "Standard_D2s_v3"
+  temporary_name_for_rotation = var.temporary_name_for_rotation
 
   resource_group_tags = local.tags
 }

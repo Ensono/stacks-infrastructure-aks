@@ -122,6 +122,28 @@ variable "aks_default_node_pool_max_count" {
   }
 }
 
+variable "aks_default_node_pool_count" {
+  description = "Fixed node count for the AKS default node pool when autoscaling is disabled. Must be at least 1. Only used when aks_default_node_pool_autoscaling is false."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.aks_default_node_pool_count >= 1
+    error_message = "aks_default_node_pool_count must be at least 1."
+  }
+}
+
+variable "temporary_name_for_rotation" {
+  description = "Temporary name for node pool rotation. Required when updating sensitive default node pool properties (vm_size, os_disk_size_gb, zones, etc.). Azure uses this to create a temporary node pool during updates to immutable properties. Must be 1-12 lowercase alphanumeric characters starting with a letter."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.temporary_name_for_rotation == "" || can(regex("^[a-z][a-z0-9]{0,11}$", var.temporary_name_for_rotation))
+    error_message = "temporary_name_for_rotation must be empty or a valid AKS node pool name: 1-12 characters, start with a lowercase letter, and contain only lowercase alphanumeric characters."
+  }
+}
+
 # ###########################
 # # CONDITIONALS
 # ##########################

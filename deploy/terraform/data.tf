@@ -35,6 +35,16 @@ resource "terraform_data" "subscription_tag_validation" {
   }
 }
 
+# Validate that min_count <= max_count when autoscaling is enabled
+resource "terraform_data" "validate_node_pool_min_max" {
+  lifecycle {
+    precondition {
+      condition     = !var.aks_default_node_pool_autoscaling || var.aks_default_node_pool_min_count <= var.aks_default_node_pool_max_count
+      error_message = "When autoscaling is enabled, aks_default_node_pool_min_count (${var.aks_default_node_pool_min_count}) must be less than or equal to aks_default_node_pool_max_count (${var.aks_default_node_pool_max_count})."
+    }
+  }
+}
+
 # Get details about the ADO project, this is required so that Terraform
 # can create the variable group in the correct project and an ID is required for that
 data "azuredevops_project" "project" {
