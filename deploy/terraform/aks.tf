@@ -2,7 +2,7 @@
 
 # Deploy an AKS cluster for each of the environments that have been specified
 module "aks_bootstrap" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.27"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.29"
 
   resource_namer                    = module.naming.names[var.project].resource_group.name
   resource_group_location           = var.location
