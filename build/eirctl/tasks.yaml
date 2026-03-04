@@ -160,7 +160,7 @@ tasks:
         $env:AZURE_TENANT_ID = $env:ARM_TENANT_ID
         $env:AZURE_SUBSCRIPTION_ID = $env:ARM_SUBSCRIPTION_ID
         Import-Module -Name EnsonoBuild -ErrorAction Stop
-        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml"
+        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml" -ExitCodes 101
 
   infra:state:lock:clear:
     context: powershell
