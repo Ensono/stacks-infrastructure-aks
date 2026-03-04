@@ -68,6 +68,12 @@ stages:
       - name: TF_VAR_aks_default_node_pool_max_count
         description: "Maximum node count for default pool when autoscaling is enabled (default: 3)"
         required: false
+      - name: TF_VAR_aks_default_node_pool_count
+        description: "Fixed node count for the default AKS node pool when autoscaling is disabled"
+        required: false
+      - name: TF_VAR_temporary_name_for_rotation
+        description: "Temporary default node pool name used during node pool rotation operations"
+        required: false
       - name: TF_VAR_create_acr
         description: State if a container registry should be created
       - name: TF_VAR_acr_resource_group
