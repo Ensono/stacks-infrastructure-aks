@@ -112,10 +112,10 @@ locals {
     }
   })
 
-  # Prefer creating/updating Azure DevOps variable groups for the active stage only.
-  # Fall back to the computed environment list when the stage is not present in outputs
-  # (for backward compatibility with stage aliases such as nonprod/prod).
-  ado_variable_group_environments = contains(keys(local.encoded_outputs), var.stage) ? [var.stage] : local.environments
+  # Create Azure DevOps variable groups for each environment being deployed in this stage.
+  # This ensures nonprod creates stacks-dev-outputs and stacks-test-outputs,
+  # while prod creates stacks-prod-outputs.
+  ado_variable_group_environments = local.environments
 
   company_short_name = lower(substr(var.company, 0, 3))
 

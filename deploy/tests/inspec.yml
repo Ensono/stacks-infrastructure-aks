@@ -38,6 +38,12 @@ inputs:
   - name: azure_application_id
     description: Azure application (client) ID used for key vault access policies
     value: ""
+  - name: container_registry_name
+    description: Name of the Azure Container Registry
+    value: ""
+  - name: container_registry_sku
+    description: SKU of the Azure Container Registry (e.g. Standard, Premium)
+    value: Standard
   - name: create_ssl_gateway
     description: Whether the Application Gateway for SSL termination is enabled
     value: true
