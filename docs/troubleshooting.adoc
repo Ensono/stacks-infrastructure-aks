@@ -105,17 +105,16 @@ Azure provider requires `temporary_name_for_rotation` when modifying certain def
 
 Resolution:
 
-This is a known limitation of the Ensono Stacks AKS module (versions prior to v8.0.29). To work around:
+The AzureRM provider requires `temporary_name_for_rotation` to be set when rotating the default node pool. The Ensono Stacks AKS module (v8.0.29 and later, as used in this repository) exposes this via the `temporary_name_for_rotation` Terraform variable. To resolve:
 
 1. **For autoscaling changes only**: The infrastructure as code is configured to set `min_nodes` and `max_nodes` to `null` when autoscaling is disabled, which complies with AzureRM provider v4.x requirements. If the error persists:
-   - Taint the node pool to force replacement using the standard `eirctl`/`Invoke-Terraform` workflow (do not call `terraform` directly)
-   - Add a dedicated `Invoke-Terraform` command in the eirctl container context: `Invoke-Terraform -TaintTarget 'module.aks_bootstrap.azurerm_kubernetes_cluster.default[0]'` (see `build/eirctl/tasks.yaml` for task definitions)
-   - Re-run the appropriate `eirctl` infrastructure task (plan/apply) in a non-production environment first to validate
+   - Set the `temporary_name_for_rotation` variable (for example via `TF_VAR_temporary_name_for_rotation`) to a short, unique temporary node pool name
+   - Run the standard `eirctl`/`Invoke-Terraform` workflow (do not call `terraform` directly) to apply the change
+   - Once the rotation has completed successfully, unset or remove `temporary_name_for_rotation` for subsequent runs
+   - As a fallback, you can taint the node pool to force replacement using the standard `eirctl`/`Invoke-Terraform` workflow:
+     `Invoke-Terraform -TaintTarget 'module.aks_bootstrap.azurerm_kubernetes_cluster.default[0]'` (see `build/eirctl/tasks.yaml` for task definitions)
 
 2. **For vm_size or disk changes**:
-   - Upgrade to a newer module version (when available) that supports `temporary_name_for_rotation`
-   - Or manually manage the node pool update in Azure portal with a temporary node pool
-
-3. **Prevention**:
-   - Avoid frequent changes to default node pool properties
-   - Use additional node pools for varying instance types instead of modifying the default pool
+   - Set the `temporary_name_for_rotation` Terraform variable (for example via `TF_VAR_temporary_name_for_rotation`) before running plan/apply so that the provider can create a temporary node pool and perform zero-downtime rotation
+   - After a successful apply and verification, unset or remove `temporary_name_for_rotation` to avoid unintended future rotations
+   - If automation cannot be used, coordinate a manual node pool update in the Azure portal (for example, by creating a temporary node pool, draining workloads, and deleting the old pool once workloads are migrated)

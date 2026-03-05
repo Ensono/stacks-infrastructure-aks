@@ -65,7 +65,7 @@ if ($env:TFOUT_acr_registry_name) {
 }
 
 $containerRegistrySku = "Standard"
-if ($env:TFOUT_acr_registry_name -and $env:TFOUT_resource_group_name) {
+if ($env:TFOUT_acr_registry_name -and $env:TFOUT_resource_group_name -and (Get-Command Get-AzContainerRegistry -ErrorAction SilentlyContinue)) {
     $acr = Get-AzContainerRegistry -Name $env:TFOUT_acr_registry_name -ResourceGroupName $env:TFOUT_resource_group_name -ErrorAction SilentlyContinue
     if ($acr -and $acr.SkuName) {
         $containerRegistrySku = $acr.SkuName
