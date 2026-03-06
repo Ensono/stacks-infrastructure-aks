@@ -2,7 +2,7 @@
 
 # Deploy an AKS cluster for each of the environments that have been specified
 module "aks_bootstrap" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.19"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.29"
 
   resource_namer                    = module.naming.names[var.project].resource_group.name
   resource_group_location           = var.location
@@ -36,10 +36,20 @@ module "aks_bootstrap" {
   subnet_names            = ["k8s1"]
   aks_ingress_private_ip  = cidrhost(cidrsubnet(var.vnet_cidr.0, 4, 0), -3)
   create_user_identity    = var.create_user_identity
-  enable_auto_scaling     = true
   log_application_type    = "Node.JS"
   key_vault_name          = substr(var.key_vault_name, 0, 24)
   create_key_vault        = var.create_key_vault
   aks_node_pools          = var.aks_node_pools
-  resource_group_tags     = local.tags
+
+  # Default node pool auto-scaling configuration for AzureRM v4.x compatibility
+  # When auto_scaling_enabled = false, max_count/min_count must be null and node_count must be set
+  # When auto_scaling_enabled = true, node_count must be null and min/max values must be set
+  auto_scaling_enabled        = var.aks_default_node_pool_autoscaling
+  min_nodes                   = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_min_count : null
+  max_nodes                   = var.aks_default_node_pool_autoscaling ? var.aks_default_node_pool_max_count : null
+  node_count                  = var.aks_default_node_pool_autoscaling ? null : var.aks_default_node_pool_count
+  vm_size                     = "Standard_D2s_v3"
+  temporary_name_for_rotation = var.temporary_name_for_rotation
+
+  resource_group_tags = local.tags
 }

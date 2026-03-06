@@ -435,7 +435,7 @@ echo "Latest eirctl: $EIRCTL_VERSION"
 # Use the versions identified in the discovery phase
 ```
 
-Expected format for eirctl: `v0.x.x` (e.g., `v0.9.8`)
+Expected Git tag format for eirctl: `0.x.x` (e.g., `0.9.10`)
 
 ### 4.1b Update Container Image Versions
 
@@ -1112,7 +1112,7 @@ git commit -m "Migrate from taskctl to eirctl
 - Update CI/CD pipelines to use eirctl run commands
 - Update GitHub Actions workflows (if present)
 - Update GitLab CI configuration (if present)
-- Update EirctlVersion to v\${EIRCTL_VERSION}
+- Update EirctlVersion to \${EIRCTL_VERSION}
 - Update all documentation references
 
 Breaking changes:

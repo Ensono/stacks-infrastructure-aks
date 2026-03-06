@@ -36,6 +36,13 @@ tasks:
       - Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
       - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
 
+  infra:init:upgrade:
+    context: powershell
+    description: Initialise Terraform and upgrade modules/providers to the latest allowed versions
+    command:
+      - $env:TF_CLI_ARGS_init = "-upgrade"; Invoke-Terraform -Init -Path $env:TF_FILE_LOCATION -Arguments $env:TF_BACKEND_INIT -debug
+      - Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCATION
+
   infra:vars:
     context: powershell
     description: Create Terraform variables file
@@ -153,7 +160,7 @@ tasks:
         $env:AZURE_TENANT_ID = $env:ARM_TENANT_ID
         $env:AZURE_SUBSCRIPTION_ID = $env:ARM_SUBSCRIPTION_ID
         Import-Module -Name EnsonoBuild -ErrorAction Stop
-        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml"
+        Invoke-Inspec -path /eirctl/deploy/tests -execute -arguments "--input-file=/eirctl/inspec_inputs.yml" -ExitCodes 101
 
   infra:state:lock:clear:
     context: powershell

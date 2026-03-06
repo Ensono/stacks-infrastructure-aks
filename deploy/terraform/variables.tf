@@ -94,6 +94,56 @@ variable "aks_node_pools" {
   default     = {}
 }
 
+variable "aks_default_node_pool_autoscaling" {
+  type        = bool
+  description = "Enable auto-scaling for the default AKS node pool. When false, node count must be fixed to a single value. Note: Due to AzureRM v4.x requirements, autoscaling is recommended unless you need fixed node counts."
+  default     = true
+}
+
+variable "aks_default_node_pool_min_count" {
+  type        = number
+  description = "Minimum node count for default node pool when autoscaling is enabled. Must be at least 1 and less than or equal to aks_default_node_pool_max_count when autoscaling is enabled."
+  default     = 1
+
+  validation {
+    condition     = var.aks_default_node_pool_min_count >= 1
+    error_message = "aks_default_node_pool_min_count must be at least 1."
+  }
+}
+
+variable "aks_default_node_pool_max_count" {
+  type        = number
+  description = "Maximum node count for default node pool when autoscaling is enabled. Must be at least 1 and greater than or equal to aks_default_node_pool_min_count when autoscaling is enabled."
+  default     = 3
+
+  validation {
+    condition     = var.aks_default_node_pool_max_count >= 1
+    error_message = "aks_default_node_pool_max_count must be at least 1."
+  }
+}
+
+variable "aks_default_node_pool_count" {
+  description = "Fixed node count for the AKS default node pool when autoscaling is disabled. Must be at least 1. Only used when aks_default_node_pool_autoscaling is false."
+  type        = number
+  default     = 1
+
+  validation {
+    condition     = var.aks_default_node_pool_count >= 1
+    error_message = "aks_default_node_pool_count must be at least 1."
+  }
+}
+
+variable "temporary_name_for_rotation" {
+  description = "Temporary name for node pool rotation. Required when updating sensitive default node pool properties (vm_size, os_disk_size_gb, zones, etc.). Azure uses this to create a temporary node pool during updates to immutable properties. Must be 1-12 lowercase alphanumeric characters starting with a letter."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.temporary_name_for_rotation == "" || can(regex("^[a-z][a-z0-9]{0,11}$", var.temporary_name_for_rotation))
+    error_message = "temporary_name_for_rotation must be empty or a valid AKS node pool name: 1-12 characters, start with a lowercase letter, and contain only lowercase alphanumeric characters."
+  }
+}
+
 # ###########################
 # # CONDITIONALS
 # ##########################
@@ -146,6 +196,12 @@ variable "cluster_sku_tier" {
 
 variable "create_acr" {
   type = bool
+}
+
+variable "create_ssl_gateway" {
+  description = "Controls creation of the Application Gateway used for external ingress and SSL termination. When true, App Gateway and related outputs/resources are created and SSL terminates at the gateway. When false, these resources are skipped and ingress/SSL termination must be handled elsewhere (for example, by an in-cluster ingress controller or another upstream gateway)."
+  type        = bool
+  default     = true
 }
 
 variable "acr_resource_group" {

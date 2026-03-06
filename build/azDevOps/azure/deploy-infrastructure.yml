@@ -55,6 +55,7 @@ parameters:
         domain_internal: $(base_domain_internal_nonprod)
         deployment_infra: InfraNonProd
         deployment_apps: K8sNonProd
+        is_prod_subscription: false
       - stage: Prod
         dependsOn: Build
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
@@ -63,6 +64,7 @@ parameters:
         domain_internal: $(base_domain_internal_prod)
         deployment_infra: InfraProd
         deployment_apps: K8sProd
+        is_prod_subscription: true
 
 variables:
   - template: pipeline-vars.yml
@@ -170,6 +172,7 @@ stages:
                         TF_VAR_create_aksvnet: $(create_aksvnet)
                         TF_VAR_create_user_identity: $(create_user_identity)
                         TF_VAR_create_acr: $(create_acr)
+                        TF_VAR_create_ssl_gateway: $(create_ssl_gateway)
                         TF_VAR_acr_resource_group: $(acr_resource_group)
                         TF_VAR_acr_name: $(acr_name)
                         TF_VAR_pfx_password: $(pfx_password)
@@ -180,6 +183,10 @@ stages:
                         # Note: Using AZDO_PERSONAL_ACCESS_TOKEN pipeline variable for Terraform
                         # For enhanced security, consider migrating to $(System.AccessToken) or Azure Key Vault
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
+                        ${{ if eq(stage.is_prod_subscription, true) }}:
+                          TF_VAR_is_prod_subscription: "true"
+                        ${{ else }}:
+                          TF_VAR_is_prod_subscription: "false"
 
                     # Upload the Terraform variables file and the plan for debugging
                     - ${{ if eq(parameters.upload, true) }}:
@@ -198,6 +205,10 @@ stages:
                             TF_BACKEND_INIT: "key=$(tf_state_key),container_name=$(tf_state_container),storage_account_name=$(tf_state_storage),resource_group_name=$(tf_state_rg)"
                             TF_BACKEND_DESTROY_PLAN: '-input=false,-out="destroy.tfplan"'
                             TF_VAR_stage: ${{ stage.environment_shortname }}
+                            ${{ if eq(stage.is_prod_subscription, true) }}:
+                              TF_VAR_is_prod_subscription: "true"
+                            ${{ else }}:
+                              TF_VAR_is_prod_subscription: "false"
 
                     # Create the resources for the Kubernetes cluster
                     - task: Bash@3
@@ -236,6 +247,7 @@ stages:
                         TF_VAR_create_aksvnet: $(create_aksvnet)
                         TF_VAR_create_user_identity: $(create_user_identity)
                         TF_VAR_create_acr: $(create_acr)
+                        TF_VAR_create_ssl_gateway: $(create_ssl_gateway)
                         TF_VAR_acr_resource_group: $(acr_resource_group)
                         TF_VAR_acr_name: $(acr_name)
                         TF_VAR_pfx_password: $(pfx_password)
@@ -244,6 +256,10 @@ stages:
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
                         TF_VAR_ado_project_name: $(ado_project_name)
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
+                        ${{ if eq(stage.is_prod_subscription, true) }}:
+                          TF_VAR_is_prod_subscription: "true"
+                        ${{ else }}:
+                          TF_VAR_is_prod_subscription: "false"
 
                     # Perform infrastructure tests
                     - ${{ if eq(parameters.deploy, true) }}:

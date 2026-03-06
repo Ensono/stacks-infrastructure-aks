@@ -66,26 +66,27 @@ locals {
     aks_node_resource_group          = module.aks_bootstrap.aks_node_resource_group
     aks_resource_group_name          = module.aks_bootstrap.aks_resource_group_name
     aks_system_identity_principal_id = module.aks_bootstrap.aks_system_identity_principal_id
-    app_gateway_ip                   = module.ssl_app_gateway.app_gateway_ip
-    app_gateway_name                 = module.ssl_app_gateway.app_gateway_name
-    app_gateway_public_ip_name       = module.ssl_app_gateway.app_gateway_ip_name
-    app_gateway_resource_group_name  = module.ssl_app_gateway.app_gateway_resource_group_name
+    app_gateway_ip                   = var.create_ssl_gateway ? module.ssl_app_gateway[0].app_gateway_ip : ""
+    app_gateway_name                 = var.create_ssl_gateway ? module.ssl_app_gateway[0].app_gateway_name : ""
+    app_gateway_public_ip_name       = var.create_ssl_gateway ? module.ssl_app_gateway[0].app_gateway_ip_name : ""
+    app_gateway_resource_group_name  = var.create_ssl_gateway ? module.ssl_app_gateway[0].app_gateway_resource_group_name : ""
     app_insights_id                  = module.aks_bootstrap.app_insights_id
     app_insights_key                 = module.aks_bootstrap.app_insights_key
     app_insights_name                = module.aks_bootstrap.app_insights_name
     app_insights_resource_group_name = module.aks_bootstrap.app_insights_resource_group_name
-    certificate_pem                  = module.ssl_app_gateway.certificate_pem
+    certificate_pem                  = var.create_ssl_gateway ? module.ssl_app_gateway[0].certificate_pem : ""
     create_acr                       = var.create_acr
     create_aksvnet                   = var.create_aksvnet
     create_dns_zone                  = var.create_dns_zone
     create_key_vault                 = var.create_key_vault
+    create_ssl_gateway               = var.create_ssl_gateway
     create_user_identity             = var.create_user_identity
     create_valid_cert                = var.create_valid_cert
     dns_base_domain                  = module.aks_bootstrap.dns_base_domain
     dns_base_domain_internal         = module.aks_bootstrap.dns_base_domain_internal
     dns_internal_resource_group_name = module.aks_bootstrap.dns_internal_resource_group_name
     dns_resource_group_name          = module.aks_bootstrap.dns_resource_group_name
-    issuer_pem                       = module.ssl_app_gateway.issuer_pem
+    issuer_pem                       = var.create_ssl_gateway ? module.ssl_app_gateway[0].issuer_pem : ""
     kubernetes_version               = var.cluster_version
     resource_group_id                = module.aks_bootstrap.resource_group_id
     resource_group_name              = module.aks_bootstrap.resource_group_name
@@ -110,6 +111,11 @@ locals {
       )
     }
   })
+
+  # Create Azure DevOps variable groups for each environment being deployed in this stage.
+  # This ensures nonprod creates stacks-dev-outputs and stacks-test-outputs,
+  # while prod creates stacks-prod-outputs.
+  ado_variable_group_environments = local.environments
 
   company_short_name = lower(substr(var.company, 0, 3))
 

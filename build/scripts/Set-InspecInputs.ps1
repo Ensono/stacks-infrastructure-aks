@@ -29,6 +29,7 @@ if ($missing.Count -gt 0) {
 }
 
 Import-Module Az.Aks
+Import-Module Az.ContainerRegistry -ErrorAction SilentlyContinue
 Import-Module Az.KeyVault -ErrorAction SilentlyContinue
 if (-not (Get-Command Get-AzKeyVault -ErrorAction SilentlyContinue)) {
     Write-Warning "Az.KeyVault module not available. Skipping key vault operations."
@@ -57,6 +58,20 @@ else {
 }
 $nodePoolCount = 1 + [int]$additionalPoolCount
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "node_pool_count: $nodePoolCount"
+
+# Map container registry inputs from Terraform outputs
+if ($env:TFOUT_acr_registry_name) {
+    Add-Content -Path /eirctl/inspec_inputs.yml -Value "container_registry_name: $($env:TFOUT_acr_registry_name)"
+}
+
+$containerRegistrySku = "Standard"
+if ($env:TFOUT_acr_registry_name -and $env:TFOUT_acr_resource_group_name -and (Get-Command Get-AzContainerRegistry -ErrorAction SilentlyContinue)) {
+    $acr = Get-AzContainerRegistry -Name $env:TFOUT_acr_registry_name -ResourceGroupName $env:TFOUT_acr_resource_group_name -ErrorAction SilentlyContinue
+    if ($acr -and $acr.SkuName) {
+        $containerRegistrySku = $acr.SkuName
+    }
+}
+Add-Content -Path /eirctl/inspec_inputs.yml -Value "container_registry_sku: $containerRegistrySku"
 
 $publicIpSku = "Standard"
 if ($env:TFOUT_app_gateway_public_ip_name -and $env:TFOUT_app_gateway_resource_group_name) {

@@ -6,12 +6,12 @@ terraform {
   required_providers {
     acme = {
       source  = "vancluever/acme"
-      version = "~> 2.0"
+      version = "~> 2.45"
     }
 
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.62"
     }
 
     azuredevops = {
