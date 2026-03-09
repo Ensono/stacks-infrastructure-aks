@@ -10,7 +10,9 @@ model: Auto (copilot)
 ## Purpose
 
 This prompt guides an AI agent to review and address all **unresolved** comments on a GitHub Pull Request,
-implement the requested changes, and commit the fixes.
+implement the requested changes, and commit the fixes. When replying to review feedback,
+prefer a **single batched review submission** so reviewers receive one grouped notification instead
+of one notification per reply.
 
 ## Prerequisites
 
@@ -159,6 +161,11 @@ For each comment requiring code changes:
    - [Any additional context or decisions made]
    ```
 
+5. **Prepare batched review content**:
+   - Keep a per-thread reply for each unresolved thread
+   - Also prepare one overall review summary covering all addressed, clarified, and deferred items
+   - Keep broad rationale in the review summary and thread-specific details in the thread reply
+
 ### Phase 5: Commit Changes
 
 1. **Stage changes by category** (prefer atomic commits):
@@ -197,19 +204,79 @@ For each comment requiring code changes:
    git push origin HEAD
    ```
 
-### Phase 6: Reply to Comments
+### Phase 6: Submit One Batched Review
 
-For each addressed comment, post a reply using GitHub MCP or gh CLI:
+Do **not** post each reply individually unless batching is unavailable. Prefer one pending review,
+attach all thread replies to it, then submit once so GitHub sends one grouped notification.
 
-```bash
-# Replace OWNER, REPO, PR_NUMBER, and COMMENT_ID with actual values
-gh api --method POST repos/{owner}/{repo}/pulls/{pr_number}/comments/{comment_id}/replies \
-  -f body="Addressed in commit abc1234:
-  - Added null check for empty input
-  - Updated tests to cover edge case"
-```
+1. **Create a pending review**:
 
-Or use the GitHub MCP `activate_comment_management_tools` and then add replies.
+   ```bash
+   # Replace PR_NODE_ID with the pull request GraphQL node id
+   gh api graphql -f query='
+      mutation($pullRequestId: ID!) {
+         addPullRequestReview(input: {pullRequestId: $pullRequestId}) {
+            pullRequestReview {
+               id
+            }
+         }
+      }
+   ' -f pullRequestId=PR_NODE_ID
+   ```
+
+2. **Add a reply for each unresolved thread to that pending review**:
+
+   ```bash
+   # Replace REVIEW_ID and THREAD_ID with GraphQL node ids
+   gh api graphql -f query='
+      mutation($reviewId: ID!, $threadId: ID!, $body: String!) {
+         addPullRequestReviewThreadReply(
+            input: {
+               pullRequestReviewId: $reviewId
+               pullRequestReviewThreadId: $threadId
+               body: $body
+            }
+         ) {
+            comment {
+               id
+            }
+         }
+      }
+   ' -f reviewId=REVIEW_ID -f threadId=THREAD_ID -f body='Addressed in commit abc1234.
+   - Added null check for empty input
+   - Updated tests to cover the edge case'
+   ```
+
+3. **Submit the review once all thread replies are attached**:
+
+   ```bash
+   gh api graphql -f query='
+      mutation($reviewId: ID!, $body: String!) {
+         submitPullRequestReview(
+            input: {
+               pullRequestReviewId: $reviewId
+               event: COMMENT
+               body: $body
+            }
+         ) {
+            pullRequestReview {
+               id
+               url
+            }
+         }
+      }
+   ' -f reviewId=REVIEW_ID -f body='Addressed PR feedback in the linked commit(s).
+
+   Summary:
+   - Resolved the requested code and test updates
+   - Added clarifications where code changes were not needed
+   - Deferred any out-of-scope items explicitly'
+   ```
+
+4. **Fallback only if batching is unavailable**:
+   - Prefer GitHub MCP review tools if they support pending reviews and thread replies
+   - If review batching is not available, fall back to individual replies and warn that multiple notifications may be sent
+   - Avoid mixing batched review replies and individual replies unless the tooling forces it
 
 ### Phase 7: Summary Report
 
@@ -229,10 +296,10 @@ Output a summary:
 | abc1234 | src/lib.rs           | #1, #3             |
 | def5678 | tests/integration.rs | #2                 |
 
-### Replies Posted
+### Review Submission
 
-- [x] Comment #1 by @reviewer1 - Replied
-- [x] Comment #2 by @reviewer2 - Replied
+- [x] Submitted one batched review for addressed threads
+- [x] Included per-thread replies in the review
 - [ ] Comment #3 by @reviewer3 - Deferred (created issue #XX)
 
 ### Follow-up Items
@@ -247,6 +314,7 @@ Output a summary:
 - **Test failures**: Report which tests fail and ask for guidance
 - **Unclear comments**: Ask for clarification before making changes
 - **Permissions issues**: Report and suggest manual gh auth refresh
+- **Batch review unsupported**: Fall back to individual replies only after stating that multiple notifications may be sent
 
 ## Constitution Compliance
 
@@ -272,8 +340,8 @@ Agent:
 4. Implementing fixes...
 5. Running validation (fmt, clippy, tests)...
 6. Committing changes...
-7. Posting replies...
-8. Summary: 2 code changes committed, 1 clarification replied
+7. Submitting one batched review...
+8. Summary: 2 code changes committed, 1 clarification included in the batched review
 ```
 
 ## Quick Reference Commands
@@ -288,8 +356,11 @@ gh pr view <number> --comments
 # Get review threads (GraphQL)
 gh api graphql -f query='...'
 
-# Reply to a review comment
-gh api --method POST repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies -f body="..."
+# Create a pending review
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews --method POST
+
+# Submit a pending review
+gh api repos/{owner}/{repo}/pulls/{pr}/reviews/{review_id}/events --method POST -f event=COMMENT -f body="..."
 
 # Push and update PR
 git push origin HEAD
