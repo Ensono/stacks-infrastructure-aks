@@ -137,13 +137,13 @@ eirctl uses a container-first approach with significantly cleaner syntax. This p
 
 **Key Changes in eirctl Contexts:**
 
-| taskctl Concept                                 | eirctl Equivalent                                             | Notes                                                                 |
-| ----------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------- |
-| `executable.bin: docker` + verbose args         | `container.name: <image>`                                     | Auto-handles docker run, mounts, working dir                          |
-| Working dir: `/app`                             | Working dir: `/eirctl`                                        | Default mount point changed                                           |
+| taskctl Concept                                 | eirctl Equivalent                                         | Notes                                                                 |
+| ----------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
+| `executable.bin: docker` + verbose args         | `container.name: <image>`                                 | Auto-handles docker run, mounts, working dir                          |
+| Working dir: `/app`                             | Working dir: `/eirctl`                                    | Default mount point changed                                           |
 | `executable.args: [pwsh, -NoProfile, -Command]` | `container.shell: pwsh``container.shell_args: [-Command]` | **Remove `-NoProfile`** - eirctl requires profiles for module loading |
-| Manual volume mounts in args                    | Automatic                                                     | eirctl auto-mounts workspace at `/eirctl`                             |
-| Manual `--env-file` in args                     | `envfile:` config                                             | Simplified, supports in-file variable references                      |
+| Manual volume mounts in args                    | Automatic                                                 | eirctl auto-mounts workspace at `/eirctl`                             |
+| Manual `--env-file` in args                     | `envfile:` config                                         | Simplified, supports in-file variable references                      |
 
 ### 2.2 Conversion Template
 

@@ -337,7 +337,7 @@ stages:
           - Prod
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
-      # TODO: Credentials should come from another group. `amido-stacks-github-credentials` are the old creds
+      - group: github-creds
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
@@ -374,6 +374,25 @@ stages:
                 fi
 
                 find "${ARTIFACT_DIR}" -maxdepth 2 -type f | sort
+
+          - task: Bash@3
+            displayName: Validate GitHub Release Token
+            inputs:
+              targetType: inline
+              script: |
+                set -euo pipefail
+
+                if [ -z "${GITHUB_TOKEN:-}" ]; then
+                  echo "##[error]GITHUB_TOKEN is not available to the Release job. Ensure the GitHub credentials variable group is linked and authorized for this pipeline."
+                  exit 1
+                fi
+
+                if [ "${#GITHUB_TOKEN}" -lt 20 ]; then
+                  echo "##[error]GITHUB_TOKEN is present but shorter than expected. Verify the stored secret value in the GitHub credentials variable group."
+                  exit 1
+                fi
+            env:
+              GITHUB_TOKEN: "$(GITHUB_TOKEN)"
 
           - task: Bash@3
             displayName: Publish Release
