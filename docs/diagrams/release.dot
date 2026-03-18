@@ -6,6 +6,8 @@ digraph G {
   end [shape=oval, label="End"];
 
   buildnumber[shape=box, label="build:number"]
+  uploaddocs[shape=box, label="Publish docs artifact"]
+  downloaddocs[shape=box, label="Download docs to artifacts/"]
   release[shape=box, label="_release"]
 
   environment[
@@ -21,7 +23,9 @@ ARTIFACTS_DIR
 REPONAME"]
 
   start -> buildnumber
-  buildnumber -> release
+  buildnumber -> uploaddocs
+  uploaddocs -> downloaddocs
+  downloaddocs -> release
   environment -> release [
       style="dashed"
   ]

@@ -349,6 +349,32 @@ stages:
             parameters:
               EirctlVersion: ${{ variables.EirctlVersion }}
 
+          - task: DownloadPipelineArtifact@2
+            displayName: Download Documentation Artifact
+            inputs:
+              artifactName: docs
+              targetPath: $(Build.SourcesDirectory)/artifacts
+
+          - task: Bash@3
+            displayName: Validate Release Artifacts
+            inputs:
+              targetType: inline
+              script: |
+                set -euo pipefail
+                ARTIFACT_DIR="$(Build.SourcesDirectory)/artifacts"
+
+                if [ ! -d "${ARTIFACT_DIR}" ]; then
+                  echo "##[error]Expected release artifact directory ${ARTIFACT_DIR} was not created."
+                  exit 1
+                fi
+
+                if ! find "${ARTIFACT_DIR}" -mindepth 1 -print -quit | grep -q .; then
+                  echo "##[error]Release artifact directory ${ARTIFACT_DIR} is empty."
+                  exit 1
+                fi
+
+                find "${ARTIFACT_DIR}" -maxdepth 2 -type f | sort
+
           - task: Bash@3
             displayName: Publish Release
             inputs:
