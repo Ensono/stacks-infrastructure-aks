@@ -176,3 +176,16 @@ output "create_valid_cert" {
 output "kubernetes_version" {
   value = var.cluster_version
 }
+
+# Diagnostic output: the IP the Application Gateway backend pool is configured to target.
+# When is_cluster_private=true  → this will be the nginx-ingress internal LB IP (e.g. 10.1.15.253).
+# When is_cluster_private=false → this will be the public ingress IP — which is wrong for this stack.
+# Use this output to verify the gateway target matches the live nginx-ingress service ClusterIP / LB IP.
+output "app_gateway_backend_address" {
+  description = "IP that the Application Gateway backend pool targets. Must match the nginx-ingress internal load balancer IP when is_cluster_private=true."
+  value = var.create_ssl_gateway ? (
+    var.is_cluster_private
+    ? cidrhost(cidrsubnet(var.vnet_cidr[0], 4, 0), -3)
+    : module.aks_bootstrap.aks_ingress_public_ip
+  ) : null
+}
