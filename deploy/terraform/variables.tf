@@ -216,7 +216,7 @@ variable "acr_name" {
 
 variable "is_cluster_private" {
   type        = bool
-  description = "Set cluster private - API only accessible over internal network"
+  description = "Controls the private-cluster / internal-ingress topology. When create_ssl_gateway=true in this stack, this must be true so Application Gateway targets the nginx-ingress internal load balancer IP."
 }
 
 variable "log_application_type" {

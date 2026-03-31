@@ -81,7 +81,7 @@ stages:
       - name: TF_VAR_acr_name
         description: Name of the ACR to create
       - name: TF_VAR_is_cluster_private
-        description: Can the API be accessed remotely
+        description: Whether the AKS/App Gateway deployment uses the internal ingress topology. Must be true when create_ssl_gateway=true.
       - name: TF_VAR_key_vault_name
         description: Name of the key vault to create
         required: false
