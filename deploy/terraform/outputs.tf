@@ -177,15 +177,16 @@ output "kubernetes_version" {
   value = var.cluster_version
 }
 
-# Diagnostic output: the IP the Application Gateway backend pool is configured to target.
-# When is_cluster_private=true  → this will be the nginx-ingress internal LB IP (e.g. 10.1.15.253).
-# When is_cluster_private=false → this will be the public ingress IP — which is wrong for this stack.
-# Use this output to verify the gateway target matches the live nginx-ingress service ClusterIP / LB IP.
+# Diagnostic output: expected IP address that the Application Gateway backend pool should target.
+# When is_cluster_private=true  → this will be the nginx-ingress internal LB IP as exposed by the AKS module.
+# When is_cluster_private=false → this will be the public ingress IP — which is wrong for this stack but kept for completeness.
+# NOTE: This value is computed from Terraform module outputs; it does NOT read the live Application Gateway configuration and
+#       therefore will not detect manual changes made via the Azure portal.
 output "app_gateway_backend_address" {
-  description = "IP that the Application Gateway backend pool targets. Must match the nginx-ingress internal load balancer IP when is_cluster_private=true."
+  description = "Expected IP address that the Application Gateway backend pool should target. Computed from AKS ingress IP outputs; does not read the live Application Gateway resource."
   value = var.create_ssl_gateway ? (
     var.is_cluster_private
-    ? cidrhost(cidrsubnet(var.vnet_cidr[0], 4, 0), -3)
+    ? module.aks_bootstrap.aks_ingress_private_ip
     : module.aks_bootstrap.aks_ingress_public_ip
   ) : null
 }

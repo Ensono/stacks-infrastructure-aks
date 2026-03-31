@@ -56,8 +56,11 @@ inputs:
   - name: aks_ingress_private_ip
     description: Static private IP assigned to the nginx-ingress internal load balancer. Must match the Application Gateway backend pool target.
     value: ""
+  - name: aks_ingress_public_ip
+    description: Public ingress IP exposed by the AKS module. If present and distinct from aks_ingress_private_ip, the Application Gateway backend pool should not target it in this topology.
+    value: ""
   - name: app_gateway_backend_address
-    description: IP the Application Gateway backend pool is configured to target. Should equal aks_ingress_private_ip when is_cluster_private=true.
+    description: Expected IP address that the Application Gateway backend pool should target. Computed from Terraform outputs and intended to match aks_ingress_private_ip when is_cluster_private=true.
     value: ""
   - name: is_cluster_private
     description: Whether the AKS cluster is in private mode (controls which ingress IP the App Gateway targets)

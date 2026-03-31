@@ -188,8 +188,9 @@ terraform -chdir=deploy/terraform state rm \
 +
 [IMPORTANT]
 ====
-Use `eirctl`/`Invoke-Terraform` for routine plan/apply.  Use `terraform` CLI directly only for
-`state` operations that `Invoke-Terraform` does not expose.  Do not run `terraform apply` directly.
+Use `eirctl`/`Invoke-Terraform` for routine plan/apply. Use the `terraform` CLI directly only for
+`state` operations and read-only inspection (for example, `terraform state list`, `terraform output`)
+that `Invoke-Terraform` does not expose. Do not run `terraform apply` directly.
 ====
 
 . Apply via the standard pipeline to re-issue the certificate:
