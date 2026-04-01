@@ -21,7 +21,7 @@ if ([string]::IsNullOrEmpty($env:TF_FILE_LOCATION)) {
 }
 
 # Fail-fast validation for required environment variables
-$requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
+$requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'TF_VAR_is_cluster_private', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
 $missing = $requiredVars | Where-Object { [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($_)) }
 if ($missing.Count -gt 0) {
     Write-Error "Missing required environment variables: $($missing -join ', '). Run the appropriate environment setup script (for example './.eirctl/envvar-azure-<stage>.sh' or './.eirctl/envvar-azure-<stage>.ps1'), or set these variables before running tests."

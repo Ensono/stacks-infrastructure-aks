@@ -37,7 +37,15 @@ control "azure-application-gateway-backend-pool" do
   DESC
 
   only_if("Application Gateway not deployed") { input("create_ssl_gateway") }
-  only_if("Cluster must be private for this check") { input("is_cluster_private") }
+
+  # Assert (rather than skip) when is_cluster_private=false so that the
+  # misconfiguration that causes 502 errors is caught by `eirctl run tests`
+  # instead of silently passing.
+  describe "Cluster configuration" do
+    it "must be private (is_cluster_private=true) when the Application Gateway is deployed" do
+      expect(input("is_cluster_private")).to be true
+    end
+  end
 
   gw = azure_application_gateway(
     resource_group: input("app_gateway_resource_group_name"),
@@ -77,18 +85,20 @@ control "azure-application-gateway-backend-pool" do
 end
 
 control "azure-application-gateway-cert-configuration" do
-  title "Application Gateway frontend certificate configuration is consistent with valid-cert deployment"
+  title "Application Gateway SSL certificate is configured and TLS policy is applied"
   desc <<~DESC
-    Provides an indirect configuration check that the valid-certificate deployment
-    path was used when creating the Application Gateway frontend listener.
+    Verifies that the Application Gateway has at least one SSL certificate loaded
+    and the expected predefined TLS policy (AppGwSslPolicy20170401S) applied.
 
-    This control does NOT directly validate certificate trust or whether the
-    certificate is self-signed. Instead, it uses the Terraform output
-    app_gateway_backend_address as a proxy signal: when Terraform apply
-    completes successfully with create_valid_cert=true and all ACME prerequisites
-    present, the gateway is expected to be wired to the nginx-ingress internal
-    load balancer IP.
+    These assertions are distinct from the backend-pool targeting check and serve
+    as non-sensitive, directly observable signals that the valid-certificate
+    deployment path completed:
+      - An empty sslCertificates collection means the cert-upload step failed so
+        no TLS termination is possible.
+      - A missing or default SSL policy indicates the TLS hardening configuration
+        was not applied by Terraform.
 
+    This control does NOT validate the certificate issuer, expiry, or chain.
     For a live TLS verification of the actual certificate and issuer, run:
       openssl s_client -connect <app_gateway_ip>:443 -servername <hostname> </dev/null 2>&1 \
         | openssl x509 -noout -issuer -subject
@@ -98,13 +108,33 @@ control "azure-application-gateway-cert-configuration" do
   only_if("Application Gateway not deployed") { input("create_ssl_gateway") }
   only_if("Valid cert creation must be enabled") { input("create_valid_cert") }
 
-  # The Terraform output app_gateway_backend_address is non-null only when
-  # create_ssl_gateway=true.  Using it as a proxy for "Terraform apply succeeded
-  # with the correct cert-related configuration prerequisites" avoids embedding
-  # any sensitive certificate material into InSpec inputs.
-  describe input("app_gateway_backend_address") do
-    it "must be the internal ingress IP, confirming Terraform applied with expected valid-cert configuration" do
-      expect(subject).to eq(input("aks_ingress_private_ip"))
+  gw = azure_application_gateway(
+    resource_group: input("app_gateway_resource_group_name"),
+    name:           input("app_gateway_name")
+  )
+
+  if gw.exist?
+    describe "Application Gateway SSL certificates" do
+      subject { gw.properties.sslCertificates }
+      it "must have at least one SSL certificate configured" do
+        expect(subject).not_to be_nil
+        expect(subject).not_to be_empty
+      end
+    end
+
+    ssl_policy = gw.properties.sslPolicy
+    describe "Application Gateway SSL policy" do
+      subject { ssl_policy }
+      it "must be configured with the expected predefined TLS policy (AppGwSslPolicy20170401S)" do
+        policy_name = subject.respond_to?(:policyName) ? subject.policyName : subject["policyName"]
+        expect(policy_name).to eq("AppGwSslPolicy20170401S")
+      end
+    end
+  else
+    describe "Application Gateway" do
+      it "must exist before SSL certificate configuration can be validated" do
+        expect(gw.exist?).to be true
+      end
     end
   end
 end
