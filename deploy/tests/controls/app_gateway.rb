@@ -5,7 +5,7 @@
 #   - Application Gateway is deployed with configuration inconsistent with the
 #     valid-certificate path → later Java PKIX errors
 #
-# Both conditions arise from is_cluster_private=false or missing ACME prerequisites,
+# Both conditions arise from internal_ingress_enabled=false or missing ACME prerequisites,
 # and are now blocked at plan time by Terraform preconditions.  These InSpec controls
 # provide the complementary post-deploy verification.
 
@@ -38,12 +38,12 @@ control "azure-application-gateway-backend-pool" do
 
   only_if("Application Gateway not deployed") { input("create_ssl_gateway") }
 
-  # Assert (rather than skip) when is_cluster_private=false so that the
+  # Assert (rather than skip) when internal_ingress_enabled=false so that the
   # misconfiguration that causes 502 errors is caught by `eirctl run tests`
   # instead of silently passing.
   describe "Cluster configuration" do
-    it "must be private (is_cluster_private=true) when the Application Gateway is deployed" do
-      expect(input("is_cluster_private")).to be true
+    it "must use internal ingress (internal_ingress_enabled=true) when the Application Gateway is deployed" do
+      expect(input("internal_ingress_enabled")).to be true
     end
   end
 
@@ -53,10 +53,25 @@ control "azure-application-gateway-backend-pool" do
   )
 
   if gw.exist?
-    backend_pools = gw.properties.backendAddressPools
-    all_backend_ips = backend_pools.flat_map do |pool|
-      pool.properties.backendAddresses.map do |addr|
-        addr.respond_to?(:ipAddress) ? addr.ipAddress : addr["ipAddress"]
+    backend_pools = Array(gw.properties&.backendAddressPools)
+    backend_addresses = backend_pools.flat_map do |pool|
+      Array(pool.properties&.backendAddresses)
+    end
+    all_backend_ips = backend_addresses.map do |addr|
+      addr.respond_to?(:ipAddress) ? addr.ipAddress : addr["ipAddress"]
+    end.compact
+
+    describe "Application Gateway backend pools" do
+      subject { backend_pools }
+      it "must contain at least one backend pool" do
+        expect(subject).not_to be_empty
+      end
+    end
+
+    describe "Application Gateway backend addresses" do
+      subject { backend_addresses }
+      it "must contain at least one backend address" do
+        expect(subject).not_to be_empty
       end
     end
 
@@ -126,7 +141,13 @@ control "azure-application-gateway-cert-configuration" do
     describe "Application Gateway SSL policy" do
       subject { ssl_policy }
       it "must be configured with the expected predefined TLS policy (AppGwSslPolicy20170401S)" do
-        policy_name = subject.respond_to?(:policyName) ? subject.policyName : subject["policyName"]
+        expect(subject).not_to be_nil
+        policy_name =
+          if subject.respond_to?(:policyName)
+            subject.policyName
+          elsif subject.respond_to?(:[])
+            subject["policyName"]
+          end
         expect(policy_name).to eq("AppGwSslPolicy20170401S")
       end
     end

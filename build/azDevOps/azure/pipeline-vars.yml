@@ -43,7 +43,7 @@ variables:
   # The ingress-nginx controller in this stack is deployed behind an internal
   # Azure Load Balancer. When create_ssl_gateway=true, the Application Gateway
   # must target that private ingress IP rather than the public ingress IP.
-  - name: private_cluster
+  - name: internal_ingress_enabled
     value: true
 
   - name: create_aksvnet

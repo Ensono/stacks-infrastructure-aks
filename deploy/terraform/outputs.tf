@@ -178,14 +178,14 @@ output "kubernetes_version" {
 }
 
 # Diagnostic output: expected IP address that the Application Gateway backend pool should target.
-# When is_cluster_private=true  → this will be the nginx-ingress internal LB IP as exposed by the AKS module.
-# When is_cluster_private=false → this will be the public ingress IP — which is wrong for this stack but kept for completeness.
+# When internal_ingress_enabled=true  → this will be the nginx-ingress internal LB IP as exposed by the AKS module.
+# When internal_ingress_enabled=false → this will be the public ingress IP — which is wrong for this stack but kept for completeness.
 # NOTE: This value is computed from Terraform module outputs; it does NOT read the live Application Gateway configuration and
 #       therefore will not detect manual changes made via the Azure portal.
 output "app_gateway_backend_address" {
   description = "Expected IP address that the Application Gateway backend pool should target. Computed from AKS ingress IP outputs; does not read the live Application Gateway resource."
   value = var.create_ssl_gateway ? (
-    var.is_cluster_private
+    var.internal_ingress_enabled
     ? module.aks_bootstrap.aks_ingress_private_ip
     : module.aks_bootstrap.aks_ingress_public_ip
   ) : null

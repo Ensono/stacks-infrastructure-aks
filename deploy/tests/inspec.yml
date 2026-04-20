@@ -60,10 +60,10 @@ inputs:
     description: Public ingress IP exposed by the AKS module. If present and distinct from aks_ingress_private_ip, the Application Gateway backend pool should not target it in this topology.
     value: ""
   - name: app_gateway_backend_address
-    description: Expected IP address that the Application Gateway backend pool should target. Computed from Terraform outputs and intended to match aks_ingress_private_ip when is_cluster_private=true.
+    description: Expected IP address that the Application Gateway backend pool should target. Computed from Terraform outputs and intended to match aks_ingress_private_ip when internal_ingress_enabled=true.
     value: ""
-  - name: is_cluster_private
-    description: Whether the AKS cluster is in private mode (controls which ingress IP the App Gateway targets)
+  - name: internal_ingress_enabled
+    description: Whether the internal-ingress topology is selected (controls which ingress IP the App Gateway targets)
     value: false
   - name: create_valid_cert
     description: Whether an ACME-issued trusted certificate should be present on the App Gateway (false means self-signed fallback is acceptable)

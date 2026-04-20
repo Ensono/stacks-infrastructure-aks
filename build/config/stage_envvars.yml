@@ -80,8 +80,8 @@ stages:
         description: Resource group that the ACR can be found if not being created
       - name: TF_VAR_acr_name
         description: Name of the ACR to create
-      - name: TF_VAR_is_cluster_private
-        description: Whether the AKS/App Gateway deployment uses the internal ingress topology. Must be true when create_ssl_gateway=true.
+      - name: TF_VAR_internal_ingress_enabled
+        description: Whether the internal-ingress topology is selected for the App Gateway integration. Must be true when create_ssl_gateway=true.
       - name: TF_VAR_key_vault_name
         description: Name of the key vault to create
         required: false

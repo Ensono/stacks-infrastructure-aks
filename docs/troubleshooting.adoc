@@ -107,16 +107,16 @@ Root cause:
 The nginx-ingress controller in this stack is **always** deployed as an internal Azure Load Balancer.
 `aks_ingress_private_ip` is unconditionally passed to the AKS module, which configures nginx-ingress with a static private IP (e.g. `10.1.15.253` for the default VNET CIDR).
 
-The Application Gateway backend pool target is controlled by `is_cluster_private`:
+The Application Gateway backend pool target is controlled by `internal_ingress_enabled`:
 
-* `is_cluster_private=true`  → gateway targets `aks_ingress_private_ip` (internal LB) ✅
-* `is_cluster_private=false` → gateway targets `aks_ingress_public_ip` (wrong endpoint) ❌
+* `internal_ingress_enabled=true`  → gateway targets `aks_ingress_private_ip` (internal LB) ✅
+* `internal_ingress_enabled=false` → gateway targets `aks_ingress_public_ip` (wrong endpoint) ❌
 
-Setting `is_cluster_private=false` causes the App Gateway to point at a public IP that is not the live ingress endpoint, producing probe timeouts and 502 responses.
+Setting `internal_ingress_enabled=false` causes the App Gateway to point at a public IP that is not the live ingress endpoint, producing probe timeouts and 502 responses.
 
 Resolution:
 
-. Set `TF_VAR_is_cluster_private=true` in the environment variable script for the affected environment.
+. Set `TF_VAR_internal_ingress_enabled=true` in the environment variable script for the affected environment.
 . Run `eirctl run infrastructure` to apply the change.
   Terraform will update the App Gateway backend pool from the stale public IP to `aks_ingress_private_ip`.
 . Verify:
@@ -136,7 +136,7 @@ az network application-gateway show-backend-health \
 Prevention:
 
 A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
-`create_ssl_gateway=true` and `is_cluster_private=false`, emitting an actionable error message.
+`create_ssl_gateway=true` and `internal_ingress_enabled=false`, emitting an actionable error message.
 
 === Application Gateway Serves Self-Signed Certificate (Java PKIX failures)
 

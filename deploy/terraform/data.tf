@@ -51,20 +51,20 @@ resource "terraform_data" "validate_node_pool_min_max" {
 # aks_ingress_private_ip is unconditionally passed to the AKS module (aks.tf), which
 # causes nginx-ingress to request a static private IP from Azure CNI.
 # The App Gateway must therefore always target that internal IP, which only happens
-# when is_cluster_private=true.  Setting is_cluster_private=false causes the gateway
+# when internal_ingress_enabled=true.  Setting internal_ingress_enabled=false causes the gateway
 # to target aks_ingress_public_ip — a different (or non-existent) endpoint — producing
 # a permanently unhealthy backend pool and 502 responses.
 resource "terraform_data" "validate_ingress_gateway_mode" {
   lifecycle {
     precondition {
-      condition = !var.create_ssl_gateway || var.is_cluster_private
+      condition = !var.create_ssl_gateway || var.internal_ingress_enabled
       error_message = join(" ", [
-        "create_ssl_gateway=true requires is_cluster_private=true.",
+        "create_ssl_gateway=true requires internal_ingress_enabled=true.",
         "The nginx-ingress controller is always deployed as an internal Azure Load Balancer",
         "at the statically computed private IP ${cidrhost(cidrsubnet(var.vnet_cidr[0], 4, 0), -3)}.",
-        "Setting is_cluster_private=false causes Application Gateway to target the public ingress IP,",
+        "Setting internal_ingress_enabled=false causes Application Gateway to target the public ingress IP,",
         "which is not the live ingress endpoint and produces a 502 Bad Gateway.",
-        "Set TF_VAR_is_cluster_private=true for all environments that use this App Gateway topology."
+        "Set TF_VAR_internal_ingress_enabled=true for all environments that use this App Gateway topology."
       ])
     }
   }
@@ -83,11 +83,11 @@ resource "terraform_data" "validate_cert_prerequisites" {
       condition = (
         !var.create_ssl_gateway ||
         !var.create_valid_cert ||
-        (var.acme_email != "" && var.dns_zone != "" && var.dns_resource_group != "")
+        (trimspace(var.acme_email) != "" && trimspace(var.dns_zone) != "" && trimspace(var.dns_resource_group) != "")
       )
       error_message = join(" ", [
         "create_ssl_gateway=true and create_valid_cert=true require acme_email, dns_zone,",
-        "and dns_resource_group to all be non-empty.",
+        "and dns_resource_group to all be non-empty after trimming whitespace.",
         "Missing values cause ACME certificate issuance to fail and the gateway to fall back",
         "to a self-signed certificate. Set TF_VAR_acme_email, TF_VAR_dns_zone, and",
         "TF_VAR_dns_resource_group before applying infrastructure."

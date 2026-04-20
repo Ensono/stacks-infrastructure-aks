@@ -214,9 +214,9 @@ variable "acr_name" {
   default = ""
 }
 
-variable "is_cluster_private" {
+variable "internal_ingress_enabled" {
   type        = bool
-  description = "Controls the private-cluster / internal-ingress topology. When create_ssl_gateway=true in this stack, this must be true so Application Gateway targets the nginx-ingress internal load balancer IP."
+  description = "Selects the internal-ingress topology. When true, the Application Gateway targets the nginx-ingress internal load balancer IP. Must be true when create_ssl_gateway=true in this stack."
 }
 
 variable "log_application_type" {
