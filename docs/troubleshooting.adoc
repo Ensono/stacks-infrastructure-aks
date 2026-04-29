@@ -93,6 +93,130 @@ Checks:
 * Confirm chart values template paths
 * Verify cluster credentials and network access
 
+=== Application Gateway 502 Bad Gateway / Unhealthy Backend Pool
+
+Symptoms:
+
+* `curl https://<hostname>/api/.../health` returns HTTP 502 from `Microsoft-Azure-Application-Gateway/v2`
+* Application Gateway backend health shows **Unhealthy** with probe timeout
+* Application Gateway backend pool IP does not match the nginx-ingress internal load balancer IP
+* Java functional tests fail post-deploy (connection refused or 502)
+
+Root cause:
+
+The nginx-ingress controller in this stack is **always** deployed as an internal Azure Load Balancer.
+`aks_ingress_private_ip` is unconditionally passed to the AKS module, which configures nginx-ingress with a static private IP (e.g. `10.1.15.253` for the default VNET CIDR).
+
+The Application Gateway backend pool target is controlled by `internal_ingress_enabled`:
+
+* `internal_ingress_enabled=true`  → gateway targets `aks_ingress_private_ip` (internal LB) ✅
+* `internal_ingress_enabled=false` → gateway targets `aks_ingress_public_ip` (wrong endpoint) ❌
+
+Setting `internal_ingress_enabled=false` causes the App Gateway to point at a public IP that is not the live ingress endpoint, producing probe timeouts and 502 responses.
+
+Resolution:
+
+. Set `TF_VAR_internal_ingress_enabled=true` in the environment variable script for the affected environment.
+. Run `eirctl run infrastructure` to apply the change.
+  Terraform will update the App Gateway backend pool from the stale public IP to `aks_ingress_private_ip`.
+. Verify:
++
+[source,bash]
+----
+# The backend pool address in Terraform output must match:
+terraform -chdir=deploy/terraform output app_gateway_backend_address
+# Expected: 10.1.15.253 (or the cidrhost(..., -3) of your vnet_cidr subnet 0)
+
+# Probe health (wait ~2 min for App Gateway to detect the pool as healthy)
+az network application-gateway show-backend-health \
+  --resource-group <rg> --name <agw-name> \
+  --query 'backendAddressPools[].backendHttpSettingsCollection[].servers[].health' -o table
+----
+
+Prevention:
+
+A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
+`create_ssl_gateway=true` and `internal_ingress_enabled=false`, emitting an actionable error message.
+
+=== Application Gateway Serves Self-Signed Certificate (Java PKIX failures)
+
+Symptoms:
+
+* Java post-deploy tests fail with `PKIX path building failed` / `SunCertPathBuilderException`
+* `openssl s_client -connect <hostname>:443 </dev/null 2>&1 | grep issuer` shows `issuer=CN=*.domain` matching the subject (self-signed)
+* `create_valid_cert=true` is set but the gateway is not using an ACME certificate
+
+Root cause:
+
+When the ACME DNS-01 challenge fails on the first Terraform apply (DNS zone not yet delegated,
+wrong `dns_resource_group`, or valid `acme_email` not provided), the upstream
+`azurerm-app-gateway` module falls back silently to a self-signed certificate and **stores it in
+Terraform state**. Subsequent applies see the certificate resource as already existing and do not
+re-issue it. The self-signed cert persists indefinitely.
+
+Resolution:
+
+. Confirm all ACME prerequisites are set correctly:
++
+[source,bash]
+----
+echo $TF_VAR_acme_email        # must be a valid email
+echo $TF_VAR_dns_zone          # e.g. nonprod.stacks.ensono.com
+echo $TF_VAR_dns_resource_group # resource group that OWNS the DNS zone
+----
+
+. Confirm the DNS zone is live and NS-delegated:
++
+[source,bash]
+----
+dig NS $TF_VAR_dns_zone +short
+# Must return the Azure DNS name servers assigned to the zone
+----
+
+. Taint the certificate resources to force re-issuance on the next apply:
++
+[source,bash]
+----
+# List all state resources in the App Gateway module to identify the cert resource
+terraform -chdir=deploy/terraform state list | grep ssl_app_gateway
+
+# Taint only the ACME certificate resource (adjust resource name from state list output)
+# Example — the exact name depends on upstream module version:
+terraform -chdir=deploy/terraform state rm \
+  'module.ssl_app_gateway[0].acme_certificate.certificate[0]'
+----
++
+[IMPORTANT]
+====
+Use `eirctl`/`Invoke-Terraform` for routine plan/apply. Use the `terraform` CLI directly only for
+`state` operations and read-only inspection (for example, `terraform state list`, `terraform output`)
+that `Invoke-Terraform` does not expose. Do not run `terraform apply` directly.
+====
+
+. Apply via the standard pipeline to re-issue the certificate:
++
+[source,bash]
+----
+eirctl run infrastructure
+----
+
+. Verify the new certificate:
++
+[source,bash]
+----
+openssl s_client -connect dev-java-api.nonprod.stacks.ensono.com:443 \
+  -servername dev-java-api.nonprod.stacks.ensono.com </dev/null 2>&1 \
+  | openssl x509 -noout -issuer -subject
+# Issuer must NOT match Subject
+# Issuer should reference Let's Encrypt or configured ACME CA
+----
+
+Prevention:
+
+A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
+`create_valid_cert=true` but `acme_email`, `dns_zone`, or `dns_resource_group` are empty,
+preventing silent fallback to self-signed certificates.
+
 === Default Node Pool Update Failures
 
 Symptoms:

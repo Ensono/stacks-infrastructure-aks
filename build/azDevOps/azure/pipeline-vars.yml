@@ -31,16 +31,20 @@ variables:
   - name: aks_cluster_sku_tier
     value: Standard
 
-  # Should a valid certificate be obtained, or use a self signed one
+  # Nonprod traffic is expected to terminate on a trusted certificate so Java
+  # functional tests can validate HTTPS without relaxed trust settings.
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
     value: "{}"
 
-  - name: private_cluster
-    value: false
+  # The ingress-nginx controller in this stack is deployed behind an internal
+  # Azure Load Balancer. When create_ssl_gateway=true, the Application Gateway
+  # must target that private ingress IP rather than the public ingress IP.
+  - name: internal_ingress_enabled
+    value: true
 
   - name: create_aksvnet
     value: true
