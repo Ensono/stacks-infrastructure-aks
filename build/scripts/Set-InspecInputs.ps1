@@ -38,7 +38,6 @@ Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCA
 Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml
 Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "region: $($env:TF_VAR_location)"
-Add-Content -Path /eirctl/inspec_inputs.yml -Value "kubernetes_private_cluster: $($env:TF_VAR_internal_ingress_enabled)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "internal_ingress_enabled: $($env:TF_VAR_internal_ingress_enabled)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "subscription_id: $($env:ARM_SUBSCRIPTION_ID)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "azure_application_id: $($env:ARM_CLIENT_ID)"
