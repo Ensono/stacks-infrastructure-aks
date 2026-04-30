@@ -173,14 +173,14 @@ dig NS $TF_VAR_dns_zone +short
 # Must return the Azure DNS name servers assigned to the zone
 ----
 
-. Taint the certificate resources to force re-issuance on the next apply:
+. Remove the ACME certificate resource from state to force re-creation on the next apply:
 +
 [source,bash]
 ----
 # List all state resources in the App Gateway module to identify the cert resource
 terraform -chdir=deploy/terraform state list | grep ssl_app_gateway
 
-# Taint only the ACME certificate resource (adjust resource name from state list output)
+# Remove only the ACME certificate resource from state (adjust resource name from state list output)
 # Example — the exact name depends on upstream module version:
 terraform -chdir=deploy/terraform state rm \
   'module.ssl_app_gateway[0].acme_certificate.certificate[0]'
@@ -200,12 +200,12 @@ that `Invoke-Terraform` does not expose. Do not run `terraform apply` directly.
 eirctl run infrastructure
 ----
 
-. Verify the new certificate:
+. Verify the new certificate. Replace `<hostname>` with the DNS name of the endpoint you want to validate:
 +
 [source,bash]
 ----
-openssl s_client -connect dev-java-api.nonprod.stacks.ensono.com:443 \
-  -servername dev-java-api.nonprod.stacks.ensono.com </dev/null 2>&1 \
+openssl s_client -connect <hostname>:443 \
+  -servername <hostname> </dev/null 2>&1 \
   | openssl x509 -noout -issuer -subject
 # Issuer must NOT match Subject
 # Issuer should reference Let's Encrypt or configured ACME CA
