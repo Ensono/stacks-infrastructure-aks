@@ -1,4 +1,4 @@
-# Validates Application Gateway backend pool targeting and certificate trust.
+# Validates Application Gateway backend pool targeting and SSL configuration.
 #
 # These tests guard against the specific failure chain where:
 #   - Application Gateway targets the wrong ingress IP  → 502 Bad Gateway
@@ -8,6 +8,8 @@
 # Both conditions arise from internal_ingress_enabled=false or missing ACME prerequisites,
 # and are now blocked at plan time by Terraform preconditions.  These InSpec controls
 # provide the complementary post-deploy verification.
+#
+# Note: These controls do not validate certificate issuer/chain trust.
 
 control "azure-application-gateway-exists" do
   title "Application Gateway provisioning"
