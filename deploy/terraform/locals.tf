@@ -48,6 +48,9 @@ locals {
     name
   ] if detail.is_prod == local.is_prod_subscription || local.deploy_all_envs])
 
+  # Shared computed ingress private IP used across module inputs and outputs.
+  aks_ingress_private_ip = cidrhost(cidrsubnet(var.vnet_cidr.0, 4, 0), -3)
+
   resource_outputs = { for envname in local.environments : envname => {
     resource_group_name = module.aks_bootstrap.resource_group_name
     }
@@ -61,7 +64,7 @@ locals {
     aks_default_user_identity_id        = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_id : ""
     aks_default_user_identity_name      = var.create_user_identity ? module.aks_bootstrap.aks_default_user_identity_name : ""
     # Use -3 to select the third-to-last IP in the subnet range for the private ingress IP address
-    aks_ingress_private_ip           = cidrhost(cidrsubnet(var.vnet_cidr.0, 4, 0), -3)
+    aks_ingress_private_ip           = local.aks_ingress_private_ip
     aks_ingress_public_ip            = module.aks_bootstrap.aks_ingress_public_ip
     aks_node_resource_group          = module.aks_bootstrap.aks_node_resource_group
     aks_resource_group_name          = module.aks_bootstrap.aks_resource_group_name

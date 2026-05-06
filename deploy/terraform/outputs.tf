@@ -62,7 +62,7 @@ output "aks_default_user_identity_client_id" {
 
 output "aks_ingress_private_ip" {
   description = "Private IP to be used for the ingress controller inside the cluster"
-  value       = cidrhost(cidrsubnet(var.vnet_cidr.0, 4, 0), -3)
+  value       = local.aks_ingress_private_ip
 }
 
 output "aks_ingress_public_ip" {
@@ -186,7 +186,7 @@ output "app_gateway_backend_address" {
   description = "Expected IP address that the Application Gateway backend pool should target. Computed from AKS ingress IP outputs; does not read the live Application Gateway resource."
   value = var.create_ssl_gateway ? (
     var.internal_ingress_enabled
-    ? module.aks_bootstrap.aks_ingress_private_ip
+    ? local.aks_ingress_private_ip
     : module.aks_bootstrap.aks_ingress_public_ip
   ) : null
 }

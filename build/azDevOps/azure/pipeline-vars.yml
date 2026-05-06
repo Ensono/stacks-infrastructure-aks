@@ -31,8 +31,8 @@ variables:
   - name: aks_cluster_sku_tier
     value: Standard
 
-  # Nonprod traffic is expected to terminate on a trusted certificate so Java
-  # functional tests can validate HTTPS without relaxed trust settings.
+  # Controls trusted-certificate creation for all stages that consume
+  # TF_VAR_create_valid_cert via deploy-infrastructure.yml.
   - name: create_valid_cert
     value: true
 
