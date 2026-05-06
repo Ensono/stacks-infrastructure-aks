@@ -31,16 +31,21 @@ variables:
   - name: aks_cluster_sku_tier
     value: Standard
 
-  # Should a valid certificate be obtained, or use a self signed one
+  # Controls trusted-certificate creation for all stages that consume
+  # TF_VAR_create_valid_cert via deploy-infrastructure.yml.
   - name: create_valid_cert
-    value: false
+    value: true
 
   # Additional node pools for kubernetes
   - name: aks_node_pools
     value: "{}"
 
-  - name: private_cluster
-    value: false
+  # The ingress-nginx controller in this stack is deployed behind an internal
+  # Azure Load Balancer. Stage-specific values are defined in
+  # deploy-infrastructure.yml (`parameters.stages.*.internal_ingress_enabled`).
+  # This variable is retained for compatibility with standalone pipeline jobs.
+  - name: internal_ingress_enabled
+    value: true
 
   - name: create_aksvnet
     value: true

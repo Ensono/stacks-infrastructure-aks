@@ -47,3 +47,24 @@ inputs:
   - name: create_ssl_gateway
     description: Whether the Application Gateway for SSL termination is enabled
     value: true
+  - name: app_gateway_name
+    description: Name of the Application Gateway resource
+    value: ""
+  - name: app_gateway_resource_group_name
+    description: Resource group containing the Application Gateway
+    value: ""
+  - name: aks_ingress_private_ip
+    description: Static private IP assigned to the nginx-ingress internal load balancer. Must match the Application Gateway backend pool target.
+    value: ""
+  - name: aks_ingress_public_ip
+    description: Public ingress IP exposed by the AKS module. If present and distinct from aks_ingress_private_ip, the Application Gateway backend pool should not target it in this topology.
+    value: ""
+  - name: app_gateway_backend_address
+    description: Expected IP address that the Application Gateway backend pool should target. Computed from Terraform outputs and intended to match aks_ingress_private_ip when internal_ingress_enabled=true.
+    value: ""
+  - name: internal_ingress_enabled
+    description: Whether the internal-ingress topology is selected (controls which ingress IP the App Gateway targets)
+    value: false
+  - name: create_valid_cert
+    description: Whether an ACME-issued trusted certificate should be present on the App Gateway (false means self-signed fallback is acceptable)
+    value: true
