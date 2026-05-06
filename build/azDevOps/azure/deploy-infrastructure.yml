@@ -158,7 +158,10 @@ stages:
                         TF_VAR_project: $(project)
                         TF_VAR_component: $(domain)
                         TF_VAR_acme_email: $(acme_email)
-                        TF_VAR_internal_ingress_enabled: ${{ stage.internal_ingress_enabled }}
+                        ${{ if eq(stage.internal_ingress_enabled, true) }}:
+                          TF_VAR_internal_ingress_enabled: "true"
+                        ${{ else }}:
+                          TF_VAR_internal_ingress_enabled: "false"
                         TF_VAR_cluster_version: $(aks_cluster_version)
                         TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
                         TF_VAR_aks_node_pools: $(aks_node_pools)
@@ -233,7 +236,10 @@ stages:
                         TF_VAR_project: $(project)
                         TF_VAR_component: $(domain)
                         TF_VAR_acme_email: $(acme_email)
-                        TF_VAR_internal_ingress_enabled: ${{ stage.internal_ingress_enabled }}
+                        ${{ if eq(stage.internal_ingress_enabled, true) }}:
+                          TF_VAR_internal_ingress_enabled: "true"
+                        ${{ else }}:
+                          TF_VAR_internal_ingress_enabled: "false"
                         TF_VAR_cluster_version: $(aks_cluster_version)
                         TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
                         TF_VAR_aks_node_pools: $(aks_node_pools)
@@ -273,7 +279,10 @@ stages:
                             TF_FILE_LOCATION: /eirctl/deploy/terraform
                             TF_VAR_stage: ${{ stage.environment_shortname }}
                             TF_VAR_location: $(region)
-                            TF_VAR_internal_ingress_enabled: ${{ stage.internal_ingress_enabled }}
+                            ${{ if eq(stage.internal_ingress_enabled, true) }}:
+                              TF_VAR_internal_ingress_enabled: "true"
+                            ${{ else }}:
+                              TF_VAR_internal_ingress_enabled: "false"
                             TF_VAR_aks_node_pools: $(aks_node_pools)
 
                     - ${{ if eq(parameters.deploy, true) }}:
