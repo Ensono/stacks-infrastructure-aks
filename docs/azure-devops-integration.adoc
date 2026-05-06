@@ -24,7 +24,7 @@ Steps:
 
 . PAT is provided via `TF_VAR_ado_personal_access_token`.
 . `setup:validate:azdo:pat` checks required scopes.
-. The task verifies read permissions and attempts a create/delete test variable group.
+. The task verifies read permissions, attempts a create/delete test variable group, and calls the Azure DevOps protected resource authorization endpoint used by the Terraform provider.
 . The pipeline continues only if validation succeeds.
 
 === Variable Group Generation
@@ -73,10 +73,7 @@ The Terraform `azuredevops` provider requires the following scopes to create and
 * Work Items: Read (`vso.work`) – required to read process templates
 * Build: Read (`vso.build`) – required to read project resources and permissions
 * Variable Groups: Read & manage (`vso.variablegroups_manage`) – required to create and manage variable groups
-
-Optional (only if required by future changes):
-
-* Pipeline resources: Use and manage (`vso.pipelineresources_manage`)
+* Pipeline resources: Use and manage (`vso.pipelineresources_manage`) – required because `azuredevops_variable_group` also calls the `authorizedresources` API to synchronize project/pipeline access for the variable group
 
 === Security Best Practices
 
@@ -93,6 +90,7 @@ Common failures:
 
 * Missing scopes
 * Expired token
+* PAT can create variable groups but cannot authorize them for project/pipeline resource use
 * Insufficient permissions in the ADO project
 
 Remediation:

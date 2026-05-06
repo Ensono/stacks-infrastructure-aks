@@ -18,7 +18,7 @@ Symptoms:
 
 Checks:
 
-* Verify scopes: `vso.project`, `vso.variablegroups_manage`
+* Verify scopes: `vso.project`, `vso.work`, `vso.build`, `vso.variablegroups_manage`, `vso.pipelineresources_manage`
 * Confirm PAT is not expired
 
 === Terraform Init/Plan Issues
@@ -39,11 +39,32 @@ Checks:
 Symptoms:
 
 * `azuredevops` provider fails
+* `Updating definitionResourceReference Azure DevOps object: Request returned status: 401 Unauthorized`
 
 Checks:
 
 * PAT scope includes Variable Groups Manage
+* PAT scope includes Pipeline resources: Use and manage
 * `TF_VAR_create_ado_variable_group=true`
+
+Cause:
+
+The Terraform `azuredevops_variable_group` resource does more than create the variable group itself. After create or update, the provider also calls the Azure DevOps `authorizedresources` API to synchronize the variable group's protected-resource authorization state. A PAT can therefore pass basic variable-group CRUD checks but still fail Terraform with `definitionResourceReference` 401/403 errors if it does not have `vso.pipelineresources_manage`.
+
+Resolution:
+
+. Recreate or update the PAT with all required scopes:
+* `vso.project`
+* `vso.work`
+* `vso.build`
+* `vso.variablegroups_manage`
+* `vso.pipelineresources_manage`
+. Update `TF_VAR_ado_personal_access_token`
+. Re-run `eirctl run setup:validate:azdo:pat`
+
+Notes:
+
+* The PAT validation script now tests the same `PATCH /{project}/_apis/build/authorizedresources` endpoint used by the Terraform provider, so this failure should now be caught before Terraform runs.
 
 === DNS Propagation Problems
 
@@ -216,6 +237,97 @@ Prevention:
 A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
 `create_valid_cert=true` but `acme_email`, `dns_zone`, or `dns_resource_group` are empty,
 preventing silent fallback to self-signed certificates.
+
+=== ACME Registration Fails With "Account Exists But Is Deactivated"
+
+Symptoms:
+
+* Terraform fails during App Gateway certificate creation with:
+  `acme: error: 403 :: ... :: unauthorized :: An account with the provided public key exists but is deactivated`
+* Local runs succeed, but Azure DevOps fails for `nonprod` or `prod`
+* `terraform state list | grep acme` in the canonical pipeline state shows missing or partial ACME resources
+
+Root cause:
+
+This repository uses a shared backend key plus Terraform workspaces in CI/CD:
+
+* Backend key: `core:infrastructure:aks`
+* Workspace: `dev`, `nonprod`, `prod`
+
+If local development uses a different backend key (for example `core:infrastructure:aks:dev`),
+local runs are operating on a different state lineage from Azure DevOps. In that case, a local
+success does not prove that the pipeline state is healthy.
+
+In the failing pipeline state, the ACME registration key may already have been used against a
+Let's Encrypt account that is now deactivated. When Terraform retries registration with the same
+key, Let's Encrypt rejects it with HTTP 403.
+
+Resolution:
+
+. Ensure local backend configuration matches Azure DevOps before inspecting or modifying state:
++
+[source,bash]
+----
+# In the local environment file, TF_BACKEND_INIT must use the shared backend key:
+export TF_BACKEND_INIT="key=core:infrastructure:aks,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
+----
+
+. Reconfigure Terraform locally to the canonical backend and select the affected workspace:
++
+[source,bash]
+----
+cd deploy/terraform
+
+terraform init -reconfigure \
+  -backend-config='key=core:infrastructure:aks' \
+  -backend-config='container_name=tfstate' \
+  -backend-config='storage_account_name=stacksstatehjfis' \
+  -backend-config='resource_group_name=stacks-terraform-state'
+
+terraform workspace select nonprod
+----
+
+. Inspect the App Gateway ACME-related resources in the canonical state:
++
+[source,bash]
+----
+terraform state list | grep 'module.ssl_app_gateway\[0\]'
+terraform state list | grep -E 'module\.ssl_app_gateway\[0\]\.(tls_private_key|acme_)'
+----
+
+. Taint the ACME key resources that are present so the next apply generates fresh key material:
++
+[source,bash]
+----
+terraform taint 'module.ssl_app_gateway[0].tls_private_key.reg_key'
+terraform taint 'module.ssl_app_gateway[0].tls_private_key.cert_private_key'
+----
+
+. If `acme_registration` or `acme_certificate` resources are also present in state, taint those as well:
++
+[source,bash]
+----
+terraform taint 'module.ssl_app_gateway[0].acme_registration.reg[0]'
+terraform taint 'module.ssl_app_gateway[0].acme_certificate.default[0]'
+----
+
+. Re-run the standard workflow against the same workspace:
++
+[source,bash]
+----
+source ./.eirctl/envvar-azure-stacks-aks.sh
+export TF_VAR_stage=nonprod
+eirctl run infra:plan
+eirctl run infra:apply
+----
+
+Notes:
+
+* If the canonical state contains only `tls_private_key.*` resources and no `acme_registration` or
+  `acme_certificate`, that usually means an earlier apply failed before the ACME resources were
+  written to state. Tainting the keys is still sufficient to force a fresh registration attempt.
+* If the next apply still fails, verify DNS delegation and the values of `TF_VAR_acme_email`,
+  `TF_VAR_dns_zone`, and `TF_VAR_dns_resource_group` before retrying.
 
 === Default Node Pool Update Failures
 
