@@ -158,10 +158,7 @@ stages:
                         TF_VAR_project: $(project)
                         TF_VAR_component: $(domain)
                         TF_VAR_acme_email: $(acme_email)
-                        ${{ if eq(stage.internal_ingress_enabled, true) }}:
-                          TF_VAR_internal_ingress_enabled: "true"
-                        ${{ else }}:
-                          TF_VAR_internal_ingress_enabled: "false"
+                        TF_VAR_internal_ingress_enabled: ${{ lower(format('{0}', stage.internal_ingress_enabled)) }}
                         TF_VAR_cluster_version: $(aks_cluster_version)
                         TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
                         TF_VAR_aks_node_pools: $(aks_node_pools)
@@ -188,10 +185,7 @@ stages:
                         # Note: Using AZDO_PERSONAL_ACCESS_TOKEN pipeline variable for Terraform
                         # For enhanced security, consider migrating to $(System.AccessToken) or Azure Key Vault
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
-                        ${{ if eq(stage.is_prod_subscription, true) }}:
-                          TF_VAR_is_prod_subscription: "true"
-                        ${{ else }}:
-                          TF_VAR_is_prod_subscription: "false"
+                        TF_VAR_is_prod_subscription: ${{ lower(format('{0}', stage.is_prod_subscription)) }}
 
                     # Upload the Terraform variables file and the plan for debugging
                     - ${{ if eq(parameters.upload, true) }}:
@@ -236,10 +230,7 @@ stages:
                         TF_VAR_project: $(project)
                         TF_VAR_component: $(domain)
                         TF_VAR_acme_email: $(acme_email)
-                        ${{ if eq(stage.internal_ingress_enabled, true) }}:
-                          TF_VAR_internal_ingress_enabled: "true"
-                        ${{ else }}:
-                          TF_VAR_internal_ingress_enabled: "false"
+                        TF_VAR_internal_ingress_enabled: ${{ lower(format('{0}', stage.internal_ingress_enabled)) }}
                         TF_VAR_cluster_version: $(aks_cluster_version)
                         TF_VAR_cluster_sku_tier: $(aks_cluster_sku_tier)
                         TF_VAR_aks_node_pools: $(aks_node_pools)
@@ -264,10 +255,7 @@ stages:
                         TF_VAR_ado_org_service_url: $(ado_org_service_url)
                         TF_VAR_ado_project_name: $(ado_project_name)
                         TF_VAR_ado_personal_access_token: $(AZDO_PERSONAL_ACCESS_TOKEN)
-                        ${{ if eq(stage.is_prod_subscription, true) }}:
-                          TF_VAR_is_prod_subscription: "true"
-                        ${{ else }}:
-                          TF_VAR_is_prod_subscription: "false"
+                        TF_VAR_is_prod_subscription: ${{ lower(format('{0}', stage.is_prod_subscription)) }}
 
                     # Perform infrastructure tests
                     - ${{ if eq(parameters.deploy, true) }}:
