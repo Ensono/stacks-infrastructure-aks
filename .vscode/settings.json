@@ -3,9 +3,11 @@
     "adoc",
     "aksvnet",
     "apikey",
+    "authorizedresources",
     "azuredevops",
     "BUILDNUMBER",
     "Clustername",
+    "distributedtask",
     "docpath",
     "EDIR",
     "emberstack",
@@ -16,14 +18,18 @@
     "linenums",
     "notcontains",
     "notmatch",
+    "pipelineresources",
     "pkcs",
     "rollouts",
     "serviceaccount",
     "TFOUT",
     "tfvars",
     "traefik",
+    "variablegroup",
     "velero",
     "versionless",
-    "vnet"
+    "vnet",
+    "Vsts",
+    "workitemtypes"
   ]
 }

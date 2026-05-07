@@ -66,8 +66,26 @@
 [CmdletBinding()]
 param()
 
+function Resolve-HttpStatusCode {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    if ($null -eq $ErrorRecord.Exception -or $null -eq $ErrorRecord.Exception.Response) {
+        return -1
+    }
+
+    if ($null -ne $ErrorRecord.Exception.Response.StatusCode) {
+        return [int]$ErrorRecord.Exception.Response.StatusCode
+    }
+
+    return -1
+}
+
 function Test-AzureDevOpsPAT {
-    $ErrorActionPreference = "Stop"
+    # Keep Write-Error non-terminating so guidance and explicit exit codes are always emitted.
+    $ErrorActionPreference = "Continue"
 
     Write-Host "=========================================="
     Write-Host "Azure DevOps PAT Validation"
@@ -302,7 +320,7 @@ function Test-AzureDevOpsPAT {
     Write-Host "Testing: GET /_apis/distributedtask/variablegroups"
     Write-Host ""
 
-    $vgListUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1"
+    $vgListUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1-preview.2"
 
     try {
         $response = Invoke-RestMethod -Uri $vgListUri -Method Get -Headers $headers -ErrorAction Stop
@@ -311,7 +329,7 @@ function Test-AzureDevOpsPAT {
         Write-Host "   Scope verified: Variable Groups → Read"
     }
     catch {
-        $statusCode = $_.Exception.Response.StatusCode.value__
+        $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
 
         if ($statusCode -eq 401 -or $statusCode -eq 403) {
             Write-Error "❌ FAILED (HTTP $statusCode)"
@@ -343,7 +361,7 @@ function Test-AzureDevOpsPAT {
     Write-Host ""
 
     $testVGName = "eirctl-validation-test-$(Get-Date -Format 'yyyyMMddHHmmss')"
-    $createUri = "$orgUrl/_apis/distributedtask/variablegroups?api-version=7.1"
+    $createUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1-preview.2"
 
     $body = @{
         name = $testVGName
@@ -400,7 +418,7 @@ function Test-AzureDevOpsPAT {
             Write-Host "   Scope verified: Pipeline resources → Use and manage"
         }
         catch {
-            $statusCode = $_.Exception.Response.StatusCode.value__
+            $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
 
             if ($statusCode -eq 401 -or $statusCode -eq 403) {
                 $authorizationFailure = [PSCustomObject]@{
@@ -434,7 +452,7 @@ function Test-AzureDevOpsPAT {
             }
         }
         catch {
-            $deleteStatusCode = $_.Exception.Response.StatusCode.value__
+            $deleteStatusCode = Resolve-HttpStatusCode -ErrorRecord $_
             Write-Warning "   ⚠️  Could not delete test variable group (HTTP $deleteStatusCode)"
             Write-Host "   Please manually delete variable group in Azure DevOps:"
             Write-Host "   Name: $testVGName"
@@ -458,7 +476,7 @@ function Test-AzureDevOpsPAT {
         }
     }
     catch {
-        $statusCode = $_.Exception.Response.StatusCode.value__
+        $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
 
         if ($statusCode -eq 401 -or $statusCode -eq 403) {
             Write-Error "❌ FAILED (HTTP $statusCode)"
