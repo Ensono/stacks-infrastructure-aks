@@ -82,4 +82,4 @@ eirctl run docs                    # Generate documentation
 ## What to Avoid
 
 - Directly calling tools, i.e. `terraform` - always use `eirctl` tasks i.e. `Invoke-Terraform` for consistency.
-- Adding an unnecessary v version prefix to eirctl (e.g., `v0.9.10`) - the expected format is `0.x.x` without the 'v' prefix.
+- Adding an unnecessary v version prefix to eirctl (e.g., `v0.10.0`) - the expected format is `0.x.x` without the 'v' prefix.
