@@ -21,7 +21,7 @@ if ([string]::IsNullOrEmpty($env:TF_FILE_LOCATION)) {
 }
 
 # Fail-fast validation for required environment variables
-$requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
+$requiredVars = @('TF_VAR_stage', 'TF_VAR_location', 'TF_VAR_internal_ingress_enabled', 'ARM_CLIENT_ID', 'ARM_CLIENT_SECRET', 'ARM_TENANT_ID', 'ARM_SUBSCRIPTION_ID')
 $missing = $requiredVars | Where-Object { [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($_)) }
 if ($missing.Count -gt 0) {
     Write-Error "Missing required environment variables: $($missing -join ', '). Run the appropriate environment setup script (for example './.eirctl/envvar-azure-<stage>.sh' or './.eirctl/envvar-azure-<stage>.ps1'), or set these variables before running tests."
@@ -38,7 +38,7 @@ Invoke-Terraform -Workspace -Arguments $env:TF_VAR_stage -Path $env:TF_FILE_LOCA
 Invoke-Terraform -Output -Path $env:TF_FILE_LOCATION | /eirctl/build/scripts/Set-EnvironmentVars.ps1 -prefix "TFOUT" -key "value" -passthru | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml
 Get-AzureServiceVersions -service aks -client_id $env:ARM_CLIENT_ID -client_password $env:ARM_CLIENT_SECRET -tenant_id $env:ARM_TENANT_ID -location $env:TF_VAR_location | ConvertTo-Yaml | Out-File -Path /eirctl/inspec_inputs.yml -Append
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "region: $($env:TF_VAR_location)"
-Add-Content -Path /eirctl/inspec_inputs.yml -Value "kubernetes_private_cluster: $($env:TF_VAR_is_cluster_private)"
+Add-Content -Path /eirctl/inspec_inputs.yml -Value "internal_ingress_enabled: $($env:TF_VAR_internal_ingress_enabled)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "subscription_id: $($env:ARM_SUBSCRIPTION_ID)"
 Add-Content -Path /eirctl/inspec_inputs.yml -Value "azure_application_id: $($env:ARM_CLIENT_ID)"
 

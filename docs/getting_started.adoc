@@ -64,7 +64,7 @@ In order to run the pipeline locally a number of environment variables are requi
 | `TF_VAR_create_acr` | State if a container registry should be created | [green]#icon:check[]#
 | `TF_VAR_acr_resource_group` | Resource group that the ACR can be found if not being created | [green]#icon:check[]#
 | `TF_VAR_acr_name` | Name of the ACR to create | [green]#icon:check[]#
-| `TF_VAR_is_cluster_private` | Can the API be accessed remotely | [green]#icon:check[]#
+| `TF_VAR_internal_ingress_enabled` | Selects the internal-ingress topology used by the Application Gateway integration. Must be `true` when `TF_VAR_create_ssl_gateway=true` in this stack. | [green]#icon:check[]#
 | `TF_VAR_key_vault_name` | Name of the key vault to create | [red]#icon:times[]#
 | `TF_VAR_acme_email` | Email address for Acme certificate registration, must be a valid email | [green]#icon:check[]#
 | `TF_VAR_create_user_identity` |  | [green]#icon:check[]#

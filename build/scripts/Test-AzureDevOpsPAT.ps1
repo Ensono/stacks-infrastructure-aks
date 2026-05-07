@@ -11,6 +11,7 @@
     - vso.work (Work Items → Read)
     - vso.build (Build → Read)
     - vso.variablegroups_manage (Variable Groups → Read, create, and manage)
+    - vso.pipelineresources_manage (Pipeline resources → Use and manage)
 
     Note: Azure DevOps PATs don't expose their scopes via API introspection,
     so this script validates permissions by attempting actual API operations.
@@ -43,6 +44,11 @@
        - API: GET/POST/PUT/DELETE /_apis/distributedtask/variablegroups
        - Required by: azuredevops_variable_group resource
 
+     5. vso.pipelineresources_manage (Pipeline resources → Use and manage)
+         - Allows authorizing protected resources such as variable groups for pipeline use
+         - API: PATCH /{project}/_apis/build/authorizedresources
+         - Required by: azuredevops_variable_group allow_access synchronization
+
      SCOPE INTROSPECTION:
 
     Unlike OAuth 2.0 tokens, Azure DevOps Personal Access Tokens (PATs) do not
@@ -60,8 +66,26 @@
 [CmdletBinding()]
 param()
 
+function Resolve-HttpStatusCode {
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    if ($null -eq $ErrorRecord.Exception -or $null -eq $ErrorRecord.Exception.Response) {
+        return -1
+    }
+
+    if ($null -ne $ErrorRecord.Exception.Response.StatusCode) {
+        return [int]$ErrorRecord.Exception.Response.StatusCode
+    }
+
+    return -1
+}
+
 function Test-AzureDevOpsPAT {
-    $ErrorActionPreference = "Stop"
+    # Keep Write-Error non-terminating so guidance and explicit exit codes are always emitted.
+    $ErrorActionPreference = "Continue"
 
     Write-Host "=========================================="
     Write-Host "Azure DevOps PAT Validation"
@@ -114,7 +138,7 @@ function Test-AzureDevOpsPAT {
         Write-Host "     • Work Items → Read"
         Write-Host "     • Build → Read"
         Write-Host "     • Library (Variable Groups) → Read, create, & manage"
-        Write-Host "     • Pipeline resources → Use and manage (only if required)"
+        Write-Host "     • Pipeline resources → Use and manage"
         Write-Host "  2. Set TF_VAR_ado_personal_access_token environment variable"
         Write-Host ""
         exit 1
@@ -296,7 +320,7 @@ function Test-AzureDevOpsPAT {
     Write-Host "Testing: GET /_apis/distributedtask/variablegroups"
     Write-Host ""
 
-    $vgListUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1"
+    $vgListUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1-preview.2"
 
     try {
         $response = Invoke-RestMethod -Uri $vgListUri -Method Get -Headers $headers -ErrorAction Stop
@@ -305,7 +329,7 @@ function Test-AzureDevOpsPAT {
         Write-Host "   Scope verified: Variable Groups → Read"
     }
     catch {
-        $statusCode = $_.Exception.Response.StatusCode.value__
+        $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
 
         if ($statusCode -eq 401 -or $statusCode -eq 403) {
             Write-Error "❌ FAILED (HTTP $statusCode)"
@@ -337,7 +361,7 @@ function Test-AzureDevOpsPAT {
     Write-Host ""
 
     $testVGName = "eirctl-validation-test-$(Get-Date -Format 'yyyyMMddHHmmss')"
-    $createUri = "$orgUrl/_apis/distributedtask/variablegroups?api-version=7.1"
+    $createUri = "$orgUrl/$projectEncoded/_apis/distributedtask/variablegroups?api-version=7.1-preview.2"
 
     $body = @{
         name = $testVGName
@@ -369,6 +393,48 @@ function Test-AzureDevOpsPAT {
         Write-Host "   Scope verified: Variable Groups → Manage"
         Write-Host ""
 
+        # Test 6: Pipeline Resources: Use and manage (Authorize protected resource)
+        Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        Write-Host "Validation 7: Pipeline Resources: Use and manage"
+        Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        Write-Host "Testing: PATCH /_apis/build/authorizedresources"
+        Write-Host "Action: Authorizing the test variable group as a project resource"
+        Write-Host ""
+
+        $authorizationFailure = $null
+        $authorizeUri = "$orgUrl/$projectEncoded/_apis/build/authorizedresources?api-version=7.1-preview.1"
+        $authorizeBody = @(
+            @{
+                type = "variablegroup"
+                id = "$vgId"
+                name = $testVGName
+                authorized = $false
+            }
+        ) | ConvertTo-Json -Depth 10
+
+        try {
+            $authorizeResponse = Invoke-RestMethod -Uri $authorizeUri -Method Patch -Headers $headers -Body $authorizeBody -ErrorAction Stop
+            Write-Host "✅ SUCCESS"
+            Write-Host "   Scope verified: Pipeline resources → Use and manage"
+        }
+        catch {
+            $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
+
+            if ($statusCode -eq 401 -or $statusCode -eq 403) {
+                $authorizationFailure = [PSCustomObject]@{
+                    StatusCode = $statusCode
+                    Message = "PAT can create variable groups but cannot authorize them for project/pipeline resource use. Missing scope: Pipeline resources → Use and manage."
+                }
+            }
+            else {
+                $authorizationFailure = [PSCustomObject]@{
+                    StatusCode = $statusCode
+                    Message = $_.Exception.Message
+                }
+            }
+        }
+        Write-Host ""
+
         # Clean up test variable group
         Write-Host "   Cleaning up test variable group..."
 
@@ -386,16 +452,31 @@ function Test-AzureDevOpsPAT {
             }
         }
         catch {
-            $deleteStatusCode = $_.Exception.Response.StatusCode.value__
+            $deleteStatusCode = Resolve-HttpStatusCode -ErrorRecord $_
             Write-Warning "   ⚠️  Could not delete test variable group (HTTP $deleteStatusCode)"
             Write-Host "   Please manually delete variable group in Azure DevOps:"
             Write-Host "   Name: $testVGName"
             Write-Host "   ID: $vgId"
             Write-Host "   Location: Pipelines → Library → Variable groups"
         }
+
+        if ($null -ne $authorizationFailure) {
+            Write-Error "❌ FAILED (HTTP $($authorizationFailure.StatusCode))"
+            Write-Host ""
+            Write-Host $authorizationFailure.Message
+            Write-Host ""
+            Write-Host "To fix:"
+            Write-Host "  1. Go to Azure DevOps → User Settings → Personal Access Tokens"
+            Write-Host "  2. Edit your PAT or create a new one"
+            Write-Host "  3. Add scope: Pipeline resources → Use and manage"
+            Write-Host "  4. Keep the existing scopes for Project, Work Items, Build, and Variable Groups"
+            Write-Host "  5. Update TF_VAR_ado_personal_access_token with the new PAT"
+            Write-Host ""
+            exit 1
+        }
     }
     catch {
-        $statusCode = $_.Exception.Response.StatusCode.value__
+        $statusCode = Resolve-HttpStatusCode -ErrorRecord $_
 
         if ($statusCode -eq 401 -or $statusCode -eq 403) {
             Write-Error "❌ FAILED (HTTP $statusCode)"
@@ -427,10 +508,11 @@ function Test-AzureDevOpsPAT {
     Write-Host "  ✅ vso.work (Work Items → Read)"
     Write-Host "  ✅ vso.build (Build → Read)"
     Write-Host "  ✅ vso.variablegroups_manage (Variable Groups → Read, create, and manage)"
+    Write-Host "  ✅ vso.pipelineresources_manage (Pipeline resources → Use and manage)"
     Write-Host ""
     Write-Host "Note: These scopes are required by the Terraform Azure DevOps provider"
     Write-Host "for reading project metadata, process templates, project resources,"
-    Write-Host "and managing variable groups."
+    Write-Host "managing variable groups, and authorizing variable groups for pipeline use."
     Write-Host ""
     Write-Host "Terraform should now authenticate successfully for all operations"
     Write-Host "including create, read, update, and delete of variable groups."

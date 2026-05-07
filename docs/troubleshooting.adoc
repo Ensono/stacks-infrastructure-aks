@@ -18,7 +18,7 @@ Symptoms:
 
 Checks:
 
-* Verify scopes: `vso.project`, `vso.variablegroups_manage`
+* Verify scopes: `vso.project`, `vso.work`, `vso.build`, `vso.variablegroups_manage`, `vso.pipelineresources_manage`
 * Confirm PAT is not expired
 
 === Terraform Init/Plan Issues
@@ -39,11 +39,32 @@ Checks:
 Symptoms:
 
 * `azuredevops` provider fails
+* `Updating definitionResourceReference Azure DevOps object: Request returned status: 401 Unauthorized`
 
 Checks:
 
 * PAT scope includes Variable Groups Manage
+* PAT scope includes Pipeline resources: Use and manage
 * `TF_VAR_create_ado_variable_group=true`
+
+Cause:
+
+The Terraform `azuredevops_variable_group` resource does more than create the variable group itself. After create or update, the provider also calls the Azure DevOps `authorizedresources` API to synchronize the variable group's protected-resource authorization state. A PAT can therefore pass basic variable-group CRUD checks but still fail Terraform with `definitionResourceReference` 401/403 errors if it does not have `vso.pipelineresources_manage`.
+
+Resolution:
+
+. Recreate or update the PAT with all required scopes:
+* `vso.project`
+* `vso.work`
+* `vso.build`
+* `vso.variablegroups_manage`
+* `vso.pipelineresources_manage`
+. Update `TF_VAR_ado_personal_access_token`
+. Re-run `eirctl run setup:validate:azdo:pat`
+
+Notes:
+
+* The PAT validation script now tests the same `PATCH /{project}/_apis/build/authorizedresources` endpoint used by the Terraform provider, so this failure should now be caught before Terraform runs.
 
 === DNS Propagation Problems
 
@@ -92,6 +113,221 @@ Checks:
 * Validate TFOUT_ variables are present
 * Confirm chart values template paths
 * Verify cluster credentials and network access
+
+=== Application Gateway 502 Bad Gateway / Unhealthy Backend Pool
+
+Symptoms:
+
+* `curl https://<hostname>/api/.../health` returns HTTP 502 from `Microsoft-Azure-Application-Gateway/v2`
+* Application Gateway backend health shows **Unhealthy** with probe timeout
+* Application Gateway backend pool IP does not match the nginx-ingress internal load balancer IP
+* Java functional tests fail post-deploy (connection refused or 502)
+
+Root cause:
+
+The nginx-ingress controller in this stack is **always** deployed as an internal Azure Load Balancer.
+`aks_ingress_private_ip` is unconditionally passed to the AKS module, which configures nginx-ingress with a static private IP (e.g. `10.1.15.253` for the default VNET CIDR).
+
+The Application Gateway backend pool target is controlled by `internal_ingress_enabled`:
+
+* `internal_ingress_enabled=true`  → gateway targets `aks_ingress_private_ip` (internal LB) ✅
+* `internal_ingress_enabled=false` → gateway targets `aks_ingress_public_ip` (wrong endpoint) ❌
+
+Setting `internal_ingress_enabled=false` causes the App Gateway to point at a public IP that is not the live ingress endpoint, producing probe timeouts and 502 responses.
+
+Resolution:
+
+. Set `TF_VAR_internal_ingress_enabled=true` in the environment variable script for the affected environment.
+. Run `eirctl run infrastructure` to apply the change.
+  Terraform will update the App Gateway backend pool from the stale public IP to `aks_ingress_private_ip`.
+. Verify:
++
+[source,bash]
+----
+# The backend pool address in Terraform output must match:
+terraform -chdir=deploy/terraform output app_gateway_backend_address
+# Expected: 10.1.15.253 (or the cidrhost(..., -3) of your vnet_cidr subnet 0)
+
+# Probe health (wait ~2 min for App Gateway to detect the pool as healthy)
+az network application-gateway show-backend-health \
+  --resource-group <rg> --name <agw-name> \
+  --query 'backendAddressPools[].backendHttpSettingsCollection[].servers[].health' -o table
+----
+
+Prevention:
+
+A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
+`create_ssl_gateway=true` and `internal_ingress_enabled=false`, emitting an actionable error message.
+
+=== Application Gateway Serves Self-Signed Certificate (Java PKIX failures)
+
+Symptoms:
+
+* Java post-deploy tests fail with `PKIX path building failed` / `SunCertPathBuilderException`
+* `openssl s_client -connect <hostname>:443 </dev/null 2>&1 | grep issuer` shows `issuer=CN=*.domain` matching the subject (self-signed)
+* `create_valid_cert=true` is set but the gateway is not using an ACME certificate
+
+Root cause:
+
+When the ACME DNS-01 challenge fails on the first Terraform apply (DNS zone not yet delegated,
+wrong `dns_resource_group`, or valid `acme_email` not provided), the upstream
+`azurerm-app-gateway` module falls back silently to a self-signed certificate and **stores it in
+Terraform state**. Subsequent applies see the certificate resource as already existing and do not
+re-issue it. The self-signed cert persists indefinitely.
+
+Resolution:
+
+. Confirm all ACME prerequisites are set correctly:
++
+[source,bash]
+----
+echo $TF_VAR_acme_email        # must be a valid email
+echo $TF_VAR_dns_zone          # e.g. nonprod.stacks.ensono.com
+echo $TF_VAR_dns_resource_group # resource group that OWNS the DNS zone
+----
+
+. Confirm the DNS zone is live and NS-delegated:
++
+[source,bash]
+----
+dig NS $TF_VAR_dns_zone +short
+# Must return the Azure DNS name servers assigned to the zone
+----
+
+. Remove the ACME certificate resource from state to force re-creation on the next apply:
++
+[source,bash]
+----
+# List all state resources in the App Gateway module to identify the cert resource
+terraform -chdir=deploy/terraform state list | grep ssl_app_gateway
+
+# Remove only the ACME certificate resource from state (adjust resource name from state list output)
+# Example — the exact name depends on upstream module version:
+terraform -chdir=deploy/terraform state rm \
+  'module.ssl_app_gateway[0].acme_certificate.certificate[0]'
+----
++
+[IMPORTANT]
+====
+Use `eirctl`/`Invoke-Terraform` for routine plan/apply. Use the `terraform` CLI directly only for
+`state` operations and read-only inspection (for example, `terraform state list`, `terraform output`)
+that `Invoke-Terraform` does not expose. Do not run `terraform apply` directly.
+====
+
+. Apply via the standard pipeline to re-issue the certificate:
++
+[source,bash]
+----
+eirctl run infrastructure
+----
+
+. Verify the new certificate. Replace `<hostname>` with the DNS name of the endpoint you want to validate:
++
+[source,bash]
+----
+openssl s_client -connect <hostname>:443 \
+  -servername <hostname> </dev/null 2>&1 \
+  | openssl x509 -noout -issuer -subject
+# Issuer must NOT match Subject
+# Issuer should reference Let's Encrypt or configured ACME CA
+----
+
+Prevention:
+
+A `terraform_data` precondition in `data.tf` now blocks `terraform plan` when
+`create_valid_cert=true` but `acme_email`, `dns_zone`, or `dns_resource_group` are empty,
+preventing silent fallback to self-signed certificates.
+
+=== ACME Registration Fails With "Account Exists But Is Deactivated"
+
+Symptoms:
+
+* Terraform fails during App Gateway certificate creation with:
+  `acme: error: 403 :: ... :: unauthorized :: An account with the provided public key exists but is deactivated`
+* Local runs succeed, but Azure DevOps fails for `nonprod` or `prod`
+* `terraform state list | grep acme` in the canonical pipeline state shows missing or partial ACME resources
+
+Root cause:
+
+This repository uses a shared backend key plus Terraform workspaces in CI/CD:
+
+* Backend key: `core:infrastructure:aks`
+* Workspace: `dev`, `nonprod`, `prod`
+
+If local development uses a different backend key (for example `core:infrastructure:aks:dev`),
+local runs are operating on a different state lineage from Azure DevOps. In that case, a local
+success does not prove that the pipeline state is healthy.
+
+In the failing pipeline state, the ACME registration key may already have been used against a
+Let's Encrypt account that is now deactivated. When Terraform retries registration with the same
+key, Let's Encrypt rejects it with HTTP 403.
+
+Resolution:
+
+. Ensure local backend configuration matches Azure DevOps before inspecting or modifying state:
++
+[source,bash]
+----
+# In the local environment file, TF_BACKEND_INIT must use the shared backend key:
+export TF_BACKEND_INIT="key=core:infrastructure:aks,container_name=tfstate,storage_account_name=stacksstatehjfis,resource_group_name=stacks-terraform-state"
+----
+
+. Reconfigure Terraform locally to the canonical backend and select the affected workspace:
++
+[source,bash]
+----
+cd deploy/terraform
+
+terraform init -reconfigure \
+  -backend-config='key=core:infrastructure:aks' \
+  -backend-config='container_name=tfstate' \
+  -backend-config='storage_account_name=stacksstatehjfis' \
+  -backend-config='resource_group_name=stacks-terraform-state'
+
+terraform workspace select nonprod
+----
+
+. Inspect the App Gateway ACME-related resources in the canonical state:
++
+[source,bash]
+----
+terraform state list | grep 'module.ssl_app_gateway\[0\]'
+terraform state list | grep -E 'module\.ssl_app_gateway\[0\]\.(tls_private_key|acme_)'
+----
+
+. Taint the ACME key resources that are present so the next apply generates fresh key material:
++
+[source,bash]
+----
+terraform taint 'module.ssl_app_gateway[0].tls_private_key.reg_key'
+terraform taint 'module.ssl_app_gateway[0].tls_private_key.cert_private_key'
+----
+
+. If `acme_registration` or `acme_certificate` resources are also present in state, taint those as well:
++
+[source,bash]
+----
+terraform taint 'module.ssl_app_gateway[0].acme_registration.reg[0]'
+terraform taint 'module.ssl_app_gateway[0].acme_certificate.default[0]'
+----
+
+. Re-run the standard workflow against the same workspace:
++
+[source,bash]
+----
+source ./.eirctl/envvar-azure-stacks-aks.sh
+export TF_VAR_stage=nonprod
+eirctl run infra:plan
+eirctl run infra:apply
+----
+
+Notes:
+
+* If the canonical state contains only `tls_private_key.*` resources and no `acme_registration` or
+  `acme_certificate`, that usually means an earlier apply failed before the ACME resources were
+  written to state. Tainting the keys is still sufficient to force a fresh registration attempt.
+* If the next apply still fails, verify DNS delegation and the values of `TF_VAR_acme_email`,
+  `TF_VAR_dns_zone`, and `TF_VAR_dns_resource_group` before retrying.
 
 === Default Node Pool Update Failures
 

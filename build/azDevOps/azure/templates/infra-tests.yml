@@ -7,7 +7,7 @@ parameters:
   TF_FILE_LOCATION:
   TF_VAR_stage:
   TF_VAR_location:
-  TF_VAR_is_cluster_private:
+  TF_VAR_internal_ingress_enabled:
   TF_VAR_aks_node_pools:
 
 steps:
@@ -20,7 +20,7 @@ steps:
       TF_FILE_LOCATION: ${{ parameters.TF_FILE_LOCATION }}
       TF_VAR_stage: ${{ parameters.TF_VAR_stage }}
       TF_VAR_location: ${{ parameters.TF_VAR_location }}
-      TF_VAR_is_cluster_private: ${{ parameters.TF_VAR_is_cluster_private }}
+      TF_VAR_internal_ingress_enabled: ${{ parameters.TF_VAR_internal_ingress_enabled }}
       TF_VAR_aks_node_pools: ${{ parameters.TF_VAR_aks_node_pools }}
 
       # Ensure that the env vars are set for access
@@ -44,7 +44,7 @@ steps:
       TF_FILE_LOCATION: ${{ parameters.TF_FILE_LOCATION }}
       TF_VAR_stage: ${{ parameters.TF_VAR_stage }}
       TF_VAR_location: ${{ parameters.TF_VAR_location }}
-      TF_VAR_is_cluster_private: ${{ parameters.TF_VAR_is_cluster_private }}
+      TF_VAR_internal_ingress_enabled: ${{ parameters.TF_VAR_internal_ingress_enabled }}
       TF_VAR_aks_node_pools: ${{ parameters.TF_VAR_aks_node_pools }}
 
       # Ensure that the env vars are set for access
