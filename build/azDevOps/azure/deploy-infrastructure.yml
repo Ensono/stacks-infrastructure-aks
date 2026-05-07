@@ -336,7 +336,7 @@ stages:
           - Prod
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/master'), eq(${{ parameters.pre_release }}, true)))
     variables:
-      - group: github-creds
+      - group: release-github-credentials
       - name: version_number
         value: "$(version_major).$(version_minor).$(version_revision)"
     jobs:
@@ -390,8 +390,30 @@ stages:
                   echo "##[error]GITHUB_TOKEN is present but shorter than expected. Verify the stored secret value in the GitHub credentials variable group."
                   exit 1
                 fi
+
+                auth_status="$(curl -sS -o /dev/null -w "%{http_code}" \
+                  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                  -H "Accept: application/vnd.github+json" \
+                  https://api.github.com/user)"
+
+                if [ "${auth_status}" != "200" ]; then
+                  echo "##[error]GITHUB_TOKEN failed GitHub authentication check (GET /user returned HTTP ${auth_status}). Verify the token is valid, active, and not expired."
+                  exit 1
+                fi
+
+                repo_status="$(curl -sS -o /dev/null -w "%{http_code}" \
+                  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/$(OWNER)/$(REPOSITORY)")"
+
+                if [ "${repo_status}" != "200" ]; then
+                  echo "##[error]GITHUB_TOKEN cannot access repository $(OWNER)/$(REPOSITORY) (GET /repos returned HTTP ${repo_status}). Ensure the token has access to this repo and organization SSO authorization is granted if required."
+                  exit 1
+                fi
             env:
               GITHUB_TOKEN: "$(GITHUB_TOKEN)"
+              OWNER: "ensono"
+              REPOSITORY: "stacks-infrastructure-aks"
 
           - task: Bash@3
             displayName: Publish Release
