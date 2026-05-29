@@ -37,7 +37,7 @@ stages:
         steps:
           - template: ../templates/setup.yml
             parameters:
-              TaskctlVersion: ${{ variables.TaskctlVersion }}
+              EirctlVersion: ${{ variables.EirctlVersion }}
 
           - template: ../templates/infra-tests.yml
             parameters:

@@ -2,7 +2,9 @@
 
 # Deploy an AKS cluster for each of the environments that have been specified
 module "aks_bootstrap" {
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.38"
+  # NOTE: stacks-terraform v8.0.52 has a known AKS idempotency/drift issue (Ensono/stacks-terraform#174).
+  # Repeat applies may report non-no-op changes until the upstream fix is released.
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.52"
 
   resource_namer                    = module.naming.names[var.project].resource_group.name
   resource_group_location           = var.location

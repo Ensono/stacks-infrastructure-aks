@@ -1,5 +1,6 @@
 parameters:
-  EirctlVersion: 0.9.10
+  - name: EirctlVersion
+    type: string
 
 steps:
   # Checkout self repo
