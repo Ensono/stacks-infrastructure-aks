@@ -36,6 +36,9 @@ eirctl run docs                    # Generate documentation
 . ./.eirctl/envvar-azure-<stage>.ps1  # Load required TF_VAR_* environment variables
 ```
 
+If a `run_in_terminal` tool call completes but fails to return captured output, use `get_terminal_last_command` to read the
+output of critical terminal commands before proceeding or summarizing results.
+
 ## Development Patterns & Conventions
 
 ### Naming Convention
