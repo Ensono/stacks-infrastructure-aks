@@ -14,11 +14,13 @@ The current TLS flow depends on Terraform-managed ACME issuance and inline certi
 ## Capabilities
 
 ### New Capabilities
+
 - `kubernetes-certificate-lifecycle`: Issue, manage, and replicate wildcard TLS certificates in-cluster using cert-manager and reflector patterns.
 - `key-vault-certificate-sync`: Synchronize managed certificate artifacts from Kubernetes to Azure Key Vault for downstream consumers.
 - `app-gateway-key-vault-tls-source`: Configure Application Gateway to use Key Vault-backed certificate source with managed identity and rotation-safe references.
 
 ### Modified Capabilities
+
 - None.
 
 ## Impact
