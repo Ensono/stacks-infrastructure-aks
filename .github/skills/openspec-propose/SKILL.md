@@ -37,15 +37,15 @@ When ready to implement, run /opsx:apply
 2. **Create the change directory**
 
    ```bash
-   openspec new change "<name>"
+   openspec new change "&lt;name&gt;"
    ```
 
-   This creates a scaffolded change at `openspec/changes/<name>/` with `.openspec.yaml`.
+   This creates a scaffolded change at `openspec/changes/&lt;name&gt;/` with `.openspec.yaml`.
 
 3. **Get the artifact build order**
 
    ```bash
-   openspec status --change "<name>" --json
+   openspec status --change "&lt;name&gt;" --json
    ```
 
    Parse the JSON to get:
@@ -62,7 +62,7 @@ When ready to implement, run /opsx:apply
       - Get instructions:
 
         ```bash
-        openspec instructions <artifact-id> --change "<name>" --json
+        openspec instructions `&lt;artifact-id&gt;` --change "&lt;name&gt;" --json
         ```
 
       - The instructions JSON includes:
@@ -75,10 +75,10 @@ When ready to implement, run /opsx:apply
       - Read any completed dependency files for context
       - Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - Show brief progress: "Created <artifact-id>"
+      - Show brief progress: "Created `&lt;artifact-id&gt;`"
 
    b. **Continue until all `applyRequires` artifacts are complete**
-      - After creating each artifact, re-run `openspec status --change "<name>" --json`
+      - After creating each artifact, re-run `openspec status --change "&lt;name&gt;" --json`
       - Check if every artifact ID in `applyRequires` has `status: "done"` in the artifacts array
       - Stop when all `applyRequires` artifacts are done
 
@@ -89,7 +89,7 @@ When ready to implement, run /opsx:apply
 5. **Show final status**
 
    ```bash
-   openspec status --change "<name>"
+   openspec status --change "&lt;name&gt;"
    ```
 
 **Output**

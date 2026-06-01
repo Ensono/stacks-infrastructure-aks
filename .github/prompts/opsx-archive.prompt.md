@@ -4,9 +4,12 @@ description: Archive a completed change in the experimental workflow
 
 Archive a completed change in the experimental workflow.
 
-**Input**: Optionally specify a change name after `/opsx:archive` (e.g., `/opsx:archive add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+## Input
 
-**Steps**
+ Optionally specify a change name after `/opsx:archive` (e.g., `/opsx:archive add-auth`). If omitted, check if it can be inferred from
+           conversation context. If vague or ambiguous you MUST prompt for available changes.
+
+## Steps
 
 1. **If no change name provided, prompt for selection**
 
@@ -19,7 +22,7 @@ Archive a completed change in the experimental workflow.
 
 2. **Check artifact completion status**
 
-   Run `openspec status --change "<name>" --json` to check artifact completion.
+   Run `openspec status --change "&lt;name&gt;" --json` to check artifact completion.
 
    Parse the JSON to understand:
    - `schemaName`: The workflow being used
@@ -45,7 +48,7 @@ Archive a completed change in the experimental workflow.
 
 4. **Assess delta spec sync state**
 
-   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync prompt.
+   Check for delta specs at `openspec/changes/&lt;name&gt;/specs/`. If none exist, proceed without sync prompt.
 
    **If delta specs exist:**
    - Compare each delta spec with its corresponding main spec at `openspec/specs/<capability>/spec.md`
@@ -56,7 +59,8 @@ Archive a completed change in the experimental workflow.
    - If changes needed: "Sync now (recommended)", "Archive without syncing"
    - If already synced: "Archive now", "Sync anyway", "Cancel"
 
-   If user chooses sync, use Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke openspec-sync-specs for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>"). Proceed to archive regardless of choice.
+   If user chooses sync, use Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke openspec-sync-specs for change '&lt;name&gt;'.
+Delta spec analysis: &lt;include the analyzed delta spec summary&gt;"). Proceed to archive regardless of choice.
 
 5. **Perform the archive**
 
@@ -73,7 +77,7 @@ Archive a completed change in the experimental workflow.
    - If no: Move the change directory to archive
 
    ```bash
-   mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
+   mv openspec/changes/&lt;name&gt; openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;
    ```
 
 6. **Display summary**
@@ -92,7 +96,7 @@ Archive a completed change in the experimental workflow.
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
+**Archived to:** openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;/
 **Specs:** ✓ Synced to main specs
 
 All artifacts complete. All tasks complete.
@@ -105,7 +109,7 @@ All artifacts complete. All tasks complete.
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
+**Archived to:** openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;/
 **Specs:** No delta specs
 
 All artifacts complete. All tasks complete.
@@ -118,7 +122,7 @@ All artifacts complete. All tasks complete.
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
+**Archived to:** openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;/
 **Specs:** Sync skipped (user chose to skip)
 
 **Warnings:**
@@ -135,7 +139,7 @@ Review the archive if this was not intentional.
 ## Archive Failed
 
 **Change:** <change-name>
-**Target:** openspec/changes/archive/YYYY-MM-DD-<name>/
+**Target:** openspec/changes/archive/YYYY-MM-DD-&lt;name&gt;/
 
 Target archive directory already exists.
 

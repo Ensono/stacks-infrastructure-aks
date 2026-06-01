@@ -137,13 +137,20 @@ eirctl uses a container-first approach with significantly cleaner syntax. This p
 
 **Key Changes in eirctl Contexts:**
 
-| taskctl Concept                                 | eirctl Equivalent                                         | Notes                                                                 |
-| ----------------------------------------------- | --------------------------------------------------------- | --------------------------------------------------------------------- |
-| `executable.bin: docker` + verbose args         | `container.name: <image>`                                 | Auto-handles docker run, mounts, working dir                          |
-| Working dir: `/app`                             | Working dir: `/eirctl`                                    | Default mount point changed                                           |
-| `executable.args: [pwsh, -NoProfile, -Command]` | `container.shell: pwsh``container.shell_args: [-Command]` | **Remove `-NoProfile`** - eirctl requires profiles for module loading |
-| Manual volume mounts in args                    | Automatic                                                 | eirctl auto-mounts workspace at `/eirctl`                             |
-| Manual `--env-file` in args                     | `envfile:` config                                         | Simplified, supports in-file variable references                      |
+| taskctl Concept                                 | eirctl Equivalent                                         | Notes
+|
+| ----------------------------------------------- | --------------------------------------------------------- |
+--------------------------------------------------------------------- |
+| `executable.bin: docker` + verbose args         | `container.name: <image>`                                 | Auto-handles docker run, mounts,
+working dir                          |
+| Working dir: `/app`                             | Working dir: `/eirctl`                                    | Default mount point changed
+|
+| `executable.args: [pwsh, -NoProfile, -Command]` | `container.shell: pwsh``container.shell_args: [-Command]` | **Remove `-NoProfile`** - eirctl
+requires profiles for module loading |
+| Manual volume mounts in args                    | Automatic                                                 | eirctl auto-mounts workspace at
+`/eirctl`                             |
+| Manual `--env-file` in args                     | `envfile:` config                                         | Simplified, supports in-file variable
+references                      |
 
 ### 2.2 Conversion Template
 
@@ -221,7 +228,8 @@ Apply the conversion to:
 2. **infratests** - InSpec testing context
 3. **docs** - Documentation build context (uses eir-asciidoctor image)
 
-**Note**: The `powershell-python` context has been removed. If Python functionality is needed, use the `powershell` context which has Python available.
+**Note**: The `powershell-python` context has been removed. If Python functionality is needed, use the `powershell` context which has Python
+          available.
 
 For contexts that need Docker socket access, add volume mounting:
 
@@ -574,7 +582,8 @@ parameters:
 
 ### 4.4b Add Docker Hub Login Step
 
-To avoid Docker Hub rate limiting (which can cause extremely slow image pulls at ~1Kbps), add a Docker Hub login step to all jobs that run eirctl commands.
+To avoid Docker Hub rate limiting (which can cause extremely slow image pulls at ~1Kbps), add a Docker Hub login step to all jobs that run eirctl
+commands.
 
 **Pre-requisite:** Create a Docker Hub service connection in Azure DevOps named `DockerHubServiceConnection`.
 
@@ -1239,4 +1248,5 @@ The git-based approach is cleaner and more maintainable than local backups.
 
 ---
 
-**Remember**: This migration affects production infrastructure automation. Thoroughness trumps speed. If anything seems wrong, STOP and ask for guidance.
+**Remember**: This migration affects production infrastructure automation. Thoroughness trumps speed. If anything seems wrong, STOP and ask for
+              guidance.
