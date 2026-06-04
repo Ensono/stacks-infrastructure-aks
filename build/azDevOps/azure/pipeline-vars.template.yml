@@ -31,9 +31,12 @@ variables:
   - name: create_valid_cert
     value: true
 
-  # Additional node pools for kubernetes
+  # Additional node pools for kubernetes. Keep default empty unless you need extra pools.
+  # Example value (JSON):
+  # {"np1":{"vm_size":"Standard_D4s_v5","auto_scaling":true,"min_nodes":1,"max_nodes":3,"enable_availability_zones":false,"availabilty_zones":[]}}
+  # Note: availabilty_zones spelling intentionally matches the upstream module contract.
   - name: aks_node_pools
-    value: {}
+    value: "{}"
 
   # ------- Terraform remote state
   # Stacks operates Terraform states based on workspaces **IT IS VERY IMPORTANT** that you ensure a unique name for each application definition

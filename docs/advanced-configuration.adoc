@@ -17,8 +17,10 @@ Configure additional node pools through the `aks_node_pools` variable. Example:
 
 [source,yaml]
 ----
-TF_VAR_aks_node_pools="{\"np1\":{\"vm_size\":\"Standard_D4s_v5\",\"auto_scaling\":true,\"min_nodes\":1,\"max_nodes\":3}}"
+TF_VAR_aks_node_pools="{\"np1\":{\"vm_size\":\"Standard_D4s_v5\",\"auto_scaling\":true,\"min_nodes\":1,\"max_nodes\":3,\"enable_availability_zones\":false,\"availabilty_zones\":[]}}"
 ----
+
+The `enable_availability_zones` and `availabilty_zones` fields match the upstream `azurerm-aks` module contract. The `availabilty_zones` spelling is intentional and must not be corrected to `availability_zones`.
 
 === DNS Parent Zone Delegation
 

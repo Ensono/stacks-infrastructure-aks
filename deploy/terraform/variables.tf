@@ -85,12 +85,14 @@ variable "dns_resource_group" {
 
 variable "aks_node_pools" {
   type = map(object({
-    vm_size      = string,
-    auto_scaling = bool,
-    min_nodes    = number,
-    max_nodes    = number
+    vm_size                   = string,
+    auto_scaling              = bool,
+    min_nodes                 = number,
+    max_nodes                 = number,
+    enable_availability_zones = optional(bool, false),
+    availabilty_zones         = optional(list(number), [])
   }))
-  description = "Additional node pools as required by the platform"
+  description = "Additional node pools as required by the platform. The availabilty_zones attribute spelling intentionally matches the upstream module contract."
   default     = {}
 }
 
