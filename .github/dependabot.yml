@@ -6,5 +6,15 @@ updates:
       interval: weekly
       day: monday
       timezone: Europe/London
+    cooldown:
+      default-days: 5
+    reviewers:
+      - Ensono/stacks-maintainers
+    groups:
+      terraform-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
     open-pull-requests-limit: 10
-    rebase-strategy: disabled
