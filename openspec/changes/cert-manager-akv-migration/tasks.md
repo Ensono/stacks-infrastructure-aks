@@ -1,8 +1,8 @@
 ## 1. First Hard Preflight And Safety Gates
 
-- [ ] 1.1 Prove ESO can synchronize both required Key Vault outputs before downstream migration work: App Gateway-compatible PFX secret and Key Vault
+- [x] 1.1 Prove ESO can synchronize both required Key Vault outputs before downstream migration work: App Gateway-compatible PFX secret and Key Vault
       certificate object; block migration if both cannot be supported
-- [ ] 1.2 Document exact ESO mechanism, CRD/provider fields, PFX conversion path, content type, Key Vault certificate import semantics, versioning
+- [x] 1.2 Document exact ESO mechanism, CRD/provider fields, PFX conversion path, content type, Key Vault certificate import semantics, versioning
       behavior, and failure semantics
 - [ ] 1.3 Verify AKS module/root wiring exposes and enables OIDC issuer and workload identity for the target cluster
 - [ ] 1.4 Confirm App Gateway module inputs for `certificate_source = "key_vault"`, versionless `key_vault_secret_id`, and managed identity wiring are
