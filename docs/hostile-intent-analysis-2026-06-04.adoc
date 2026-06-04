@@ -9,11 +9,11 @@ Scope: staged changes in `deploy/terraform`, plus related Azure DevOps variable 
 
 No clear hostile intent found in staged Terraform module-related changes.
 
-Changes appear to align repository variable schema with upstream `Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.79` expectations for `aks_node_pools`, and refresh provider lock entries for `azure/modtm` and `hashicorp/azurerm` within existing version constraints.
+Changes appear to align repository variable schema with upstream `Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.79` expectations for `aks_node_pools`, retain the `azure/modtm` lock within its existing `~> 0.3` constraint, and refresh `hashicorp/azurerm` within existing version constraints.
 
 Main risks are operational and supply-chain validation risks, not obvious malicious behavior:
 
-* Provider lock file updates move `azure/modtm` from `0.3.5` to `0.4.0` and `hashicorp/azurerm` from `4.74.0` to `4.75.0`.
+* Provider lock file updates keep `azure/modtm` at `0.3.5` because the recorded constraint is `~> 0.3`, and move `hashicorp/azurerm` from `4.74.0` to `4.75.0`.
 * `aks_node_pools` now accepts optional availability-zone fields that can change node pool placement if enabled by operators.
 * Misspelled `availabilty_zones` is intentional because upstream module contract uses that spelling; typo may still confuse future maintainers.
 
@@ -24,7 +24,7 @@ Main risks are operational and supply-chain validation risks, not obvious malici
 ** Keeps `aks_node_pools` default as `{}`.
 ** Documents misspelling as matching upstream module contract.
 * `deploy/terraform/.terraform.lock.hcl`
-** Updates locked `azure/modtm` provider from `0.3.5` to `0.4.0`.
+** Keeps locked `azure/modtm` provider at `0.3.5` to satisfy the recorded `~> 0.3` constraint.
 ** Updates locked `hashicorp/azurerm` provider from `4.74.0` to `4.75.0`.
 ** Replaces hashes for those updated provider versions.
 ** Other provider versions reviewed stayed unchanged.
@@ -85,12 +85,12 @@ Main risks are operational and supply-chain validation risks, not obvious malici
 
 Risk: medium until validated.
 
-The lock file updates two provider versions:
+The lock file updates one provider version and keeps one provider pinned to its constraint-compatible version:
 
-* `registry.terraform.io/azure/modtm`: `0.3.5` -> `0.4.0`
+* `registry.terraform.io/azure/modtm`: remains `0.3.5` because `~> 0.3` does not allow `0.4.0`
 * `registry.terraform.io/hashicorp/azurerm`: `4.74.0` -> `4.75.0`
 
-Both updates remain within existing constraints:
+The resulting lock file remains within existing constraints:
 
 * `azure/modtm` constraint: `~> 0.3`
 * `hashicorp/azurerm` constraint: `>= 4.0.0, ~> 4.62`
