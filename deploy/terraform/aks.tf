@@ -4,7 +4,7 @@
 module "aks_bootstrap" {
   # NOTE: stacks-terraform v8.0.52 has a known AKS idempotency/drift issue (Ensono/stacks-terraform#174).
   # Repeat applies may report non-no-op changes until the upstream fix is released.
-  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.52"
+  source = "git::https://github.com/Ensono/stacks-terraform//azurerm/modules/azurerm-aks?ref=v8.0.84"
 
   resource_namer                    = module.naming.names[var.project].resource_group.name
   resource_group_location           = var.location
